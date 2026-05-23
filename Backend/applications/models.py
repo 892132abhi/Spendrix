@@ -1,0 +1,32 @@
+from django.db import models
+from django.conf import settings
+from jobs.models import Job
+# Create your models here.
+
+
+class Application(models.Model):
+    
+    STATUS_CHOICES = (
+        ('APPLIED','Applied'),
+        ('SHORT_LISTED','Short Listed'),
+        ('INTERVIEW','Interview'),
+        ('HIRED','Hired'),
+        ('REJECTED','Rejected')
+    )
+    candidate = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE,related_name='applicants')
+    
+    job = models.ForeignKey(Job,on_delete=models.CASCADE,related_name='applications')
+    
+    status = models.CharField(max_length=20,choices=STATUS_CHOICES,default='APPLIED')
+    
+    resume = models.FileField(upload_to='',blank=True,null=True)
+    
+    applied_at = models.DateTimeField(auto_now_add=True)
+    
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        unique_together = ('candidate','job')
+        
+    def __str__(self):
+        return f"{self.candidate.username} - {self.job.title}"
