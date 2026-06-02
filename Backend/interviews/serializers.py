@@ -12,14 +12,20 @@ User = get_user_model()
 class InterviewSerializer(serializers.ModelSerializer):
     interviewer_name = serializers.SerializerMethodField()
     interviewer_email = serializers.EmailField(write_only=True, required=False, allow_blank=True)
+    candidate_id = serializers.IntegerField(source='application.candidate.id', read_only=True)
     candidate_name = serializers.CharField(source='application.candidate.username', read_only=True)
+    hr_id = serializers.IntegerField(source='hr_name.id', read_only=True)
+    interviewer_id = serializers.IntegerField(source='interviewer.id', read_only=True)
 
     class Meta:
         model = Interview
         fields = [
             'id',
             'application',
+            'candidate_id',
+            'hr_id',
             'interviewer',
+            'interviewer_id',
             'interviewer_email',
             'interviewer_name',
             'candidate_name',
@@ -106,11 +112,13 @@ class AssignedInterviewCandidateSerializer(serializers.ModelSerializer):
     bio = serializers.CharField(source='application.candidate.profile.bio', read_only=True)
     resume = serializers.FileField(source='application.candidate.profile.resume', read_only=True)
     recruiter_name = serializers.CharField(source='hr_name.profile.full_name', read_only=True)
+    hr_id = serializers.IntegerField(source='hr_name.id', read_only=True)
 
     class Meta:
         model = Interview
         fields = [
             'id',
+            'hr_id',
             'name',
             'email',
             'role',
@@ -131,12 +139,13 @@ class AssignedInterviewCandidateSerializer(serializers.ModelSerializer):
 
 
 class CandidateInterviewSerializer(serializers.ModelSerializer):
+    hr_id = serializers.IntegerField(source='hr_name.id', read_only=True)
     interviewer_name = serializers.SerializerMethodField()
     job_title = serializers.CharField(source='application.job.title', read_only=True)
 
     class Meta:
         model = Interview
-        fields = ['id', 'job_title', 'interviewer_name', 'sheduled_date', 'meeting_link', 'status']
+        fields = ['id', 'hr_id', 'job_title', 'interviewer_name', 'sheduled_date', 'meeting_link', 'status']
 
     def get_interviewer_name(self, obj):
         if obj.interviewer and hasattr(obj.interviewer, "profile"):

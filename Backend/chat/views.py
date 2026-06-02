@@ -1,93 +1,63 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
+from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from .models import ChatRoom, ChatMessage
-from .serializers import ChatSerializer
-from interviews.models import Interview
+from .models import ChatRoom
+
+User = get_user_model()
 
 
-class ChatView(APIView):
-    def get(self, request, room_type, interview_id):
-        user = request.user
+class GetOrCreateChatRoom(APIView):
+    permission_classes = [IsAuthenticated]
 
-        if not user.is_authenticated:
+    def post(self, request):
+        other_user_id = request.data.get("other_user_id")
+
+        if not other_user_id:
             return Response(
-                {"error": "Authentication required"},
-                status=status.HTTP_401_UNAUTHORIZED
+                {"error": "other_user_id is required"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
-        if room_type not in ["candidate", "interviewer", "group"]:
+        other_user = get_object_or_404(User, id=other_user_id)
+        current_user = request.user
+
+        if current_user.id == other_user.id:
             return Response(
-                {"error": "Invalid chat room type"},
-                status=status.HTTP_400_BAD_REQUEST
+                {"error": "You cannot chat with yourself"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
-        try:
-            interview = Interview.objects.select_related(
-                "application__candidate__profile",
-                "application__job__created_by",
-                "hr_name",
-                "interviewer__profile"
-            ).get(id=interview_id)
+        user1, user2 = sorted([current_user, other_user], key=lambda user: user.id)
+        room, _ = ChatRoom.objects.get_or_create(user1=user1, user2=user2)
 
-            room, created = ChatRoom.objects.get_or_create(
-                interview=interview,
-                room_type=room_type,
-            )
+        return Response({"room_id": str(room.id)}, status=status.HTTP_200_OK)
 
-            if created:
-                self.add_room_participants(room, interview, room_type)
 
-            if not room.participants.filter(id=user.id).exists():
-                return Response(
-                    {"error": "You are not allowed to access this chat"},
-                    status=status.HTTP_403_FORBIDDEN
-                )
+class ChatHistoryView(APIView):
+    permission_classes = [IsAuthenticated]
 
-            messages = ChatMessage.objects.filter(room=room).order_by("timestamp")
-            serializer = ChatSerializer(messages, many=True)
+    def get(self, request, room_id):
+        room = get_object_or_404(ChatRoom, id=room_id)
 
-            candidate_name = interview.application.candidate.profile.full_name
-            interviewer_name = interview.interviewer.profile.full_name
-
-            return Response({
-                "messages": serializer.data,
-                "participants": {
-                    "candidate_name": candidate_name,
-                    "interviewer_name": interviewer_name,
-                },
-                "room_type": room_type,
-                "session_info": {
-                    "position": interview.application.job.title,
-                    "status": "Active",
-                }
-            }, status=status.HTTP_200_OK)
-
-        except Interview.DoesNotExist:
+        if request.user.id not in [room.user1_id, room.user2_id]:
             return Response(
-                {"error": "Interview not found"},
-                status=status.HTTP_404_NOT_FOUND
+                {"error": "Unauthorized"},
+                status=status.HTTP_403_FORBIDDEN,
             )
 
-        except Exception as e:
-            return Response(
-                {"error": str(e)},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        messages = [
+            {
+                "id": message.id,
+                "sender_id": message.sender_id,
+                "sender_username": message.sender.username,
+                "text": message.text,
+                "timestamp": message.timestamp.isoformat(),
+            }
+            for message in room.messages.select_related("sender").all()
+        ]
 
-    def add_room_participants(self, room, interview, room_type):
-        hr_user = interview.hr_name or interview.application.job.created_by
-        candidate = interview.application.candidate
-        interviewer = interview.interviewer
-
-        participants = [hr_user]
-
-        if room_type == "candidate":
-            participants.append(candidate)
-        elif room_type == "interviewer":
-            participants.append(interviewer)
-        elif room_type == "group":
-            participants.extend([candidate, interviewer])
-
-        room.participants.add(*[user for user in participants if user])
+        return Response(messages, status=status.HTTP_200_OK)

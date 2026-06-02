@@ -118,7 +118,7 @@ const EditProfilePage = () => {
     }
   };
 
-  if (loading) return <div className="p-20 text-center font-black animate-pulse text-amber-600 tracking-widest">SYNCHRONIZING SECURE DOSSIER...</div>;
+  if (loading) return <div className="p-20 text-center font-black animate-pulse text-amber-600 tracking-widest">Profile ...</div>;
 
   return (
     <div className="min-h-screen bg-stone-50 py-12 px-4">
@@ -126,7 +126,7 @@ const EditProfilePage = () => {
         
         <header className="bg-gradient-to-r from-stone-950 via-stone-900 to-amber-950/40 p-10 text-white border-b-2 border-amber-500">
           <h1 className="text-3xl font-black uppercase tracking-tighter italic text-transparent bg-clip-text bg-gradient-to-r from-white via-amber-200 to-orange-400">Edit Identity</h1>
-          <p className="text-amber-500/70 text-sm font-bold uppercase tracking-widest mt-1">Professional Records Sync</p>
+          <p className="text-amber-500/70 text-sm font-bold uppercase tracking-widest mt-1">Professional Records </p>
         </header>
 
         <form onSubmit={handleSubmit} className="p-10 space-y-8 bg-gradient-to-b from-white to-amber-50/10">
@@ -198,7 +198,7 @@ const EditProfilePage = () => {
           <div className="flex justify-end gap-6 pt-6">
             <button type="button" onClick={() => navigate(-1)} className="text-[10px] font-black uppercase text-stone-400 hover:text-orange-600 transition-colors tracking-widest">Discard</button>
             <button type="submit" disabled={saving} className="px-12 py-4 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-stone-950 rounded-[1.5rem] text-xs font-black uppercase tracking-[0.3em] shadow-lg shadow-orange-500/10 transition-all disabled:opacity-50 active:scale-95">
-              {saving ? 'SYNCING DATA...' : 'COMMIT CHANGES'}
+              {saving ? 'SYNCING DATA...' : 'Update Profile'}
             </button>
           </div>
         </form>

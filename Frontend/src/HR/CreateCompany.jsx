@@ -1,209 +1,275 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-hot-toast';
-import api from '../api/instance';
-
+import { useState } from "react";
+import { useNavigate } from "react-router-dom"; // Added for seamless redirection
+import api from "../api/instance";
+import toast from "react-hot-toast";
 const CreateCompanyPage = () => {
   const navigate = useNavigate();
-  const [currentStep, setCurrentStep] = useState(1);
-  const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    website: '',
-    location: '',
-    description: '',
+    name: "",
+    email: "",
+    location: "",
+    phone: "",
+    description: "",
+    otp: "",
   });
 
+  const [otpSent, setOtpSent] = useState(false);
+  const [verified, setVerified] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  // HANDLE INPUT CHANGE
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
-  const nextStep = (e) => {
-    e.preventDefault();
-    if (!formData.name.trim()) {
-      return toast.error("Company Name is strictly mandatory.");
+  // SEND OTP
+  const handleSendOtp = async () => {
+    if (!formData.email) {
+      toast.error("Please enter company email");
+      return;
     }
-    setCurrentStep(2);
-  };
-
-  const prevStep = () => {
-    setCurrentStep(1);
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(false);
-
-    const loadingToast = toast.loading('Initializing corporate tenant workspace...');
-    setLoading(true);
 
     try {
-      await api.post('company/initialize-workspace/', formData);
-      
-      toast.success('Workspace established successfully!', { id: loadingToast });
-      
-      navigate('/hr-dashboard');
-      
-      window.location.reload();
+      setLoading(true);
+      // FIXED: Removed leading slash to ensure Axios preserves your /api/ prefix base path configuration
+      const response = await api.post("company/send-company-otp/", {
+        email: formData.email,
+      });
+
+      toast.success(response.data.detail || "OTP sent to the provided email.");
+      setOtpSent(true);
     } catch (error) {
-      console.error("Workspace initialization failed:", error);
-      const errorMessage = error.response?.data?.detail || "Failed to initialize company. Please check required fields.";
-      toast.error(errorMessage, { id: loadingToast });
+      console.error(error);
+      toast.error(
+        error.response?.data?.detail || "Failed to send OTP"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // VERIFY OTP
+  const handleVerifyOtp = async () => {
+    if (!formData.otp) {
+      toast.error("Please enter OTP");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      // FIXED: Removed leading slash to prevent base URL prefix clipping
+      const response = await api.post("company/verify-company-otp/", {
+        email: formData.email,
+        otp: formData.otp,
+      });
+
+      toast.success(response.data.detail || "Company verified successfully.");
+      setVerified(true);
+    } catch (error) {
+      console.error(error);
+      toast.error(
+        error.response?.data?.detail || "OTP verification failed"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // CREATE COMPANY
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!verified) {
+      toast.error("Please verify email first");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      // FIXED: Removed leading slash to resolve URL assembly errors
+      const response = await api.post("company/create-company/", {
+        name: formData.name,
+        email: formData.email,
+        location: formData.location,
+        phone: formData.phone,
+        description: formData.description,
+      });
+
+      toast.success(response.data.message || "Company workspace setup complete!");
+
+      // RESET FORM
+      setFormData({
+        name: "",
+        email: "",
+        location: "",
+        phone: "",
+        description: "",
+        otp: "",
+      });
+
+      setOtpSent(false);
+      setVerified(false);
+
+      // REDIRECT: Send the recruiter immediately to look at their completed workspace profile card!
+      navigate("/my-company");
+
+    } catch (error) {
+      console.error(error);
+      toast.error(
+        error.response?.data?.detail || "Failed to create company"
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20 font-sans text-left">
-      
-      
-      <header className="space-y-2">
-        <h1 className="text-3xl font-black text-slate-800 tracking-tight uppercase">Setup Your Workspace</h1>
-        <p className="text-xs font-black text-slate-400 tracking-widest uppercase">
-          Establish your multi-tenant brand sandbox inside Spendrix
-        </p>
-      </header>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-5">
+      <div className="bg-white w-full max-w-lg rounded-xl shadow-lg p-8">
+        <h1 className="text-2xl font-bold mb-6 text-center text-slate-800">
+          Create Company
+        </h1>
 
-      <div className="flex items-center gap-4 max-w-xs bg-slate-100 p-1.5 rounded-full border border-slate-200/40">
-        <div className={`flex-1 text-center py-2 rounded-full font-black text-[10px] tracking-widest uppercase transition-all duration-300 ${currentStep === 1 ? 'bg-slate-900 text-white shadow-md' : 'text-slate-400'}`}>
-          01. Identity
-        </div>
-        <div className={`flex-1 text-center py-2 rounded-full font-black text-[10px] tracking-widest uppercase transition-all duration-300 ${currentStep === 2 ? 'bg-slate-900 text-white shadow-md' : 'text-slate-400'}`}>
-          02. Profile
-        </div>
-      </div>
+        <form onSubmit={handleSubmit}>
+          {/* COMPANY NAME */}
+          <div className="mb-4">
+            <label className="block mb-2 font-medium text-slate-700">
+              Company Name
+            </label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              placeholder="Enter company name"
+              required
+              className="w-full border border-slate-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 font-semibold"
+            />
+          </div>
 
-      <div className="bg-white/70 backdrop-blur-xl border border-white rounded-[2.5rem] p-10 shadow-2xl shadow-slate-200/50">
-        
-        {currentStep === 1 && (
-          <form onSubmit={nextStep} className="space-y-8 animate-in fade-in duration-300">
-            <div className="border-b border-slate-100 pb-4">
-              <h3 className="text-xs font-black text-indigo-600 uppercase tracking-[0.2em]">Core Registration Data</h3>
-            </div>
-
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest">Company Corporate Name *</label>
-                <input 
-                  type="text"
-                  name="name"
-                  required
-                  placeholder="e.g. Stripe Inc."
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="w-full px-6 py-4 bg-slate-50/80 border border-slate-100 rounded-2xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest">Corporate Email Address</label>
-                  <input 
-                    type="email"
-                    name="email"
-                    placeholder="e.g. hr@company.com"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="w-full px-6 py-4 bg-slate-50/80 border border-slate-100 rounded-2xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest">Contact Phone Number</label>
-                  <input 
-                    type="text"
-                    name="phone"
-                    placeholder="e.g. +1 (555) 019-2834"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    className="w-full px-6 py-4 bg-slate-50/80 border border-slate-100 rounded-2xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-6 border-t border-slate-100 flex justify-end">
-              <button
-                type="submit"
-                className="px-10 py-4 bg-slate-900 hover:bg-indigo-600 text-white text-xs font-black uppercase tracking-widest rounded-xl shadow-xl transition-all duration-300"
-              >
-                Continue Workflow →
-              </button>
-            </div>
-          </form>
-        )}
-
-        {currentStep === 2 && (
-          <form onSubmit={handleSubmit} className="space-y-8 animate-in fade-in duration-300">
-            <div className="border-b border-slate-100 pb-4">
-              <h3 className="text-xs font-black text-indigo-600 uppercase tracking-[0.2em]">Localization & Brand Scope</h3>
-            </div>
-
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest">Official Website URL</label>
-                  <input 
-                    type="url"
-                    name="website"
-                    placeholder="e.g. https://stripe.com"
-                    value={formData.website}
-                    onChange={handleChange}
-                    className="w-full px-6 py-4 bg-slate-50/80 border border-slate-100 rounded-2xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest">Headquarters Location</label>
-                  <input 
-                    type="text"
-                    name="location"
-                    placeholder="e.g. San Francisco, CA"
-                    value={formData.location}
-                    onChange={handleChange}
-                    className="w-full px-6 py-4 bg-slate-50/80 border border-slate-100 rounded-2xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest">About / Company Overview Description</label>
-                <textarea 
-                  name="description"
-                  placeholder="Describe the company's core services, technical vision, and operating cultural pillars..."
-                  value={formData.description}
-                  onChange={handleChange}
-                  className="w-full px-6 py-4 bg-slate-50/80 border border-slate-100 rounded-2xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500 transition-all min-h-[160px] outline-none resize-none"
-                />
-              </div>
-            </div>
-
-            <div className="pt-6 border-t border-slate-100 flex items-center justify-between gap-4">
+          {/* COMPANY EMAIL */}
+          <div className="mb-4">
+            <label className="block mb-2 font-medium text-slate-700">
+              Company Email
+            </label>
+            <div className="flex gap-3">
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Enter company email"
+                required
+                disabled={otpSent}
+                className="flex-1 border border-slate-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 font-semibold disabled:bg-slate-50 disabled:text-slate-400"
+              />
               <button
                 type="button"
-                onClick={prevStep}
-                disabled={loading}
-                className="px-8 py-4 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-black uppercase tracking-widest rounded-xl transition-all disabled:opacity-50"
+                onClick={handleSendOtp}
+                disabled={verified || loading}
+                className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 text-white font-bold px-5 text-xs uppercase tracking-wider rounded-lg transition"
               >
-                ← Back
-              </button>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="px-12 py-4 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black uppercase tracking-widest rounded-xl shadow-xl shadow-indigo-100 transition-all disabled:opacity-50"
-              >
-                {loading ? "Allocating Studio Tenant..." : "Launch Corporate Studio ✨"}
+                {verified ? "Verified" : "Verify"}
               </button>
             </div>
-          </form>
-        )}
+          </div>
 
+          {/* OTP FIELD */}
+          {otpSent && !verified && (
+            <div className="mb-4 animate-in fade-in slide-in-from-top-2 duration-200">
+              <label className="block mb-2 font-medium text-slate-700">
+                Enter OTP
+              </label>
+              <div className="flex gap-3">
+                <input
+                  type="text"
+                  name="otp"
+                  value={formData.otp}
+                  onChange={handleChange}
+                  placeholder="Enter 6-digit OTP"
+                  className="flex-1 border border-slate-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 font-semibold"
+                />
+                <button
+                  type="button"
+                  onClick={handleVerifyOtp}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 text-xs uppercase tracking-wider rounded-lg transition"
+                >
+                  Verify OTP
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* VERIFIED INDICATION TEXT */}
+          {verified && (
+            <p className="text-sm font-bold text-emerald-600 mb-4 bg-emerald-50 border border-emerald-100 px-4 py-2 rounded-xl flex items-center gap-1.5">
+              <span>✅</span> Company email verified successfully
+            </p>
+          )}
+
+          {/* LOCATION */}
+          <div className="mb-4">
+            <label className="block mb-2 font-medium text-slate-700">
+              Location
+            </label>
+            <input
+              type="text"
+              name="location"
+              value={formData.location}
+              onChange={handleChange}
+              placeholder="Enter location"
+              required
+              className="w-full border border-slate-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 font-semibold"
+            />
+          </div>
+
+          {/* PHONE */}
+          <div className="mb-4">
+            <label className="block mb-2 font-medium text-slate-700">
+              Phone
+            </label>
+            <input
+              type="text"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              placeholder="Enter phone number"
+              className="w-full border border-slate-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 font-semibold"
+            />
+          </div>
+
+          {/* DESCRIPTION */}
+          <div className="mb-6">
+            <label className="block mb-2 font-medium text-slate-700">
+              Description
+            </label>
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              placeholder="About company..."
+              rows="4"
+              className="w-full border border-slate-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 font-semibold resize-none"
+            />
+          </div>
+
+          {/* SUBMIT BUTTON */}
+          <button
+            type="submit"
+            disabled={!verified || loading}
+            className={`w-full py-3.5 rounded-xl text-white text-sm font-bold transition-all ${
+              verified && !loading
+                ? "bg-slate-900 hover:bg-slate-800 shadow-md"
+                : "bg-slate-300 cursor-not-allowed"
+            }`}
+          >
+            {loading ? "Processing Workspace Link..." : "Create Company Profile"}
+          </button>
+        </form>
       </div>
     </div>
   );

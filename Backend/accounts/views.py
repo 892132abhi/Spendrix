@@ -18,6 +18,8 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 
+# NEW IMPORT: For managing secure temporary signature tokens safely
+from django.core.signing import TimestampSigner, SignatureExpired, BadSignature
 
 User = get_user_model()
 
@@ -48,20 +50,89 @@ def set_auth_cookies(response, user):
     return response
 
 
+# =========================================================================
+# NEW VIEW: Validates invitation token for frontend mount checks
+# =========================================================================
+class ValidateInvitationTokenView(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes = []
 
+    def get(self, request):
+        token = request.query_params.get('token')
+        if not token:
+            return Response({"valid": False, "detail": "Missing invitation configuration parameters."}, status=status.HTTP_400_BAD_REQUEST)
+
+        signer = TimestampSigner()
+        try:
+            # Token signature strictly expires after 48 hours (172800 seconds)
+            decrypted_payload = signer.unsign(token, max_age=172800)
+            email, role = decrypted_payload.split(":")
+            
+            return Response({
+                "valid": True,
+                "email": email,
+                "role": role
+            }, status=status.HTTP_200_OK)
+
+        except SignatureExpired:
+            return Response({"valid": False, "detail": "This platform invitation token link has expired."}, status=status.HTTP_400_BAD_REQUEST)
+        except (BadSignature, ValueError):
+            return Response({"valid": False, "detail": "Cryptographic registration signature verification failed."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+# =========================================================================
+# UPDATED VIEW: Supports token parsing and strict role injection
+# =========================================================================
 class RegisterView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
     
     def post(self, request):
+        # Clean out stale unverified junk account profiles
         CustomUser.objects.filter(
             is_email_verified=False,
             otp_expiry__lt=timezone.now()
         ).delete()
 
-        serializer = RegisterSerializer(data=request.data)
+        invite_token = request.data.get('invite_token')
+        assigned_role = None
+        invited_company_id = None
+
+        # 1. Server-side token validation checkpoint
+        if invite_token:
+            signer = TimestampSigner()
+            try:
+                decrypted_payload = signer.unsign(invite_token, max_age=172800)
+                token_email, token_role ,token_company_id=decrypted_payload.split(":")
+                
+                # Enforce that the provided registration email matches the token target address precisely
+                if request.data.get('email', '').strip().lower() != token_email:
+                    return Response({"email": ["Email address mismatch against authorized invitation parameters."]}, status=status.HTTP_400_BAD_REQUEST)
+                
+                assigned_role = token_role # Safely assigns 'INTERVIEWER' from the signed payload
+                invited_company_id = token_company_id
+                
+            except (SignatureExpired, BadSignature, ValueError):
+                return Response({"detail": "The invitation secure key signature handle is invalid or expired."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 2. Run your standard serialization configurations
+        data = request.data.copy()
+        data.pop('invite_token', None)
+
+        if assigned_role:
+            data['role'] = assigned_role
+
+        serializer = RegisterSerializer(data=data)
         if serializer.is_valid():
             user = serializer.save()
+            
+            # If an explicit role was securely decrypted, overwrite serializer default fields directly
+            if assigned_role:
+                user.role = assigned_role
+            if invited_company_id:
+                user.profile.company_id = invited_company_id
+                user.profile.department = "INTERVIEWER"
+                user.profile.save()
             user.is_email_verified = False
             user.is_active = False
             user.save()
@@ -134,7 +205,6 @@ class VerifyOTPView(APIView):
         return Response({"detail": "Invalid or expired OTP"}, status=status.HTTP_401_UNAUTHORIZED)
 
 
-
 class RequestPasswordResetOTPView(APIView):
     permission_classes = [AllowAny]
     
@@ -175,7 +245,6 @@ class SetNewPasswordView(APIView):
         user.save()
         clear_user_otp(user)
         return Response({"message": "Password reset successful"}, status=status.HTTP_200_OK)
-
 
 
 class LoginView(APIView):
@@ -241,7 +310,6 @@ class Logoutview(APIView):
         response.delete_cookie(settings.SIMPLE_JWT['AUTH_COOKIE'], path=settings.SIMPLE_JWT.get('AUTH_COOKIE_PATH', '/'))
         response.delete_cookie('refresh_token', path='/api/accounts/token/refresh/')
         return response
-
 
 
 class GoogleLoginView(APIView):
@@ -396,4 +464,3 @@ class DeleteAccount(APIView):
             user.delete()
             return Response({"detail":"account deleted successfully..."},status=status.HTTP_200_OK)
         return Response({"detail":"user not found..."},status=status.HTTP_404_NOT_FOUND)
-        

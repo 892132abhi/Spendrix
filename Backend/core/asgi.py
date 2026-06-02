@@ -9,12 +9,13 @@ https://docs.djangoproject.com/en/6.0/howto/deployment/asgi/
 
 import os
 
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
+
 from django.core.asgi import get_asgi_application
 from channels.routing import ProtocolTypeRouter,URLRouter
 import chat.routing
 from accounts.middleware import JWTAuthMiddleware
 import notifications.routing
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 
 combined_websocket_routes = chat.routing.websocket_urlpatterns + notifications.routing.websocket_urlpatterns
 

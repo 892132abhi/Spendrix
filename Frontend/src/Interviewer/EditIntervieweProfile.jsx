@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../api/instance';
 import { toast } from 'react-hot-toast';
 
-const ProfileEdit = () => {
+const InterviewerEditprofile = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -223,4 +223,4 @@ const InputGroup = ({ label, name, value, onChange, type = "text" }) => (
   </div>
 );
 
-export default ProfileEdit;
+export default InterviewerEditprofile;

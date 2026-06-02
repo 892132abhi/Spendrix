@@ -6,6 +6,7 @@ urlpatterns=[
     path('request-otp/',views.RequestOTPView.as_view(), name='request-otp'),
     path('verify-otp/',views.VerifyOTPView.as_view(), name='verify-otp'),
     path('login/',views.LoginView.as_view(),name='login'),
+    path('validate-invite/', views.ValidateInvitationTokenView.as_view(), name='validate-invite'),
     path('password-reset/request-otp/', views.RequestPasswordResetOTPView.as_view(), name='password-reset-request-otp'),
     path('password-reset/verify-otp/', views.VerifyPasswordResetOTPView.as_view(), name='password-reset-verify-otp'),
     path('set-new-password/', views.SetNewPasswordView.as_view(), name='set-new-password'),

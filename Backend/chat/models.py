@@ -1,51 +1,46 @@
-from django.db import models
+import uuid
+
 from django.conf import settings
-from interviews.models import Interview
+from django.db import models
 
 
 class ChatRoom(models.Model):
-    interview = models.OneToOneField(
-        Interview,
-        on_delete=models.CASCADE,
-        related_name="chat_room"
-    )
-
-    candidate = models.ForeignKey(
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user1 = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="candidate_chat_rooms"
+        related_name="chat_rooms_as_user1",
     )
-
-    interviewer = models.ForeignKey(
+    user2 = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="interviewer_chat_rooms"
+        related_name="chat_rooms_as_user2",
     )
-
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        unique_together = ("user1", "user2")
+
     def __str__(self):
-        return f"Chat for interview {self.interview.id}"
+        return f"Room between {self.user1.username} and {self.user2.username}"
 
 
-class ChatMessage(models.Model):
+class Message(models.Model):
     room = models.ForeignKey(
         ChatRoom,
         on_delete=models.CASCADE,
-        related_name="messages"
+        related_name="messages",
     )
-
     sender = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="messages"
+        related_name="sent_chat_messages",
     )
-
-    message = models.TextField()
+    text = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ["timestamp"]
 
     def __str__(self):
-        return f"{self.sender.username}: {self.message[:20]}"f"{self.sender.username}: {self.message[:20]}"f"{self.sender.username}: {self.message[:20]}""{self.sender.username}: {self.message[:20]}"
+        return f"{self.sender.username}: {self.text[:20]}"

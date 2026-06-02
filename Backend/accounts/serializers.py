@@ -9,11 +9,10 @@ User = get_user_model()
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=6)
     confirm_password = serializers.CharField(write_only=True)
-    invite_token = serializers.UUIDField(write_only=True, required=False)
-
+    role = serializers.CharField(required=False, allow_blank=True)
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'confirm_password', 'role','invite_token']
+        fields = ['username', 'email', 'password', 'confirm_password', 'role']
 
     def validate(self, data):
         if data['password'] != data['confirm_password']:
@@ -62,7 +61,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     role = serializers.CharField(source='user.role', read_only=True)
     user_id = serializers.IntegerField(source='user.id', read_only=True)
     is_active = serializers.BooleanField(source='user.is_active', read_only=True)
-
+    company_name = serializers.CharField(source='company.name', read_only=True)
     class Meta:
         model = Profile
         fields = [

@@ -39,7 +39,9 @@ import CandidateInterviews from './Userpages/InterviewsList'
 import CompaniesListPage from './Admin/Companylist'
 import CreateCompanyPage from './HR/CreateCompany'
 import JobManagement from './Admin/Job management'
-
+import CompanyDetail from "./HR/CompanyDetail";
+import InterviewerProfile from './Interviewer/InterviewerProfile'
+import InterviewerEditprofile from './Interviewer/EditIntervieweProfile'
 function App() {
 
   return (
@@ -62,6 +64,7 @@ function App() {
       <Route path='/applicants' element={<ApplicantsPage/>}/>
       <Route path='/interviews' element={<InterviewsPage/>}/>
       <Route path='/createinterview' element={<CreateInterviewPage/>}/>
+      <Route path='/my-company' element={<CompanyDetail/>}/>
       <Route path='/create-company' element={<CreateCompanyPage/>}/>
       <Route path='/createjob' element={<CreateJobPage/>}/>
       <Route path="/editjob/:id" element={<EditJobPage />} />
@@ -72,6 +75,8 @@ function App() {
 
 
       <Route path='/interviewer-dashboard' element={<InterviewerDashboard/>}/>
+      <Route path='/interviewer-profile' element={<InterviewerProfile/>}/>
+      <Route path='/interviewer-editprofile' element={<InterviewerEditprofile/>}/>
       <Route path='candidate-list' element={<InterviewerCandidates/>}/>
       <Route path='/assigned-interviews' element={<InterviewerSessions/>}/>
       <Route path='/feedback' element={<InterviewerFeedback/>}/>

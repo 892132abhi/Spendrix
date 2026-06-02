@@ -145,12 +145,12 @@ CHANNEL_LAYERS = {
 
 DATABASES = {
     'default': {
-        'ENGINE': os.getenv('DB_ENGINE'),
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('DB_NAME', 'spendrix_db'),
+        'USER': os.getenv('DB_USER', 'postgres'),
+        'PASSWORD': os.getenv('DB_PASSWORD', '2003'),
+        'HOST': os.getenv('DB_HOST', 'db'),
+        'PORT': os.getenv('DB_PORT', '5432'),
     }
 }
 
@@ -190,7 +190,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = os.getenv('STATIC_URL')
-AUTH_USER_MODEL = os.getenv('AUTH_USER_MODEL')
+AUTH_USER_MODEL ='accounts.CustomUser'
 
 MEDIA_URL = os.getenv('MEDIA_URL')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -204,9 +204,8 @@ EMAIL_HOST_PASSWORD = os.getenv('SMTP_EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = os.getenv('SMTP_DEFAULT_FROM_EMAIL')
 
 
-CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://redis:6379/0")
-CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://redis:6379/0")
-CELERY_ACCEPT_CONTENT = ["json"]
-CELERY_TASK_SERIALIZER = "json"
-CELERY_RESULT_SERIALIZER = "json"
-CELERY_TIMEZONE = TIME_ZONE
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/1'  # Using database 1 to avoid conflicts with Channels
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/1'
+CELERY_TIMEZONE = 'UTC'

@@ -16,24 +16,42 @@ const CandidateChat = () => {
     const initChat = async () => {
       setLoading(true);
       try {
-        
-        const res = await api.get(`chat/chatview/candidate/${sessionId}/`);
-        const history = res.data.messages.map(m => ({
-          text: m.message,
+        const interviewsRes = await api.get('interviews/candidateinterviews/');
+        const interview = (interviewsRes.data || []).find(
+          item => String(item.id) === String(sessionId)
+        );
+
+        if (!interview?.hr_id) {
+          toast.error("HR not found for this interview.");
+          return;
+        }
+
+        const profileRes = await api.get('accounts/profiledata/');
+        const currentUserId = profileRes.data.user_id;
+
+        const roomRes = await api.post('chat/room/', {
+          other_user_id: interview.hr_id,
+        });
+        const roomId = roomRes.data.room_id;
+
+        const historyRes = await api.get(`chat/history/${roomId}/`);
+        const history = (historyRes.data || []).map(m => ({
+          text: m.text,
           sender: m.sender_username,
-          is_me: m.sender_role === 'CANDIDATE' 
+          is_me: m.sender_id === currentUserId
         }));
         setMessages(history);
 
-        const wsUrl = `ws://localhost:8000/ws/chat/candidate/${sessionId}/`;
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+        const wsUrl = `${wsProtocol}://localhost:8000/ws/chat/${roomId}/`;
         socket.current = new WebSocket(wsUrl);
 
         socket.current.onmessage = (e) => {
           const data = JSON.parse(e.data);
           setMessages((prev) => [...prev, {
             text: data.message,
-            sender: data.username,
-            is_me: data.role === 'CANDIDATE' 
+            sender: data.sender_username,
+            is_me: data.sender_id === currentUserId
           }]);
         };
       } catch (err) {
@@ -53,7 +71,7 @@ const CandidateChat = () => {
 
   const handleSend = () => {
     if (newMessage.trim() && socket.current?.readyState === WebSocket.OPEN) {
-      socket.current.send(JSON.stringify({ message: newMessage, role: 'CANDIDATE' }));
+      socket.current.send(JSON.stringify({ message: newMessage }));
       setNewMessage("");
     }
   };

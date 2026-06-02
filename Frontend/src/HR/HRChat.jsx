@@ -1,11 +1,12 @@
 import  { useState, useEffect, useRef} from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import api from '../api/instance';
 import { toast } from 'react-hot-toast';
 
 const ChatPageHR = () => {
   const { target, sessionId } = useParams(); 
   const navigate = useNavigate();
+  const location = useLocation();
   
   // State Management
   const [messages, setMessages] = useState([]);
@@ -24,30 +25,60 @@ const ChatPageHR = () => {
     const initChat = async () => {
       setLoading(true);
       try {
-        const res = await api.get(`chat/chatview/${target}/${sessionId}/`);
-        setParticipants(res.data.participants || {
-  candidate_name: "Candidate",
-  interviewer_name: "Interviewer"
-});
-        const history = (res.data.messages || []).map(m => ({
-  text: m.message,
-  sender: m.sender_username,
-  timestamp: new Date(m.timestamp).toLocaleTimeString([], {
-    hour: '2-digit',
-    minute: '2-digit'
-  }),
-  is_me: m.sender_role === 'HR'
-}));
+        let targetUserId = location.state?.targetUserId;
+        let targetName = location.state?.targetName;
 
-setMessages(history);
+        if (!targetUserId) {
+          const interviewsRes = await api.get('interviews/interviewlist/?');
+          const interview = (interviewsRes.data || []).find(
+            item => String(item.id) === String(sessionId)
+          );
+
+          targetUserId = target === 'candidate'
+            ? interview?.candidate_id
+            : interview?.interviewer_id;
+          targetName = target === 'candidate'
+            ? interview?.candidate_name
+            : interview?.interviewer_name;
+        }
+
+        if (!targetUserId) {
+          toast.error("Target user not found. Open chat from interviews page.");
+          return;
+        }
+
+        const profileRes = await api.get('accounts/profiledata/');
+        const currentUserId = profileRes.data.user_id;
+
+        const roomRes = await api.post('chat/room/', {
+          other_user_id: targetUserId,
+        });
+        const roomId = roomRes.data.room_id;
+
+        const historyRes = await api.get(`chat/history/${roomId}/`);
+        const history = (historyRes.data || []).map(m => ({
+          text: m.text,
+          sender: m.sender_username,
+          timestamp: new Date(m.timestamp).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit'
+          }),
+          is_me: m.sender_id === currentUserId
+        }));
+
+        setMessages(history);
+        setParticipants({
+          candidate_name: target === 'candidate' ? targetName || 'Candidate' : 'Candidate',
+          interviewer_name: target === 'interviewer' ? targetName || 'Interviewer' : 'Interviewer'
+        });
         setChatInfo(
           target === "candidate"
-            ? { name: res.data.participants?.candidate_name || "Candidate", role: "Candidate" }
-            : { name: res.data.participants?.interviewer_name || "Interviewer", role: "Interviewer" }
+            ? { name: targetName || "Candidate", role: "Candidate" }
+            : { name: targetName || "Interviewer", role: "Interviewer" }
         );
 
         const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-        const wsUrl = `${wsProtocol}://localhost:8000/ws/chat/${target}/${sessionId}/`;
+        const wsUrl = `${wsProtocol}://localhost:8000/ws/chat/${roomId}/`;
         
         socket.current = new WebSocket(wsUrl);
 
@@ -55,9 +86,9 @@ setMessages(history);
           const data = JSON.parse(e.data);
           setMessages((prev) => [...prev, {
             text: data.message,
-            sender: data.sender,
+            sender: data.sender_username,
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            is_me: data.role ==='HR' 
+            is_me: data.sender_id === currentUserId
           }]);
         };
       } catch (err) {
@@ -73,7 +104,7 @@ setMessages(history);
     return () => {
       if (socket.current) socket.current.close();
     };
-  }, [target, sessionId]);
+  }, [target, sessionId, location.state]);
 
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });

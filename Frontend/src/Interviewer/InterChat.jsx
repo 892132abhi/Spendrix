@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../api/instance';
+import { toast } from 'react-hot-toast';
 
 const InterviewerChat = () => {
   const { sessionId } = useParams(); 
@@ -10,45 +11,65 @@ const InterviewerChat = () => {
   const scrollRef = useRef(null);
 
 useEffect(() => {
-  const wsUrl = `ws://localhost:8000/ws/chat/interviewer/${sessionId}/`;
-
-  const loadHistory = async () => {
+  const initChat = async () => {
     try {
-      const res = await api.get(`chat/chatview/interviewer/${sessionId}/`);
+      const interviewsRes = await api.get('interviews/assignedinterviews/');
+      const interview = (interviewsRes.data || []).find(
+        item => String(item.id) === String(sessionId)
+      );
 
-      const history = (res.data.messages || []).map(m => ({
-        text: m.message,
+      if (!interview?.hr_id) {
+        toast.error("HR not found for this interview.");
+        return;
+      }
+
+      const profileRes = await api.get('accounts/profiledata/');
+      const currentUserId = profileRes.data.user_id;
+
+      const roomRes = await api.post('chat/room/', {
+        other_user_id: interview.hr_id,
+      });
+      const roomId = roomRes.data.room_id;
+
+      const res = await api.get(`chat/history/${roomId}/`);
+
+      const history = (res.data || []).map(m => ({
+        text: m.text,
         sender: m.sender_username,
-        is_me: m.sender_role === 'INTERVIEWER',
+        is_me: m.sender_id === currentUserId,
         timestamp: m.timestamp
       }));
 
       setMessages(history);
+
+      const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+      const wsUrl = `${wsProtocol}://localhost:8000/ws/chat/${roomId}/`;
+
+      socket.current = new WebSocket(wsUrl);
+
+      socket.current.onmessage = (e) => {
+        const data = JSON.parse(e.data);
+
+        setMessages((prev) => [...prev, {
+          text: data.message,
+          sender: data.sender_username,
+          is_me: data.sender_id === currentUserId,
+          timestamp: data.timestamp
+        }]);
+      };
     } catch (error) {
       console.error("Failed to load chat history:", error);
+      toast.error("Chat failed to load.");
     }
   };
 
-  loadHistory();
-
-  socket.current = new WebSocket(wsUrl);
-
-  socket.current.onmessage = (e) => {
-    const data = JSON.parse(e.data);
-
-    setMessages((prev) => [...prev, {
-      text: data.message,
-      sender: data.username,
-      is_me: data.role === 'INTERVIEWER',
-      timestamp: new Date().toISOString()
-    }]);
-  };
+  initChat();
 
   return () => socket.current?.close();
 }, [sessionId]);
 
   const handleSend = () => {
-    if (newMessage.trim() && socket.current) {
+    if (newMessage.trim() && socket.current?.readyState === WebSocket.OPEN) {
       socket.current.send(JSON.stringify({ 'message': newMessage }));
       setNewMessage("");
     }

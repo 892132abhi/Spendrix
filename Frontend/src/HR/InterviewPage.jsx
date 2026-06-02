@@ -189,14 +189,30 @@ const InterviewsPage = () => {
                       <div className="flex items-center justify-center gap-3">
                         {/* CANDIDATE CHAT */}
                         <div className="relative group/tooltip">
-                          <button onClick={() => navigate(`/hr/chat/candidate/${session.id}`)} className="p-2 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-indigo-600 transition-all shadow-sm">
+                          <button
+                            onClick={() => navigate(`/hr/chat/candidate/${session.id}`, {
+                              state: {
+                                targetUserId: session.candidate_id,
+                                targetName: session.candidate_name || 'Candidate',
+                              }
+                            })}
+                            className="p-2 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-indigo-600 transition-all shadow-sm"
+                          >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                           </button>
                           <span className="absolute -top-8 left-1/2 -translate-x-1/2 scale-0 group-hover/tooltip:scale-100 transition-all bg-slate-900 text-white text-[7px] font-black px-2 py-1 rounded uppercase tracking-widest shadow-xl">Candidate</span>
                         </div>
                         {/* INTERVIEWER CHAT */}
                         <div className="relative group/tooltip">
-                          <button onClick={() => navigate(`/hr/chat/interviewer/${session.id}`)} className="p-2 bg-indigo-50 border border-indigo-100 rounded-xl text-indigo-500 hover:bg-indigo-600 hover:text-white transition-all shadow-sm">
+                          <button
+                            onClick={() => navigate(`/hr/chat/interviewer/${session.id}`, {
+                              state: {
+                                targetUserId: session.interviewer_id,
+                                targetName: session.interviewer_name || 'Interviewer',
+                              }
+                            })}
+                            className="p-2 bg-indigo-50 border border-indigo-100 rounded-xl text-indigo-500 hover:bg-indigo-600 hover:text-white transition-all shadow-sm"
+                          >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857" /></svg>
                           </button>
                           <span className="absolute -top-8 left-1/2 -translate-x-1/2 scale-0 group-hover/tooltip:scale-100 transition-all bg-indigo-600 text-white text-[7px] font-black px-2 py-1 rounded uppercase tracking-widest shadow-xl">Interviewer</span>

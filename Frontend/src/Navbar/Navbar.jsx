@@ -80,7 +80,7 @@ const Navbar = () => {
     HR: [
       { path: "/hr-dashboard", label: "Dashboard", icon: <DashboardIcon /> },
       // --- UPDATED: Injected Corporate Workspace Profile Route Link ---
-      { path: "/create-company", label: "Company Profile", icon: <FlowIcon /> },
+      { path: "/my-company", label: "Company Profile", icon: <FlowIcon /> },
       { path: "/hr-staff", label: "Staff", icon: <PeopleIcon /> },
       { path: "/hr-jobs", label: "Jobs", icon: <JobsIcon /> },
       { path: "/applicants", label: "Applicants", icon: <ApplicationsIcon /> },
@@ -93,6 +93,7 @@ const Navbar = () => {
       { path: "/interviewer-dashboard", label: "Dashboard", icon: <DashboardIcon /> },
       { path: "/candidate-list", label: "Candidates", icon: <ProfileIcon /> },
       { path: "/assigned-interviews", label: "Interviews", icon: <CalendarIcon /> },
+      { path: "/interviewer-profile", label: "My Profile", icon: <ProfileIcon /> },
       // { path: "/feedback", label: "Feedback", icon: <ChatIcon /> },
       { path: "/interviewer-notification", label: "Notifications", icon: <NotifyIcon /> },
     ],

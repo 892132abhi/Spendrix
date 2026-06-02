@@ -40,7 +40,7 @@ function Register() {
     );
   };
 
-  const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (form.password !== form.confirm_password) {
@@ -62,7 +62,7 @@ function Register() {
       payload.role = form.role;
     }
 
-    // --- Added missing "try" block wrapper here to repair the syntax ---
+    // --- CRITICAL FIX: Added missing "try" wrapper ---
     try {
       await api.post("accounts/register/", payload);
       localStorage.setItem("verify_username", form.username);

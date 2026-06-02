@@ -12,7 +12,7 @@ def copy_existing_room_participants(apps, schema_editor):
         'candidate',
         'interviewer',
         'interview__hr_name',
-        'interview__application__job__created_by',
+        
     ):
         hr_user_id = (
             room.interview.hr_name_id
