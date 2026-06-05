@@ -9,3 +9,4 @@ urlpatterns = [
     path('my-company/', views.MyCompanyDetailView.as_view(), name='my-company-detail'),
     path('invite-staff/', views.InviteStaffView.as_view(), name='invite-staff'),
 ]
+

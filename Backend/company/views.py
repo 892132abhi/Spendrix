@@ -186,7 +186,7 @@ class InviteStaffView(APIView):
             secure_token = signer.sign(payload)
 
             # 3. ➔ CRITICAL PARAMETER FIX: Changed ?token= to ?invite_token= to match your React searchParams hook exactly!
-            invite_link = f"http://localhost:5173/registerpage?invite_token={secure_token}"
+            invite_link = f"http://localhost/registerpage?invite_token={secure_token}"
 
             # 4. Dispatch the system email task vector
             subject = f"Invitation to join {getattr(request.user.profile, 'company.name', 'Spendrix Workspace')}"

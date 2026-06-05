@@ -43,7 +43,7 @@ const InterviewerProfilePage = () => {
             Back
           </button>
           <h1 className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">Interviewer Profile Management</h1>
-          <button className="px-6 py-2 bg-indigo-600 text-white rounded-full text-xs font-black uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100" onClick={()=>navigate("/hr-editprofile")}>
+          <button className="px-6 py-2 bg-indigo-600 text-white rounded-full text-xs font-black uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100" onClick={()=>navigate("/interviewer-editprofile")}>
             Edit Profile
           </button>
         </div>

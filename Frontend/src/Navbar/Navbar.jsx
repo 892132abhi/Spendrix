@@ -87,7 +87,7 @@ const Navbar = () => {
       { path: "/interviews", label: "Interviews", icon: <CalendarIcon /> },
       { path: "/hr-profile", label: "My Profile", icon: <ProfileIcon /> },
       { path: "/hr-notification", label: "Notifications", icon: <NotifyIcon /> },
-      { path: "/settings", label: "Settings", icon: <SettingsIcon /> },
+      // { path: "/settings", label: "Settings", icon: <SettingsIcon /> },
     ],
     INTERVIEWER: [
       { path: "/interviewer-dashboard", label: "Dashboard", icon: <DashboardIcon /> },

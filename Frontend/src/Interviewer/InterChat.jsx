@@ -43,7 +43,7 @@ useEffect(() => {
       setMessages(history);
 
       const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-      const wsUrl = `${wsProtocol}://localhost:8000/ws/chat/${roomId}/`;
+      const wsUrl = `${wsProtocol}://localhost/ws/chat/${roomId}/`;
 
       socket.current = new WebSocket(wsUrl);
 
