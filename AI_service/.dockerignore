@@ -1,0 +1,17 @@
+.venv
+venv
+__pycache__
+*.pyc
+*.pkl
+*.pt
+*.bin
+*.h5
+*.model
+data/
+datasets/
+models/
+node_modules
+.git
+.env
+*.log
+.DS_Store

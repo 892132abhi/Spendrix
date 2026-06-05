@@ -17,7 +17,8 @@ from .utils import send_otp, is_otp_expired, clear_user_otp
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-
+from .utils import extract_resume_text
+from .tasks import send_job_recommendations_email
 # NEW IMPORT: For managing secure temporary signature tokens safely
 from django.core.signing import TimestampSigner, SignatureExpired, BadSignature
 
@@ -378,15 +379,31 @@ class ProfileView(APIView):
 class ProfileUpdateView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
-    
+
     def patch(self, request):
         profile = Profile.objects.get(user=request.user)
-        serializer = ProfileSerializer(profile, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        print(serializer.errors)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = ProfileSerializer(
+            profile,
+            data=request.data,
+            partial=True
+        )
+
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        profile = serializer.save()
+
+        if "resume" in request.FILES:
+            try:
+                resume_text = extract_resume_text(profile.resume.path)
+                profile.resume_text = resume_text
+                profile.save(update_fields=["resume_text"])
+
+            except Exception as error:
+                print("Resume text extraction error:", error)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ProfileCount(APIView):

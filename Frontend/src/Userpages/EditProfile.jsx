@@ -46,7 +46,7 @@ const EditProfilePage = () => {
           experience_years: data.experience_years || 0,
         });
 
-        if (data.profile_pic) setPreview(`http://127.0.0.1:8000${data.profile_pic}`);
+        if (data.profile_pic) setPreview(`http://localhost${data.profile_pic}`);
       } catch (err) {
         toast.error("Failed to load profile data");
       } finally {

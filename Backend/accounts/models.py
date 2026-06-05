@@ -73,6 +73,7 @@ class Profile(models.Model):
     )
     company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True, blank=True, related_name='members')
     resume = models.FileField(upload_to='resumes/', null=True, blank=True)
+    resume_text = models.TextField(blank=True,null=True)
     skills = models.CharField(max_length=255, blank=True, null=True)
     experience_years = models.IntegerField(blank=True, default=0)
     bio = models.TextField(blank=True)

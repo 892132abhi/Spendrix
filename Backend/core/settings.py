@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+from celery.schedules import crontab
 import os
 from dotenv import load_dotenv
 load_dotenv()
@@ -205,9 +206,15 @@ EMAIL_HOST_USER = os.getenv('SMTP_EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('SMTP_EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = os.getenv('SMTP_DEFAULT_FROM_EMAIL')
 
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://redis:6379/0")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://redis:6379/0")
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_TIMEZONE = "Asia/Kolkata"
 
-CELERY_BROKER_URL = 'redis://127.0.0.1:6379/1'  # Using database 1 to avoid conflicts with Channels
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/1'
-CELERY_TIMEZONE = 'UTC'
+CELERY_BEAT_SCHEDULE = {
+    "send-job-recommendations-every-day": {
+        "task": "accounts.tasks.send_scheduled_job_recommendations",
+        "schedule": crontab(hour=9, minute=0),
+    },
+}

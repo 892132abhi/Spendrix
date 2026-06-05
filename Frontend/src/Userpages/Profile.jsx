@@ -8,10 +8,11 @@ const ProfilePage = () => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const getMediaUrl = (path) => {
-    if (!path) return null;
-    return path.startsWith('http') ? path : `http://127.0.0.1:8000${path}`;
-  };
+  // Dynamic origin calculation to protect against CORS errors and hardcoded string typos
+const getMediaUrl = (path) => {
+  if (!path) return null;
+  return path.startsWith('http') ? path : `http://localhost${path}`;
+};
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -19,7 +20,7 @@ const ProfilePage = () => {
         const response = await api.get('accounts/profile/'); 
         setProfile(response.data);
       } catch (err) {
-        console.log("error found :",err)
+        console.log("error found :", err);
         toast.error("Failed to load official database profile credentials.");
       } finally {
         setLoading(false);
@@ -40,7 +41,7 @@ const ProfilePage = () => {
       <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-amber-100 py-4 mb-8 shadow-sm">
         <div className="max-w-6xl mx-auto px-6 flex justify-between items-center">
           <button onClick={() => navigate(-1)} className="text-stone-500 hover:text-orange-600 flex items-center font-black text-xs uppercase tracking-widest transition-colors">
-            ← Back
+            &larr; Back
           </button>
           <h1 className="text-xs font-black uppercase tracking-[0.3em] text-stone-400">Profile</h1>
           <button className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-stone-950 rounded-full text-xs font-black uppercase tracking-widest shadow-md transition-all" onClick={()=>navigate("/editprofile")}>
@@ -81,7 +82,7 @@ const ProfilePage = () => {
           </section>
 
           {profile?.linked_in && (
-            <a href={profile.linked_in} target="_blank" rel="noreferrer" className="flex items-center justify-between p-5 bg-gradient-to-r from-stone-950 via-stone-900 to-amber-950 text-amber-400 border border-amber-500/30 rounded-3xl hover:-translate-y-0.5 transition-all shadow-lg">
+            <a href={profile.linked_in} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-5 bg-gradient-to-r from-stone-950 via-stone-900 to-amber-950 text-amber-400 border border-amber-500/30 rounded-3xl hover:-translate-y-0.5 transition-all shadow-lg">
               <span className="font-black text-xs uppercase tracking-widest"> LinkedIn </span>
               <span className="text-orange-500 text-xl">🔱</span>
             </a>
@@ -122,9 +123,33 @@ const ProfilePage = () => {
                     <p className="text-sm font-black text-stone-900 uppercase tracking-tight">CV_Official_Records.pdf</p>
                     <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wide"></p>
                   </div>
-                  <a href={getMediaUrl(profile.resume)} target="_blank" rel="noreferrer" className="px-6 py-2.5 bg-white text-orange-600 font-black text-[10px] uppercase rounded-xl border border-orange-200 shadow-sm hover:bg-stone-950 hover:text-amber-400 transition-all">
+                  
+                  {/* BULLETPROOF BREAKOUT BUTTON */}
+                  <button 
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      
+                      const targetUrl = getMediaUrl(profile.resume);
+                      
+                      // Create a detached HTML element completely isolated from the React DOM tree
+                      const hiddenLink = document.createElement('a');
+                      hiddenLink.href = targetUrl;
+                      hiddenLink.target = '_blank';
+                      hiddenLink.rel = 'noopener noreferrer';
+                      
+                      // Append directly to document body context to bypass React Router's event interceptors
+                      document.body.appendChild(hiddenLink);
+                      hiddenLink.click();
+                      
+                      // Immediate garbage collection clean up
+                      document.body.removeChild(hiddenLink);
+                    }}
+                    className="px-6 py-2.5 bg-white text-orange-600 font-black text-[10px] uppercase rounded-xl border border-orange-200 shadow-sm hover:bg-stone-950 hover:text-amber-400 transition-all"
+                  >
                     View 
-                  </a>
+                  </button>
                 </div>
               ) : (
                 <div className="text-center py-12 bg-stone-50 rounded-3xl border-2 border-dashed border-stone-200">
