@@ -9,6 +9,11 @@ const AllApplicationsPage = () => {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
 
+const getMediaUrl = (path) => {
+    if (!path) return null;
+    return path.startsWith('http') ? path : `http://localhost${path}`;
+};
+
   const fetchApplications = async () => {
     try {
       setLoading(true);
@@ -97,7 +102,7 @@ const AllApplicationsPage = () => {
                     </span>
                   </td>
                   <td className="p-6 text-center">
-                    <a href={`http://localhost:8000${app.resume}`} target="_blank" className="text-indigo-600 font-black text-[10px] border-b border-indigo-100">VIEW PDF</a>
+                    <a href={getMediaUrl(app.resume)} target="_blank" rel="noopener noreferrer" className="text-indigo-600 font-black text-[10px] border-b border-indigo-100">VIEW PDF</a>
                   </td>
                 </tr>
               ))}

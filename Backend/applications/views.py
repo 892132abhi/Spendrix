@@ -22,11 +22,13 @@ class ApplyJob(APIView):
         
         if Application.objects.filter(candidate=request.user,job=job).exists():
            return Response({"detail":"you already for this job"},status=status.HTTP_400_BAD_REQUEST)
-       
+        profile_resume = getattr(request.user.profile, "resume", None)
+        if not profile_resume:
+            return Response({"detail":"Please upload your resume in  profile."},status=status.HTTP_400_BAD_REQUEST)
         serializer = ApplicationSerializer(data=request.data,context = {"request":request})
         
         if serializer.is_valid():
-            applications = serializer.save(candidate=request.user,job=job)
+            applications = serializer.save(candidate=request.user,job=job,resume = profile_resume)
             score_application.delay(applications.id)
             return Response({"detail":"Applied to Job Successfully"},status=status.HTTP_201_CREATED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)

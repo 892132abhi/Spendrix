@@ -25,9 +25,6 @@ from django.core.signing import TimestampSigner, SignatureExpired, BadSignature
 User = get_user_model()
 
 def set_auth_cookies(response, user):
-    """
-    Standardizes how JWT cookies are set across all login methods.
-    """
     refresh = RefreshToken.for_user(user)
     access_token = str(refresh.access_token)
 

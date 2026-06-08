@@ -43,6 +43,7 @@ import CompanyDetail from "./HR/CompanyDetail";
 import InterviewerProfile from './Interviewer/InterviewerProfile'
 import InterviewerEditprofile from './Interviewer/EditIntervieweProfile'
 import ResumeAnalyzer from './Userpages/Resume'
+import AIWorkspace from './Userpages/AIWorkspace'
 function App() {
 
   return (
@@ -95,6 +96,7 @@ function App() {
       <Route path='/jobdetails/:id' element={<JobDetailsPage/>}/>
       <Route path='/notifications' element={<NotificationCenter/>}/>
       <Route path='/interviewslsit' element={<CandidateInterviews/>}/>
+      <Route path='/ai-rag'element={<AIWorkspace/>}/>
       </Route>
       </Routes>
     </>

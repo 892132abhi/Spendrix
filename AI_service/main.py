@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.resume_analyzer import router as resume_router
 from app.api.job_recommender import router as job_router
 from app.api.interview_schedule import router as interview_router
+from app.api.rag_chat import router as rag_router
 app = FastAPI()
 
 app.add_middleware(
@@ -28,6 +29,11 @@ app.include_router(
     interview_router,
     prefix="/interview",
     tags=["Interview Scheduler"]
+)
+app.include_router(
+    rag_router,
+    prefix="/workspace",
+    tags=["AI RAG workspace"]
 )
 @app.get("/")
 def home():
