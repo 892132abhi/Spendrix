@@ -98,7 +98,7 @@ class ApplicationLookUpSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Application
-        fields = ['id', 'candidate_username', 'job_title']
+        fields = ['id','job' ,'candidate_username', 'job_title']
 
 
 class AssignedInterviewCandidateSerializer(serializers.ModelSerializer):

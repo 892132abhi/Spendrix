@@ -8,13 +8,20 @@ from .serializer import JobSerializer
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
 from rest_framework.pagination import PageNumberPagination
+from django.utils import timezone
+from datetime import timedelta
 # Create your views here.
 
+def get_active_jobs_queryset():
+    return Job.objects.filter(
+        job_status='OPEN',
+        expires_at__gt=timezone.now()
+    )
 class SingleJobList(APIView):
     permission_classes=[IsAuthenticated]
     def get(self,request,id):
         try:
-            job = Job.objects.get(id=id)
+            job = get_active_jobs_queryset().get(id=id)
             serializer = JobSerializer(job)
             return Response(serializer.data,status=status.HTTP_200_OK)
         except Job.DoesNotExist:
@@ -62,7 +69,7 @@ class AvailableJob(APIView):
         search_item = request.query_params.get('search', None)
         job_types = request.query_params.get('type', None)
         
-        jobs = Job.objects.all().order_by('-id').filter(job_status='OPEN')
+        jobs = get_active_jobs_queryset().order_by('-id')
         
         if search_item and search_item.strip():
             jobs = jobs.filter(
@@ -92,32 +99,30 @@ class JobCreation(APIView):
                 {"detail": "Access Denied: Only HR recruiters can publish job vacancies."}, 
                 status=status.HTTP_403_FORBIDDEN
             )
-            
-        profile_company_name = request.user.profile.company_name
-        
-        if not profile_company_name:
+
+        profile_company = request.user.profile.company
+
+        if not profile_company:
             return Response(
-                {"detail": "Please initialize your company workspace details before publishing posts."}, 
+                {"detail": "Please assign a company to your profile before publishing jobs."}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
-            
-        company_instance = Company.objects.filter(name=profile_company_name).first()
-        if not company_instance:
-            company_instance = Company.objects.create(name=profile_company_name, is_approved=True)
 
         serializer = JobSerializer(data=request.data)
-        
+
         if serializer.is_valid():
+            expiry_days = int(request.data.get('expiry_days',10))  # Default to 30 days if not provided
             serializer.save(
                 created_by=request.user,
-                company=company_instance
+                company=profile_company,
+                expires_at = timezone.now() +timedelta(days=int(expiry_days))
             )
             return Response(
                 {"detail": "Job created Successfully"}, 
                 status=status.HTTP_201_CREATED
             )
-            
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)   
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  
 class JobDeletion(APIView):
     permission_classes = [IsAuthenticated]
     def delete(self,request,id):

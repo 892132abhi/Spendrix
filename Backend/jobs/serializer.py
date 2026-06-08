@@ -24,7 +24,8 @@ class JobSerializer(serializers.ModelSerializer):
                 'job_type', 
                 'job_status', 
                 'created_at', 
-                'updated_at'
+                'updated_at',
+                'expires_at'
             ]
         read_only_fields = ['company', 'created_by', 'created_at', 'updated_at']
         

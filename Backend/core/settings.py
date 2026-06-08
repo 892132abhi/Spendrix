@@ -217,4 +217,8 @@ CELERY_BEAT_SCHEDULE = {
         "task": "accounts.tasks.send_scheduled_job_recommendations",
         "schedule": crontab(hour=9, minute=0),
     },
+    "process-expired-jobs": {
+        "task": "jobs.tasks.process_expired_jobs",
+        "schedule": 60.0,
+    },
 }

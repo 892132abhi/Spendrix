@@ -96,15 +96,6 @@ const MyApplicationsPage = () => {
                   ))}
                 </div>
               </div>
-
-              <div className="flex items-center gap-3">
-                <button 
-                  onClick={() => handleWithdraw(app.id)}
-                  className="px-5 py-2.5 bg-stone-50 border border-stone-200 hover:bg-orange-600 hover:text-white text-stone-500 rounded-xl text-xs font-black uppercase tracking-widest transition-all shadow-sm"
-                >
-                  Retract
-                </button>
-              </div>
             </div>
           </div>
         ))}

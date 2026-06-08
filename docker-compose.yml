@@ -80,6 +80,7 @@ services:
       - db
       - redis
       - backend
+      - ai_service
 
 
   # =========================
@@ -87,7 +88,7 @@ services:
   # =========================
   celery_beat:
     build: ./backend
-    command: celery -A core beat -l info
+    command: celery -A core beat -l info --schedule=/tmp/celerybeat-schedule
     volumes:
       - ./backend:/app
     environment:
@@ -103,6 +104,7 @@ services:
       - redis
       - backend
       - celery
+      - ai_service
 
 
   # =========================

@@ -7,6 +7,8 @@ from .models import Application
 from .serializers import ApplicationSerializer
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
+from .tasks import score_application
+
 # Create your views here.
 
 class ApplyJob(APIView):
@@ -24,7 +26,8 @@ class ApplyJob(APIView):
         serializer = ApplicationSerializer(data=request.data,context = {"request":request})
         
         if serializer.is_valid():
-            serializer.save(candidate=request.user,job=job)
+            applications = serializer.save(candidate=request.user,job=job)
+            score_application.delay(applications.id)
             return Response({"detail":"Applied to Job Successfully"},status=status.HTTP_201_CREATED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     

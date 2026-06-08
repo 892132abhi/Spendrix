@@ -1,6 +1,7 @@
 from django.db import models
 from company.models import Company
 from django.conf import settings
+from datetime import timedelta
 # Create your models here.
 class Job(models.Model):
     JOB_STATUS = (
@@ -38,6 +39,8 @@ class Job(models.Model):
     location = models.CharField(max_length=250)
     
     Qualification = models.CharField(max_length=255,blank=True,null=True)
+
+    ai_processed = models.BooleanField(default=False)
     
     job_type = models.CharField(max_length=20,choices=JOB_TYPES_CHOICES,default='FULL_TIME')
     
@@ -47,6 +50,8 @@ class Job(models.Model):
     
     updated_at = models.DateTimeField(auto_now=True)
     
+    expires_at = models.DateTimeField(blank=True,null=True)
+
     def __str__(self):
         return self.title
     

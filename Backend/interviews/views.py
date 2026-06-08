@@ -9,6 +9,9 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django.db.models import Q
 from rest_framework.pagination import PageNumberPagination
+import uuid
+from jobs.models import Job
+from .service import run_ai_interview_scheduler
 # Create your views here.
 User =get_user_model()
 class InterviewCreateView(APIView):
@@ -190,3 +193,4 @@ class CandidateInterview(APIView):
         
         serializer = CandidateInterviewSerializer(interviews,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
+
