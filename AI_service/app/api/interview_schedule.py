@@ -27,7 +27,7 @@ async def auto_schedule_interviews_api(
 
     # Shortlist if the score returned by your analyzer is >= 70
     score = analysis.get("score", 0)
-    is_match = score >= 70 
+    is_match = score >= 50
 
     if is_match:
         parsed_interviewers = json.loads(interviewers)
