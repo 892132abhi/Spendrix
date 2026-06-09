@@ -26,8 +26,7 @@ const Navbar = () => {
     const interval = setInterval(fetchUnreadCount, 30000);
 
     const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    const socket = new WebSocket(`${wsProtocol}://localhost:8000/ws/notifications/`);
-
+    const socket = new WebSocket(`${wsProtocol}://${window.location.host}/ws/notifications/`);
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
 
