@@ -23,7 +23,9 @@ def analyze_resume(resume_text):
     # 🔥 1. CHECK CACHE FIRST
     cached = get_cached_result(resume_text)
     if cached:
+        print("Cache done")
         return cached
+    print("cache failed")
 
     prompt = f"""
 Analyze this resume and return ONLY valid JSON.
@@ -57,6 +59,7 @@ Resume:
 
         # 🔥 2. SAVE TO CACHE
         set_cached_result(resume_text, parsed)
+        print("cache saved")
 
         return parsed
 
