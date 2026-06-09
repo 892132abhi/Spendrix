@@ -1,4 +1,7 @@
-node_modules
-build
-dist
-.git
+node_modules/
+build/
+dist/
+.git/
+.env
+npm-debug.log
+yarn-error.log

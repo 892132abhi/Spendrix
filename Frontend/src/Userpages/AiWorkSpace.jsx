@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 export default function WorkspacePage() {
-  // --- STATE LAYER ---
-  const [docText, setDocText] = useState(''); // Holds extracted text for the RAG background context
+  const [docText, setDocText] = useState('');
   const [fileName, setFileName] = useState('');
   const [isUploading, setIsUploading] = useState(false);
-  
+
   const [chatHistory, setChatHistory] = useState([]);
   const [messageInput, setMessageInput] = useState('');
   const [isChatLoading, setIsChatLoading] = useState(false);
@@ -13,17 +12,32 @@ export default function WorkspacePage() {
   const chatBottomRef = useRef(null);
   const AI_SERVICE_BASE = '/ai/workspace';
 
-  // Smooth-scroll console window down as conversations grow
   useEffect(() => {
     chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatHistory, isChatLoading]);
 
-  // --- API SERVICE HANDLERS ---
+  const readResponse = async (response) => {
+    const contentType = response.headers.get('content-type') || '';
 
-  // 1. File Upload Handler (Triggers Phase 1)
+    if (contentType.includes('application/json')) {
+      return response.json();
+    }
+
+    const text = await response.text();
+    return {
+      detail: text || `Request failed with status ${response.status}`,
+    };
+  };
+
   const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (!file) return;
+
+    if (!file.name.toLowerCase().endsWith('.pdf')) {
+      alert('Please upload a PDF file.');
+      e.target.value = '';
+      return;
+    }
 
     setFileName(file.name);
     setIsUploading(true);
@@ -36,38 +50,40 @@ export default function WorkspacePage() {
         method: 'POST',
         body: formData,
       });
-      const data = await response.json();
 
-      if (response.ok) {
-        setDocText(data.extracted_text);
-        // Inject a native automated confirmation bubble into the chat flow
-        setChatHistory([
-          { 
-            sender: 'AI', 
-            text: `✅ **System Notice:** Successfully processed \`${file.name}\`.\n\nSemantic vector paths are mapped. Ask me anything about the content below!` 
-          }
-        ]);
-      } else {
-        alert(data.detail || "File processing failure.");
+      const data = await readResponse(response);
+
+      if (!response.ok) {
+        alert(data.detail || 'File processing failed.');
         resetWorkspace();
+        return;
       }
+
+      setDocText(data.extracted_text || '');
+      setChatHistory([
+        {
+          sender: 'AI',
+          text: `System Notice: Successfully processed ${file.name}.\n\nAsk me anything about the uploaded document.`,
+        },
+      ]);
     } catch (err) {
-      console.error("Upload stream anomaly:", err);
-      alert("Error reaching the AI ingestion microservice.");
+      console.error('Upload stream anomaly:', err);
+      alert('Error reaching the AI ingestion microservice.');
       resetWorkspace();
     } finally {
       setIsUploading(false);
+      e.target.value = '';
     }
   };
 
-  // 2. Chat Ingestion Handler (Triggers Phase 2 RAG)
   const handleSendChatMessage = async (e) => {
     e.preventDefault();
-    if (!messageInput.trim() || isChatLoading || !docText) return;
 
-    const userQuery = messageInput;
+    const userQuery = messageInput.trim();
+    if (!userQuery || isChatLoading || !docText) return;
+
     setMessageInput('');
-    setChatHistory(prev => [...prev, { sender: 'USER', text: userQuery }]);
+    setChatHistory((prev) => [...prev, { sender: 'USER', text: userQuery }]);
     setIsChatLoading(true);
 
     const formData = new FormData();
@@ -79,16 +95,36 @@ export default function WorkspacePage() {
         method: 'POST',
         body: formData,
       });
-      const data = await response.json();
 
-      if (response.ok) {
-        setChatHistory(prev => [...prev, { sender: 'AI', text: data.reply }]);
-      } else {
-        setChatHistory(prev => [...prev, { sender: 'AI', text: "⚠️ Error parsing vector space context for this message request." }]);
+      const data = await readResponse(response);
+
+      if (!response.ok) {
+        setChatHistory((prev) => [
+          ...prev,
+          {
+            sender: 'AI',
+            text: data.detail || 'Error processing this message.',
+          },
+        ]);
+        return;
       }
+
+      setChatHistory((prev) => [
+        ...prev,
+        {
+          sender: 'AI',
+          text: data.reply || 'No response returned.',
+        },
+      ]);
     } catch (err) {
-      console.error("Chat engine link crash:", err);
-      setChatHistory(prev => [...prev, { sender: 'AI', text: "❌ Connection timeout with the FastAPI vector space engine." }]);
+      console.error('Chat engine link crash:', err);
+      setChatHistory((prev) => [
+        ...prev,
+        {
+          sender: 'AI',
+          text: 'Connection failed with the AI service.',
+        },
+      ]);
     } finally {
       setIsChatLoading(false);
     }
@@ -98,23 +134,23 @@ export default function WorkspacePage() {
     setDocText('');
     setFileName('');
     setChatHistory([]);
+    setMessageInput('');
   };
 
   return (
     <div className="min-h-screen w-full bg-[#0b0f19] text-slate-200 font-sans antialiased flex flex-col items-center">
-      
-      {/* COMPACT FLOATING CONTAINER WORKSPACE */}
       <div className="w-full max-w-3xl flex flex-col h-screen p-4 md:p-6">
-        
-        {/* TOP STATUS SUB-BAR */}
         <header className="flex items-center justify-between border-b border-slate-800/60 pb-3 shrink-0">
           <div className="flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-indigo-500 shadow-sm"></span>
-            <h1 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Spendrix Workspace</h1>
+            <h1 className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+              Spendrix Workspace
+            </h1>
           </div>
+
           {docText && (
-            <button 
-              onClick={resetWorkspace} 
+            <button
+              onClick={resetWorkspace}
               className="text-[10px] bg-slate-900 border border-slate-800 text-slate-400 px-2 py-1 rounded-md hover:text-red-400 hover:border-red-900/40 transition"
             >
               Clear Session
@@ -122,85 +158,99 @@ export default function WorkspacePage() {
           )}
         </header>
 
-        {/* DYNAMIC CHAT & UPLOAD WINDOW CONSOLE */}
         <div className="flex-1 overflow-y-auto py-6 space-y-6 scrollbar-thin">
-          
-          {/* STATE A: AWAITING INGESTION (NO FILE LOADED) */}
           {!docText && !isUploading && (
             <div className="h-full flex flex-col items-center justify-center text-center max-w-md mx-auto space-y-4 my-auto pt-20">
-              <div className="text-3xl opacity-50">📁</div>
               <div className="space-y-1">
-                <h2 className="text-sm font-bold text-white tracking-wide">Upload Context Document</h2>
+                <h2 className="text-sm font-bold text-white tracking-wide">
+                  Upload Context Document
+                </h2>
                 <p className="text-xs text-slate-500 leading-relaxed">
-                  Drop a profile specification or candidate resume PDF below. The system will extract text parameters to initialize a custom RAG sandbox.
+                  Upload a PDF resume or document. The AI workspace will extract the text and prepare it for chat.
                 </p>
               </div>
 
               <label className="w-full border border-dashed border-slate-800/80 hover:border-indigo-500/50 bg-slate-900/20 rounded-xl p-8 cursor-pointer transition flex flex-col items-center justify-center group shadow-md">
-                <svg className="w-6 h-6 text-slate-500 group-hover:text-indigo-400 mb-2 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                <svg
+                  className="w-6 h-6 text-slate-500 group-hover:text-indigo-400 mb-2 transition"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 6v12m6-6H6"
+                  />
                 </svg>
-                <span className="text-xs font-semibold text-slate-300">Select Document PDF</span>
-                <input type="file" className="hidden" accept=".pdf" onChange={handleFileUpload} />
+                <span className="text-xs font-semibold text-slate-300">
+                  Select PDF Document
+                </span>
+                <input
+                  type="file"
+                  className="hidden"
+                  accept="application/pdf,.pdf"
+                  onChange={handleFileUpload}
+                />
               </label>
             </div>
           )}
 
-          {/* STATE B: PROCESSING ACTIVE EXTRACTION ANIMATION */}
           {isUploading && (
             <div className="h-full flex flex-col items-center justify-center text-center space-y-3 pt-20">
               <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
               <div className="space-y-0.5">
-                <p className="text-xs font-semibold text-indigo-400 tracking-wide">Processing Document Matrix...</p>
-                <p className="text-[10px] text-slate-600 italic">Running extraction via pdfplumber streaming RAM layers...</p>
+                <p className="text-xs font-semibold text-indigo-400 tracking-wide">
+                  Processing document...
+                </p>
+                <p className="text-[10px] text-slate-600 italic">
+                  Extracting PDF text for the AI workspace.
+                </p>
               </div>
             </div>
           )}
 
-          {/* STATE C: LINEAR CHAT MESSAGE STREAM MAPPING */}
-          {docText && chatHistory.map((chat, idx) => (
-            <div 
-              key={idx} 
-              className={`flex w-full ${chat.sender === 'USER' ? 'justify-end' : 'justify-start'}`}
-            >
-              <div className={`max-w-[88%] rounded-xl px-4 py-3 text-xs leading-relaxed whitespace-pre-wrap transition-all shadow-sm ${
-                chat.sender === 'USER' 
-                  ? 'bg-indigo-600 text-white font-medium rounded-tr-none' 
-                  : 'bg-slate-900/80 text-slate-300 border border-slate-800/60 rounded-tl-none'
-              }`}>
-                {chat.text.startsWith('✅ **System Notice:**') ? (
-                  // Custom rendering styling layout rule for the initial notice payload block
-                  <div className="text-slate-300 border-l-2 border-emerald-500 pl-3 py-0.5 my-1 bg-emerald-950/10 rounded-r">
-                    {chat.text.replace('✅ **System Notice:**', '')}
-                  </div>
-                ) : (
-                  chat.text
-                )}
+          {docText &&
+            chatHistory.map((chat, idx) => (
+              <div
+                key={`${chat.sender}-${idx}`}
+                className={`flex w-full ${
+                  chat.sender === 'USER' ? 'justify-end' : 'justify-start'
+                }`}
+              >
+                <div
+                  className={`max-w-[88%] rounded-xl px-4 py-3 text-xs leading-relaxed whitespace-pre-wrap transition-all shadow-sm ${
+                    chat.sender === 'USER'
+                      ? 'bg-indigo-600 text-white font-medium rounded-tr-none'
+                      : 'bg-slate-900/80 text-slate-300 border border-slate-800/60 rounded-tl-none'
+                  }`}
+                >
+                  {chat.text}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
 
-          {/* CONTEXT LOG MATRIX LOADER BUBBLE */}
           {isChatLoading && (
             <div className="flex justify-start">
               <div className="text-[10px] tracking-wide font-medium text-slate-400 bg-slate-900/40 px-3 py-2 rounded-lg border border-slate-800/40 flex items-center gap-2 animate-pulse">
                 <span className="h-1 w-1 rounded-full bg-indigo-500 animate-ping"></span>
-                AI processing context alignments...
+                AI is reading the document...
               </div>
             </div>
           )}
+
           <div ref={chatBottomRef} />
         </div>
 
-        {/* BOTTOM USER INPUT CONSOLE CONTROLLER */}
         <footer className="pt-3 border-t border-slate-800/60 shrink-0">
-          <form onSubmit={handleSendChatMessage} className="relative flex items-center bg-slate-900/60 rounded-xl border border-slate-800/80 p-1.5 focus-within:border-indigo-500/80 transition-all shadow-xl">
-            
-            {/* MINI ATTACHMENT POPOVER BADGE INDICATOR */}
+          <form
+            onSubmit={handleSendChatMessage}
+            className="relative flex items-center bg-slate-900/60 rounded-xl border border-slate-800/80 p-1.5 focus-within:border-indigo-500/80 transition-all shadow-xl"
+          >
             {docText && (
               <div className="absolute -top-7 left-1 flex items-center gap-1.5 text-[10px] font-bold text-indigo-400 bg-indigo-950/50 border border-indigo-900/40 px-2 py-0.5 rounded-md">
-                <span>📄</span>
-                <span className="max-w-[140px] truncate">{fileName}</span>
+                <span className="max-w-[180px] truncate">{fileName}</span>
               </div>
             )}
 
@@ -208,11 +258,15 @@ export default function WorkspacePage() {
               type="text"
               value={messageInput}
               onChange={(e) => setMessageInput(e.target.value)}
-              placeholder={docText ? "Ask Gemini anything about the uploaded file text..." : "Awaiting system data context ingestion..."}
+              placeholder={
+                docText
+                  ? 'Ask anything about the uploaded document...'
+                  : 'Upload a PDF first...'
+              }
               disabled={!docText || isChatLoading}
               className="flex-1 bg-transparent px-3 py-2 text-xs text-slate-100 placeholder-slate-600 focus:outline-none disabled:opacity-30"
             />
-            
+
             <button
               type="submit"
               disabled={!docText || isChatLoading || !messageInput.trim()}
@@ -221,11 +275,11 @@ export default function WorkspacePage() {
               Ask
             </button>
           </form>
+
           <p className="text-[9px] text-slate-600 text-center mt-2 tracking-wide">
-            Spendrix AI Engine • State verification parameters run locally out of transient memory spaces.
+            Spendrix AI Engine
           </p>
         </footer>
-
       </div>
     </div>
   );

@@ -1,21 +1,31 @@
-import faiss
-import numpy as np
+import math
+
+
+def _normalize(vector):
+    length = math.sqrt(sum(value * value for value in vector))
+    if length == 0:
+        return vector
+    return [value / length for value in vector]
+
+
+def _cosine_similarity(left, right):
+    return sum(a * b for a, b in zip(left, right))
+
 
 def create_transient_index(chunks, vectors):
-    dimension = 384
-    index = faiss.IndexFlatL2(dimension)
-    
-    # Cast vectors safely to float32 numpy array
-    index.add(np.array(vectors).astype("float32"))
-    return index
+    return {
+        "chunks": chunks,
+        "vectors": [_normalize(vector) for vector in vectors],
+    }
 
-def search_dynamic_index(index, query_vector, chunks, k=4):
-    actual_k = min(k, len(chunks))
-    distances, indices = index.search(np.array([query_vector]).astype("float32"), actual_k)
-    
-    results = []
-    for i in indices[0]:
-        if i != -1 and i < len(chunks):
-            results.append(chunks[i])
-            
+
+def search_dynamic_index(index, query_vector, chunks=None, k=4):
+    query_vector = _normalize(query_vector)
+
+    scored = []
+    for position, vector in enumerate(index["vectors"]):
+        scored.append((_cosine_similarity(query_vector, vector), position))
+
+    scored.sort(reverse=True)
+    results = [index["chunks"][position] for _, position in scored[:k]]
     return "\n".join(results)

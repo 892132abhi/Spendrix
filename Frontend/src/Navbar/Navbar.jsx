@@ -100,7 +100,7 @@ const Navbar = () => {
       { path: "/", label: "Dashboard", icon: <DashboardIcon /> },
       { path: "/profile", label: "My Profile", icon: <ProfileIcon /> },
       { path: "/resume", label: "My Resume", icon: <ResumeIcon /> },
-      { path: "/ai-rag", label: "My Resume", icon: <ResumeIcon /> },
+      { path: "/ai-rag", label: "Chatbot", icon: <ResumeIcon /> },
       { path: "/joblist", label: "Job Listings", icon: <JobsIcon /> },
       { path: "/interviewslsit", label: "Interviews", icon: <CalendarIcon /> },
       { path: "/myjoblist", label: "My Applications", icon: <ApplicationsIcon /> },
