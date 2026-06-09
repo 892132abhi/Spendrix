@@ -52,13 +52,26 @@ async def handle_chat(message: str = Form(...), doc_text: str = Form(...)):
                 detail="No usable document chunks found."
             )
 
-        vectors = [embed(chunk) for chunk in chunks]
+        vectors = [
+            embed(chunk, task_type="retrieval_document")
+            for chunk in chunks
+        ]
+
         index = create_transient_index(chunks, vectors)
 
-        query_vector = embed(message)
+        query_vector = embed(
+            message,
+            task_type="retrieval_query"
+        )
+
         context = search_dynamic_index(index, query_vector, chunks, k=4)
 
-        reply = generate_answer(query=message, context=context, force_json=False)
+        reply = generate_answer(
+            query=message,
+            context=context,
+            force_json=False
+        )
+
         return {"reply": reply}
 
     except HTTPException:
@@ -71,7 +84,10 @@ async def handle_chat(message: str = Form(...), doc_text: str = Form(...)):
 
 
 @router.post("/generate-kit")
-async def handle_generate_kit(doc_text: str = Form(...), job_description: str = Form(...)):
+async def handle_generate_kit(
+    doc_text: str = Form(...),
+    job_description: str = Form(...)
+):
     try:
         chunks = chunk_text(doc_text)
 
@@ -81,18 +97,28 @@ async def handle_generate_kit(doc_text: str = Form(...), job_description: str = 
                 detail="No usable document chunks found."
             )
 
-        vectors = [embed(chunk) for chunk in chunks]
+        vectors = [
+            embed(chunk, task_type="RETRIEVAL_DOCUMENT")
+            for chunk in chunks
+        ]
+
         index = create_transient_index(chunks, vectors)
 
-        query_vector = embed(job_description)
+        query_vector = embed(
+            job_description,
+            task_type="RETRIEVAL_QUERY"
+        )
+
         context = search_dynamic_index(index, query_vector, chunks, k=5)
 
         prompt_directive = f"""
-Target Job Criteria: {job_description}
+Target Job Criteria:
+{job_description}
 
 Task:
 Review the candidate text context and write exactly 3 high-impact technical interview questions.
-Return your response strictly as a structured JSON object matching this exact schema:
+
+Return this JSON format:
 {{
     "questions": [
         {{

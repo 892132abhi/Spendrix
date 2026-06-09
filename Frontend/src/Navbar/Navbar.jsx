@@ -91,7 +91,7 @@ const Navbar = () => {
     INTERVIEWER: [
       { path: "/interviewer-dashboard", label: "Dashboard", icon: <DashboardIcon /> },
       { path: "/candidate-list", label: "Candidates", icon: <ProfileIcon /> },
-      { path: "/assigned-interviews", label: "Interviews", icon: <CalendarIcon /> },
+      // { path: "/assigned-interviews", label: "Interviews", icon: <CalendarIcon /> },
       { path: "/interviewer-profile", label: "My Profile", icon: <ProfileIcon /> },
       // { path: "/feedback", label: "Feedback", icon: <ChatIcon /> },
       { path: "/interviewer-notification", label: "Notifications", icon: <NotifyIcon /> },

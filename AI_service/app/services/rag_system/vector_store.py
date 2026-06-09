@@ -27,5 +27,10 @@ def search_dynamic_index(index, query_vector, chunks=None, k=4):
         scored.append((_cosine_similarity(query_vector, vector), position))
 
     scored.sort(reverse=True)
-    results = [index["chunks"][position] for _, position in scored[:k]]
+
+    results = [
+        index["chunks"][position]
+        for _, position in scored[:k]
+    ]
+
     return "\n".join(results)

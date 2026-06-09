@@ -1,5 +1,19 @@
 import React, { useEffect, useRef, useState } from 'react';
 
+// Reusable Typing Animation Dots Component
+const TypingDots = () => (
+  <div style={{ display: 'flex', gap: 5, alignItems: 'center', padding: '4px 2px' }}>
+    {[0, 1, 2].map(i => (
+      <span key={i} style={{
+        width: 6, height: 6, borderRadius: '50%',
+        background: '#a78bfa', display: 'block',
+        animation: `typingBounce 1.1s ease-in-out ${i * 0.18}s infinite`,
+        opacity: 0.5,
+      }} />
+    ))}
+  </div>
+);
+
 export default function WorkspacePage() {
   const [docText, setDocText] = useState('');
   const [fileName, setFileName] = useState('');
@@ -138,11 +152,34 @@ export default function WorkspacePage() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#0b0f19] text-slate-200 font-sans antialiased flex flex-col items-center">
-      <div className="w-full max-w-3xl flex flex-col h-screen p-4 md:p-6">
-        <header className="flex items-center justify-between border-b border-slate-800/60 pb-3 shrink-0">
+    <div className="h-screen w-full bg-[#0b0f19] text-slate-200 font-sans antialiased flex flex-col overflow-hidden">
+      {/* ── SEAMLESS HOOK LAYOUT STYLE KEYFRAMES ── */}
+      <style>{`
+        @keyframes typingBounce {
+          0%,60%,100% { transform: translateY(0); opacity: 0.4; }
+          30% { transform: translateY(-6px); opacity: 1; }
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes uploadPulse {
+          0%,100% { opacity: 0.6; } 50% { opacity: 1; }
+        }
+        .msg-bubble { animation: fadeIn 0.2s ease; }
+        
+        /* Fixed scrollbar adjustments to use native track sizing safely */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e1e2e; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #2a2a3d; }
+      `}</style>
+
+      {/* Main Full-Width Wrapper Dashboard Container */}
+      <div className="w-full flex flex-col h-full p-4 md:p-6 overflow-hidden">
+        
+        {/* Header Block Panel */}
+        <header className="flex items-center justify-between border-b border-slate-800/60 pb-3 px-2 shrink-0">
           <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-indigo-500 shadow-sm"></span>
+            <span className="h-2 w-2 rounded-full bg-indigo-500 shadow-sm animate-pulse"></span>
             <h1 className="text-xs font-bold text-slate-400 uppercase tracking-widest">
               Spendrix Workspace
             </h1>
@@ -151,16 +188,19 @@ export default function WorkspacePage() {
           {docText && (
             <button
               onClick={resetWorkspace}
-              className="text-[10px] bg-slate-900 border border-slate-800 text-slate-400 px-2 py-1 rounded-md hover:text-red-400 hover:border-red-900/40 transition"
+              className="text-[10px] font-semibold bg-slate-900 border border-slate-800 text-slate-400 px-3 py-1.5 rounded-md hover:text-red-400 hover:border-red-900/40 transition-all shadow-sm"
             >
               Clear Session
             </button>
           )}
         </header>
 
-        <div className="flex-1 overflow-y-auto py-6 space-y-6 scrollbar-thin">
+        {/* Dynamic Inner Central Feed Workspace View */}
+        <div className="flex-1 overflow-y-auto my-4 pr-1 space-y-6 custom-scrollbar">
+          
+          {/* State A: Upload Form Dashboard Card View */}
           {!docText && !isUploading && (
-            <div className="h-full flex flex-col items-center justify-center text-center max-w-md mx-auto space-y-4 my-auto pt-20">
+            <div className="h-full flex flex-col items-center justify-center text-center max-w-md mx-auto space-y-4 pt-20 msg-bubble">
               <div className="space-y-1">
                 <h2 className="text-sm font-bold text-white tracking-wide">
                   Upload Context Document
@@ -197,11 +237,30 @@ export default function WorkspacePage() {
             </div>
           )}
 
+          {/* State B: Processing/Uploading Intermediary Loader Indicator */}
           {isUploading && (
-            <div className="h-full flex flex-col items-center justify-center text-center space-y-3 pt-20">
-              <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+            <div className="h-full flex flex-col items-center justify-center text-center space-y-4 pt-20 msg-bubble">
+              <div style={{ position: 'relative', width: 48, height: 48 }}>
+                <div style={{
+                  position: 'absolute', inset: 0,
+                  border: '2px solid #1e1e2e',
+                  borderTop: '2px solid #6366f1',
+                  borderRadius: '50%',
+                  animation: 'spin 0.9s linear infinite',
+                }} />
+                <div style={{
+                  position: 'absolute', inset: 6,
+                  border: '1.5px solid rgba(99,102,241,0.1)',
+                  borderBottom: '1.5px solid #6366f1',
+                  borderRadius: '50%',
+                  animation: 'spin 0.6s linear infinite reverse',
+                }} />
+              </div>
               <div className="space-y-0.5">
-                <p className="text-xs font-semibold text-indigo-400 tracking-wide">
+                <p 
+                  style={{ animation: 'uploadPulse 1.5s ease infinite' }}
+                  className="text-xs font-semibold text-indigo-400 tracking-wide"
+                >
                   Processing document...
                 </p>
                 <p className="text-[10px] text-slate-600 italic">
@@ -211,18 +270,19 @@ export default function WorkspacePage() {
             </div>
           )}
 
+          {/* State C: Active Chat Dialogue Stream Render View */}
           {docText &&
             chatHistory.map((chat, idx) => (
               <div
                 key={`${chat.sender}-${idx}`}
-                className={`flex w-full ${
+                className={`flex w-full msg-bubble px-2 ${
                   chat.sender === 'USER' ? 'justify-end' : 'justify-start'
                 }`}
               >
                 <div
-                  className={`max-w-[88%] rounded-xl px-4 py-3 text-xs leading-relaxed whitespace-pre-wrap transition-all shadow-sm ${
+                  className={`max-w-[75%] rounded-xl px-4 py-3 text-xs leading-relaxed whitespace-pre-wrap transition-all shadow-sm ${
                     chat.sender === 'USER'
-                      ? 'bg-indigo-600 text-white font-medium rounded-tr-none'
+                      ? 'bg-indigo-600 text-white font-medium rounded-tr-none shadow-md shadow-indigo-600/10'
                       : 'bg-slate-900/80 text-slate-300 border border-slate-800/60 rounded-tl-none'
                   }`}
                 >
@@ -231,11 +291,11 @@ export default function WorkspacePage() {
               </div>
             ))}
 
+          {/* Chat Engine Generating Response Bubble Panel Loading State */}
           {isChatLoading && (
-            <div className="flex justify-start">
-              <div className="text-[10px] tracking-wide font-medium text-slate-400 bg-slate-900/40 px-3 py-2 rounded-lg border border-slate-800/40 flex items-center gap-2 animate-pulse">
-                <span className="h-1 w-1 rounded-full bg-indigo-500 animate-ping"></span>
-                AI is reading the document...
+            <div className="flex justify-start msg-bubble px-2">
+              <div className="bg-slate-900/80 border border-slate-800/60 rounded-xl rounded-tl-none px-4 py-3.5 shadow-sm flex items-center justify-center">
+                <TypingDots />
               </div>
             </div>
           )}
@@ -243,14 +303,15 @@ export default function WorkspacePage() {
           <div ref={chatBottomRef} />
         </div>
 
-        <footer className="pt-3 border-t border-slate-800/60 shrink-0">
+        {/* Footer Area Controls Component Form Bar */}
+        <footer className="pt-3 border-t border-slate-800/60 shrink-0 px-2">
           <form
             onSubmit={handleSendChatMessage}
-            className="relative flex items-center bg-slate-900/60 rounded-xl border border-slate-800/80 p-1.5 focus-within:border-indigo-500/80 transition-all shadow-xl"
+            className="relative flex items-center bg-slate-900/60 rounded-xl border border-slate-800/80 p-2 focus-within:border-indigo-500/80 transition-all shadow-xl"
           >
             {docText && (
-              <div className="absolute -top-7 left-1 flex items-center gap-1.5 text-[10px] font-bold text-indigo-400 bg-indigo-950/50 border border-indigo-900/40 px-2 py-0.5 rounded-md">
-                <span className="max-w-[180px] truncate">{fileName}</span>
+              <div className="absolute -top-7 left-1 flex items-center gap-1.5 text-[10px] font-bold text-indigo-400 bg-indigo-950/50 border border-indigo-900/40 px-2 py-0.5 rounded-md shadow-sm">
+                <span className="max-w-[240px] truncate">{fileName}</span>
               </div>
             )}
 
@@ -270,13 +331,13 @@ export default function WorkspacePage() {
             <button
               type="submit"
               disabled={!docText || isChatLoading || !messageInput.trim()}
-              className="h-8 px-4 bg-indigo-600 hover:bg-indigo-500 text-white disabled:bg-slate-800 disabled:text-slate-600 rounded-lg text-xs font-bold transition shadow-md shrink-0"
+              className="h-8 px-4 bg-indigo-600 hover:bg-indigo-500 text-white disabled:bg-slate-800 disabled:text-slate-600 rounded-lg text-xs font-bold transition shadow-md shrink-0 flex items-center justify-center"
             >
               Ask
             </button>
           </form>
 
-          <p className="text-[9px] text-slate-600 text-center mt-2 tracking-wide">
+          <p className="text-[9px] text-slate-600 text-center mt-2.5 tracking-wider uppercase font-medium">
             Spendrix AI Engine
           </p>
         </footer>
