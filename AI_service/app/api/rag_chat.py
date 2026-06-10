@@ -27,10 +27,7 @@ async def handle_upload(file: UploadFile = File(...)):
                 detail="Could not extract any readable text from this PDF."
             )
 
-        return {
-            "extracted_text": raw_text,
-            "status": "Ready"
-        }
+        return {"extracted_text": raw_text, "status": "Ready"}
 
     except HTTPException:
         raise
@@ -53,7 +50,7 @@ async def handle_chat(message: str = Form(...), doc_text: str = Form(...)):
             )
 
         vectors = [
-            embed(chunk, task_type="retrieval_document")
+            embed(chunk, task_type="RETRIEVAL_DOCUMENT")
             for chunk in chunks
         ]
 
@@ -61,7 +58,7 @@ async def handle_chat(message: str = Form(...), doc_text: str = Form(...)):
 
         query_vector = embed(
             message,
-            task_type="retrieval_query"
+            task_type="RETRIEVAL_QUERY"
         )
 
         context = search_dynamic_index(index, query_vector, chunks, k=4)
@@ -84,10 +81,7 @@ async def handle_chat(message: str = Form(...), doc_text: str = Form(...)):
 
 
 @router.post("/generate-kit")
-async def handle_generate_kit(
-    doc_text: str = Form(...),
-    job_description: str = Form(...)
-):
+async def handle_generate_kit(doc_text: str = Form(...), job_description: str = Form(...)):
     try:
         chunks = chunk_text(doc_text)
 

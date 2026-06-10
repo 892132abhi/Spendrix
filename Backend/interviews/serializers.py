@@ -1,9 +1,10 @@
 from rest_framework import serializers
-from .models import Interview, InterviewInvitation
-from applications.models import Application
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django.db import transaction
+
+from .models import Interview, InterviewInvitation
+from applications.models import Application
 from .tasks import send_interviewer_invitation_email
 
 User = get_user_model()
@@ -29,7 +30,7 @@ class InterviewSerializer(serializers.ModelSerializer):
             'interviewer_email',
             'interviewer_name',
             'candidate_name',
-            'sheduled_date',
+            'scheduled_date',  # Fixed spelling from 'sheduled_date'
             'note',
             'meeting_link',
             'status',
@@ -44,7 +45,7 @@ class InterviewSerializer(serializers.ModelSerializer):
             return invitation.email
         return "Pending invitation"
 
-    def validate_sheduled_date(self, value):
+    def validate_scheduled_date(self, value):  # Fixed spelling validation hook
         if value < timezone.now():
             raise serializers.ValidationError("This date is not available")
         return value
@@ -78,7 +79,7 @@ class InterviewSerializer(serializers.ModelSerializer):
                 invited_by=request.user if request else None
             )
             transaction.on_commit(
-                lambda:send_interviewer_invitation_email.delay(invitation.id)
+                lambda: send_interviewer_invitation_email.delay(invitation.id)
             )
         return interview
 
@@ -98,7 +99,7 @@ class ApplicationLookUpSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Application
-        fields = ['id','job' ,'candidate_username', 'job_title']
+        fields = ['id', 'job', 'candidate_username', 'job_title']
 
 
 class AssignedInterviewCandidateSerializer(serializers.ModelSerializer):
@@ -124,13 +125,13 @@ class AssignedInterviewCandidateSerializer(serializers.ModelSerializer):
             'role',
             'skills',
             'status',
-            'sheduled_date',
+            'scheduled_date',  # Fixed spelling from 'sheduled_date'
             'phone',
             'experience_years',
             'meeting_link',
             'bio',
-            'profile_pic',
-            'resume',
+            'profile_pic',     # Generates secure, signed AWS URL natively
+            'resume',          # Generates secure, signed AWS URL natively
             'strength',
             'weakness',
             'decision_note',
@@ -145,7 +146,7 @@ class CandidateInterviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Interview
-        fields = ['id', 'hr_id', 'job_title', 'interviewer_name', 'sheduled_date', 'meeting_link', 'status']
+        fields = ['id', 'hr_id', 'job_title', 'interviewer_name', 'scheduled_date', 'meeting_link', 'status']
 
     def get_interviewer_name(self, obj):
         if obj.interviewer and hasattr(obj.interviewer, "profile"):
