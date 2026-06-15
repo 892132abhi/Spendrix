@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../api/instance';
 import { toast } from 'react-hot-toast';
+import { FiUsers, FiShield, FiUserCheck, FiUser, FiBriefcase, FiCalendar, FiActivity, FiArrowRight, FiClock, FiPlusCircle } from 'react-icons/fi';
 
 const HRDashboard = () => {
   const [statsData, setStatsData] = useState(null);
@@ -24,9 +25,9 @@ const HRDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center space-y-4">
-        <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] animate-pulse">
+      <div className="min-h-[70vh] flex flex-col items-center justify-center space-y-4 bg-slate-50/50">
+        <div className="w-12 h-12 border-4 border-indigo-650 border-t-transparent rounded-full animate-spin"></div>
+        <p className="text-[10px] font-black text-slate-450 uppercase tracking-[0.25em] animate-pulse">
           Syncing HR Intelligence...
         </p>
       </div>
@@ -35,115 +36,139 @@ const HRDashboard = () => {
 
   const metrics = [
     { 
-        label: 'Total Users', 
-        value: statsData?.Total_user || 0, 
-        icon: '👥', 
-        color: 'text-indigo-600', 
-        trend: 'Platform' 
+      label: 'Total Users', 
+      value: statsData?.Total_user || 0, 
+      icon: <FiUsers className="w-6 h-6" />, 
+      color: 'text-indigo-600', 
+      bg: 'bg-indigo-50/70 border-indigo-100/60',
+      trend: 'Platform' 
     },
     { 
-        label: 'Total HRs', 
-        value: statsData?.Total_admin || 0, 
-        icon: '💼', 
-        color: 'text-blue-600', 
-        trend: 'Team' 
+      label: 'Total HRs', 
+      value: statsData?.Total_admin || 0, 
+      icon: <FiShield className="w-6 h-6" />, 
+      color: 'text-blue-600', 
+      bg: 'bg-blue-50/70 border-blue-100/60',
+      trend: 'Team' 
     },
     { 
-        label: 'Total Interviewers', 
-        value: statsData?.Total_Interviewer || 0, 
-        icon: '🎙️', 
-        color: 'text-violet-600', 
-        trend: 'Active' 
+      label: 'Total Interviewers', 
+      value: statsData?.Total_Interviewer || 0, 
+      icon: <FiUserCheck className="w-6 h-6" />, 
+      color: 'text-violet-600', 
+      bg: 'bg-violet-50/70 border-violet-100/60',
+      trend: 'Active' 
     },
     { 
-        label: 'Total Candidates', 
-        value: statsData?.Total_candidates || 0, 
-        icon: '🎓', 
-        color: 'text-emerald-600', 
-        trend: 'Talent' 
+      label: 'Total Candidates', 
+      value: statsData?.Total_candidates || 0, 
+      icon: <FiUser className="w-6 h-6" />, 
+      color: 'text-emerald-600', 
+      bg: 'bg-emerald-50/70 border-emerald-100/60',
+      trend: 'Talent' 
     },
     { 
-        label: 'Total Jobs', 
-        value: statsData?.Total_jobs || 0, 
-        icon: '⚡', 
-        color: 'text-rose-500', 
-        trend: 'Open' 
+      label: 'Total Jobs', 
+      value: statsData?.Total_jobs || 0, 
+      icon: <FiBriefcase className="w-6 h-6" />, 
+      color: 'text-rose-500', 
+      bg: 'bg-rose-50/70 border-rose-100/60',
+      trend: 'Open' 
     },
     { 
-        label: 'Active Interviews', 
-        value: statsData?.Total_Interviewer || 0, 
-        icon: '🎥', 
-        color: 'text-amber-500', 
-        trend: 'Live' 
+      label: 'Active Interviews', 
+      value: statsData?.Total_Interviewer || 0, 
+      icon: <FiCalendar className="w-6 h-6" />, 
+      color: 'text-amber-500', 
+      bg: 'bg-amber-50/70 border-amber-100/60',
+      trend: 'Live' 
     },
   ];
 
+  const activities = [
+    { text: "New applicant applied for Django Developer", type: "apply", time: "Processed Just Now", icon: <FiUser className="w-4.5 h-4.5 text-indigo-650" />, bg: "bg-indigo-550/10 border-indigo-100/50" },
+    { text: "Interview scheduled for React Developer role", type: "schedule", time: "10 mins ago", icon: <FiCalendar className="w-4.5 h-4.5 text-amber-600" />, bg: "bg-amber-500/10 border-amber-100/50" },
+    { text: "Offer sent to Arjun Nair", type: "offer", time: "1 hr ago", icon: <FiUserCheck className="w-4.5 h-4.5 text-emerald-600" />, bg: "bg-emerald-500/10 border-emerald-100/50" },
+    { text: "Backend Developer position closed", type: "close", time: "2 hrs ago", icon: <FiBriefcase className="w-4.5 h-4.5 text-rose-600" />, bg: "bg-rose-500/10 border-rose-100/50" },
+  ];
+
   return (
-    <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in duration-500 px-6 pb-16 font-sans">
       
-      
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white/50 backdrop-blur-md p-8 rounded-[2.5rem] border border-white shadow-sm gap-4">
-        <div>
-          <h1 className="text-3xl font-black text-slate-800 tracking-tight italic uppercase">HR Intelligence</h1>
-          <p className="text-slate-500 text-sm font-bold uppercase tracking-widest mt-1">Recruitment & Talent Overview</p>
+      {/* HEADER */}
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white/80 backdrop-blur-xl p-8 rounded-3xl border border-slate-200/60 shadow-sm gap-6 mt-6">
+        <div className="text-left">
+          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
+            <FiActivity className="text-indigo-500" />
+            HR Intelligence
+          </h1>
+          <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider mt-1.5 flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping"></span>
+            Recruitment & Talent Overview
+          </p>
         </div>
-        <div className="bg-emerald-50 px-6 py-3 rounded-2xl border border-emerald-100">
-          <div className="flex items-center gap-2">
-             <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-             <span className="text-[10px] font-black text-emerald-700 uppercase tracking-widest">HR Portal Active</span>
-          </div>
+        <div className="bg-emerald-50 text-emerald-700 border border-emerald-150 px-5 py-2.5 rounded-full flex items-center gap-2 shadow-sm shrink-0 self-start md:self-auto">
+          <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+          <span className="text-[10px] font-black uppercase tracking-wider">HR Portal Active</span>
         </div>
       </header>
 
+      {/* METRICS GRID */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {metrics.map((stat, i) => (
           <div 
             key={i} 
-            className="bg-white border border-slate-200 p-8 rounded-[2.5rem] hover:shadow-2xl hover:shadow-indigo-100 transition-all duration-500 group relative overflow-hidden"
+            className="bg-white border border-slate-200/60 p-8 rounded-3xl hover:shadow-xl hover:shadow-indigo-500/5 hover:-translate-y-0.5 transition-all duration-300 group relative overflow-hidden text-left"
           >
             <div className="flex justify-between items-start mb-6 relative z-10">
-              <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center text-2xl group-hover:scale-110 group-hover:bg-indigo-50 transition-all duration-500 shadow-inner">
+              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border shadow-inner transition-transform group-hover:scale-105 duration-300 ${stat.bg}`}>
                 {stat.icon}
               </div>
-              <span className="text-[9px] font-black px-3 py-1 rounded-full bg-slate-900 text-white uppercase tracking-tighter">
+              <span className="text-[9px] font-black px-3.5 py-1.5 rounded-full bg-slate-900 text-white uppercase tracking-wider shadow-sm">
                 {stat.trend}
               </span>
             </div>
             
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1 relative z-10">{stat.label}</p>
-            <h2 className={`text-5xl font-black tracking-tighter ${stat.color} relative z-10`}>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 relative z-10">{stat.label}</p>
+            <h2 className={`text-5xl font-black tracking-tight ${stat.color} relative z-10 leading-none`}>
               {stat.value}
             </h2>
 
-            <div className="absolute -right-4 -bottom-4 text-slate-50 text-8xl font-black opacity-40 group-hover:scale-110 transition-transform duration-700 select-none">
-                {stat.icon}
+            <div className="absolute -right-4 -bottom-4 text-slate-100 text-8xl font-black opacity-15 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500 select-none pointer-events-none">
+              {stat.icon}
             </div>
           </div>
         ))}
       </div>
 
-      <section className="bg-white border border-slate-200 rounded-[3.5rem] p-10 shadow-sm">
-        <div className="flex items-center justify-between mb-8">
-            <h3 className="text-xl font-black tracking-tight uppercase italic text-slate-800">Recruitment Activity</h3>
-            <button className="text-[10px] font-black text-indigo-600 border-b-2 border-indigo-600 pb-1 uppercase tracking-widest">
-                Full Talent Audit
+      {/* RECRUITMENT ACTIVITIES */}
+      <section className="bg-white border border-slate-200/60 rounded-3xl p-8 md:p-10 shadow-sm text-left">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-5 mb-8">
+            <h3 className="text-xl font-extrabold tracking-tight text-slate-900 flex items-center gap-2">
+              <FiClock className="text-indigo-500 w-5 h-5" />
+              Recruitment Activity Feed
+            </h3>
+            <button className="text-[10px] font-black text-indigo-600 hover:text-indigo-850 transition-colors uppercase tracking-wider flex items-center gap-1 cursor-pointer">
+              <span>Full Talent Audit</span>
+              <FiArrowRight className="w-3.5 h-3.5" />
             </button>
         </div>
 
         <div className="grid gap-4">
-            {[
-                "New applicant applied for Django Developer",
-                "Interview scheduled for React Developer role",
-                "Offer sent to Arjun Nair",
-                "Backend Developer position closed",
-            ].map((activity, index) => (
-                <div key={index} className="flex items-center gap-6 p-6 bg-slate-50 rounded-3xl border border-transparent hover:border-slate-200 hover:bg-white transition-all group">
-                    <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-xs">
-                        ⚡
+            {activities.map((activity, index) => (
+                <div 
+                  key={index} 
+                  className="flex items-center gap-5 p-5 bg-slate-50/70 hover:bg-slate-50 border border-slate-100 rounded-2xl hover:border-slate-200 hover:-translate-x-0.5 transition-all cursor-pointer group"
+                >
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center border shadow-sm shrink-0 ${activity.bg}`}>
+                        {activity.icon}
                     </div>
-                    <div>
-                        <p className="text-sm font-bold text-slate-700">{activity}</p>
-                        <p className="text-[9px] font-black text-slate-400 uppercase mt-1 tracking-widest">Processed Just Now</p>
+                    <div className="min-w-0 flex-1">
+                        <p className="text-sm font-bold text-slate-700 group-hover:text-indigo-650 transition-colors truncate">{activity.text}</p>
+                        <p className="text-[9px] font-extrabold text-slate-400 uppercase mt-1 tracking-wider flex items-center gap-1">
+                          <FiClock className="w-3 h-3" />
+                          {activity.time}
+                        </p>
                     </div>
                 </div>
             ))}

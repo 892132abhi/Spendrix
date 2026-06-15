@@ -25,3 +25,6 @@ build/
 
 # Logs
 *.log
+
+
+firebase-credentials.json

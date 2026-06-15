@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/instance';
 import { toast } from 'react-hot-toast';
+import { FiSearch, FiMapPin, FiBriefcase, FiDollarSign, FiAward, FiInfo, FiChevronRight } from 'react-icons/fi';
 
 const JobListPage = () => {
   const [jobs, setJobs] = useState([]);
@@ -44,7 +45,7 @@ const JobListPage = () => {
         toast.error("Session expired.");
         navigate('/loginpage');
       } else {
-        toast.error("Failed to sync structural board tracks.");
+        toast.error("Failed to sync job listings.");
       }
     } finally {
       setLoading(false);
@@ -59,65 +60,73 @@ const JobListPage = () => {
   const handleApply = async (e, jobId) => {
     e.stopPropagation(); 
     if (!jobId) return;
-    const loadingToast = toast.loading("Filing profile data metrics...");
+    const loadingToast = toast.loading("Filing application...");
     try {
       await api.post(`applications/applyjob/${jobId}/`);
-      toast.success("Application registered successfully into Spendrix tracking network!", { id: loadingToast });
+      toast.success("Applied successfully!", { id: loadingToast });
     } catch (error) {
-      toast.error("You have already filed an assertion loop for this asset track.", { id: loadingToast });
+      toast.error("You have already applied to this job.", { id: loadingToast });
+    }
+  };
+
+  const getJobTypeLabel = (type) => {
+    switch (type) {
+      case 'FULL_TIME': return 'Full-time';
+      case 'PART_TIME': return 'Part-time';
+      case 'REMOTE': return 'Remote';
+      case 'INTERN_SHIP': return 'Internship';
+      default: return type || 'Full-time';
     }
   };
 
   return (
     <div className="max-w-[1400px] mx-auto h-[calc(100vh-120px)] flex flex-col p-4 gap-6 font-sans">
       
-      {/* SEARCH FRAME */}
-      <div className="bg-white rounded-2xl shadow-xl border border-orange-100 p-3 flex flex-col md:flex-row items-center gap-2 max-w-4xl mx-auto w-full">
-        <div className="flex-1 flex items-center px-6 gap-3 w-full">
-          <span className="text-amber-500 text-sm">🔍</span>
+      {/* Search & Filter Bar */}
+      <div className="bg-white rounded-2xl border border-slate-100 p-3 flex flex-col md:flex-row items-center gap-3 w-full shadow-sm">
+        <div className="flex-1 flex items-center px-4 gap-3 w-full bg-slate-50 rounded-xl border border-slate-100">
+          <FiSearch className="text-slate-400" size={18} />
           <input 
             type="text" 
             value={search} 
             onChange={(e) => handleFilterChange(e, 'search')}
-            placeholder="Search ..."
-            className="w-full border-none outline-none text-sm font-semibold py-2 bg-transparent text-stone-800 placeholder-stone-400"
+            placeholder="Search roles, skills, or companies..."
+            className="w-full border-none outline-none text-sm font-semibold py-3 bg-transparent text-slate-800 placeholder-slate-400"
           />
         </div>
         
-        <div className="hidden md:block w-px h-8 bg-amber-100"></div>
-
-        <div className="flex-1 flex items-center px-4 w-full">
+        <div className="w-full md:w-56 bg-slate-50 rounded-xl border border-slate-100 px-4">
           <select 
             value={type}
             onChange={(e) => handleFilterChange(e, 'type')}
-            className="w-full bg-transparent border-none text-sm font-black text-amber-900 outline-none cursor-pointer uppercase tracking-widest text-[10px]"
+            className="w-full bg-transparent border-none text-xs font-bold text-slate-600 py-3.5 outline-none cursor-pointer uppercase tracking-wider"
           >
             <option value="">All Arrangements</option>
-            <option value="FULL_TIME">Full-time </option>
-            <option value="PART_TIME">Part-time </option>
-            <option value="REMOTE">Remote </option>
-            <option value="INTERN_SHIP"> Internship </option>
+            <option value="FULL_TIME">Full-time</option>
+            <option value="PART_TIME">Part-time</option>
+            <option value="REMOTE">Remote</option>
+            <option value="INTERN_SHIP">Internship</option>
           </select>
         </div>
 
         <button 
           onClick={fetchJobs}
-          className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-stone-950 px-10 py-3.5 w-full md:w-auto rounded-xl font-black text-xs uppercase tracking-widest transition-all active:scale-95 shadow-md"
+          className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3.5 w-full md:w-auto rounded-xl font-bold text-xs uppercase tracking-wider transition-all active:scale-98 shadow-md cursor-pointer"
         >
-          Filter
+          Search
         </button>
       </div>
 
-      {/* ECOSYSTEM PANELS */}
-      <div className="flex flex-1 gap-6 overflow-hidden w-full">
+      {/* Main Split Panels */}
+      <div className="flex flex-1 gap-6 overflow-hidden w-full items-stretch">
         
-        {/* Left Card Deck */}
-        <div className="w-full md:w-[400px] lg:w-[450px] flex flex-col h-full gap-4">
+        {/* Left: Job Card Deck */}
+        <div className="w-full md:w-[400px] lg:w-[450px] flex flex-col h-full gap-4 flex-shrink-0">
           <div className="flex-1 overflow-y-auto pr-2 space-y-4 custom-scrollbar">
             {loading ? (
               <div className="space-y-4">
                 {[1, 2, 3].map(i => (
-                  <div key={i} className="h-40 bg-stone-50 border border-stone-200 rounded-3xl animate-pulse" />
+                  <div key={i} className="h-32 bg-slate-50 border border-slate-100 rounded-2xl animate-pulse" />
                 ))}
               </div>
             ) : jobs.length > 0 ? (
@@ -125,117 +134,146 @@ const JobListPage = () => {
                 <div 
                   key={job.id}
                   onClick={() => setSelectedJob(job)}
-                  className={`p-6 bg-white rounded-3xl border-2 text-left relative overflow-hidden group transition-all cursor-pointer ${
+                  className={`p-6 bg-white rounded-2xl border transition-all duration-300 cursor-pointer relative ${
                     selectedJob?.id === job.id 
-                      ? 'border-amber-500 shadow-xl shadow-amber-500/5 bg-gradient-to-br from-white to-amber-50/10' 
-                      : 'border-stone-100 hover:border-amber-200/60'
+                      ? 'border-indigo-600 shadow-md shadow-indigo-600/5 bg-indigo-50/10' 
+                      : 'border-slate-100 hover:border-slate-200/80 hover:shadow-sm'
                   }`}
                 >
-                  <h3 className="font-black text-stone-900 text-lg group-hover:text-amber-800 transition-colors uppercase italic tracking-tight">{job.title}</h3>
-                  <p className="text-xs font-bold text-orange-600 mt-1 mb-1 tracking-wide">{job.company_name || "Independent Enterprise Block"}</p>
-                  <p className="text-xs font-semibold text-stone-400 mb-4">{job.location}</p>
-                  
-                  <div className="flex justify-between items-center mt-4 pt-4 border-t border-amber-100">
-                     <span className="text-[9px] font-black text-amber-900 bg-amber-100 border border-amber-200/60 px-2.5 py-1 rounded-md uppercase tracking-widest">
-                       {job.job_type?.replace('_', ' ')}
-                     </span>
-                     <button 
-                       type="button"
-                       onClick={(e) => handleApply(e, job.id)}
-                       className="text-xs font-black text-orange-600 hover:text-orange-700 hover:underline transition-colors tracking-wider"
-                     >
-                       Apply
-                     </button>
+                  <div className="flex justify-between items-start gap-4">
+                    <div>
+                      <h3 className="font-bold text-slate-900 text-base group-hover:text-indigo-600 transition-colors">{job.title}</h3>
+                      <p className="text-xs font-semibold text-slate-500 mt-1">{job.company_name || "Enterprise Block"}</p>
+                    </div>
+                    <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-100/50 px-2 py-0.5 rounded uppercase tracking-wider">
+                      {getJobTypeLabel(job.job_type)}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2 mt-4 text-xs text-slate-400 font-medium">
+                    <FiMapPin size={13} />
+                    <span>{job.location}</span>
+                  </div>
+
+                  <div className="flex justify-between items-center mt-4 pt-4 border-t border-slate-100/60">
+                    <button 
+                      type="button"
+                      onClick={(e) => handleApply(e, job.id)}
+                      className="text-xs font-bold text-indigo-600 hover:text-indigo-700 transition-colors cursor-pointer bg-transparent border-none p-0"
+                    >
+                      Apply Now
+                    </button>
+                    <FiChevronRight size={16} className="text-slate-400" />
                   </div>
                 </div>
               ))
             ) : (
-              <div className="text-center py-20 bg-stone-50 rounded-3xl border border-dashed border-amber-200 p-8 text-stone-400 font-bold italic text-sm">
-                No active matching architectural paths matching this profile query.
+              <div className="text-center py-12 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200 p-8 text-slate-400 font-medium text-sm">
+                No jobs match your filter options.
               </div>
             )}
           </div>
 
-          {/* PAGINATION ROW */}
+          {/* Left Panel Pagination */}
           {hasPagination.totalCount > 0 && (
-            <div className="bg-white border border-amber-100 rounded-2xl p-3 flex justify-between items-center shadow-md">
+            <div className="bg-white border border-slate-100 rounded-xl p-3 flex justify-between items-center shadow-sm">
               <button
                 disabled={!hasPagination.previous || loading}
                 onClick={() => setPage(prev => Math.max(prev - 1, 1))}
-                className="px-4 py-2 text-xs font-black uppercase border border-stone-200 rounded-xl tracking-wider text-stone-600 hover:bg-stone-50 disabled:opacity-40 transition-all"
+                className="px-4 py-2 text-xs font-bold uppercase border border-slate-200 rounded-lg tracking-wider text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-all cursor-pointer bg-white"
               >
-                ← Previous
+                Prev
               </button>
-              <span className="text-xs font-bold text-stone-400">
-                No : <strong className="text-amber-600">{page}</strong>
+              <span className="text-xs font-bold text-slate-400">
+                Page <strong className="text-indigo-600 font-semibold">{page}</strong>
               </span>
               <button
                 disabled={!hasPagination.next || loading}
                 onClick={() => setPage(prev => prev + 1)}
-                className="px-4 py-2 text-xs font-black uppercase bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 rounded-xl tracking-wider shadow-sm disabled:opacity-40 transition-all"
+                className="px-4 py-2 text-xs font-bold uppercase bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg tracking-wider shadow-sm disabled:opacity-40 transition-all cursor-pointer border-none"
               >
-                Next  →
+                Next
               </button>
             </div>
           )}
         </div>
 
-        {/* Right Feature Panel View Drawer */}
-        <div className="hidden md:flex flex-1 bg-white border border-amber-100 rounded-[2.5rem] overflow-hidden flex-col shadow-2xl">
+        {/* Right: Feature Detail Panel */}
+        <div className="hidden md:flex flex-1 bg-white border border-slate-100 rounded-[2rem] overflow-hidden flex-col shadow-sm">
           {selectedJob ? (
-            <div className="p-10 overflow-y-auto h-full space-y-8 text-left bg-gradient-to-b from-white to-amber-50/5">
-              <header className="space-y-4 border-b border-amber-100 pb-8">
-                <span className="text-[9px] font-black text-orange-600 bg-orange-50 px-3 py-1.5 rounded-full uppercase tracking-widest border border-orange-100">
-                  Live Placement 
-                </span>
-                <h2 className="text-3xl font-black text-stone-950 leading-tight mt-2 italic uppercase tracking-tight">{selectedJob.title}</h2>
-                <p className="text-base font-bold text-amber-700 tracking-wide">{selectedJob.company_name || "Independent Enterprise Block"}</p>
-                
-                <div className="flex gap-4 pt-2">
-                  <button 
-                    onClick={(e) => handleApply(e, selectedJob.id)}
-                    className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-stone-950 px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-md transition-all active:scale-95"
-                  >
-                    Apply 
-                  </button>
-                  <button 
-                    onClick={() => navigate(`/jobdetails/${selectedJob.id}`)}
-                    className="px-8 py-3.5 border-2 border-stone-900 text-stone-900 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-stone-50 transition-all"
-                  >
-                    View job details
-                  </button>
-                </div>
-              </header>
+            <div className="p-8 overflow-y-auto h-full space-y-6 text-left flex flex-col justify-between">
+              <div className="space-y-6">
+                <header className="space-y-3 border-b border-slate-100 pb-6">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-100/50 px-2.5 py-1 rounded uppercase tracking-wider">
+                      Live Placement
+                    </span>
+                    <span className="text-xs font-semibold text-slate-400 flex items-center gap-1">
+                      <FiMapPin size={13} />
+                      <span>{selectedJob.location}</span>
+                    </span>
+                  </div>
+                  <h2 className="text-2xl font-bold text-slate-900 leading-tight">{selectedJob.title}</h2>
+                  <p className="text-sm font-semibold text-slate-500">{selectedJob.company_name || "Enterprise Block"}</p>
+                </header>
 
-              <div className="grid grid-cols-2 gap-8 bg-stone-50 p-6 rounded-2xl border border-amber-100 shadow-inner">
-                <div>
-                   <h4 className="text-[9px] font-black text-stone-400 uppercase tracking-widest mb-1">location</h4>
-                   <p className="font-bold text-stone-700 text-sm">{selectedJob.location}</p>
+                <div className="grid grid-cols-2 gap-4 bg-slate-50/50 p-4 rounded-xl border border-slate-100/60">
+                  <div>
+                    <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                      <FiDollarSign size={10} />
+                      <span>Salary Range</span>
+                    </h4>
+                    <p className="font-bold text-slate-700 text-sm mt-0.5">{selectedJob.salary || "Disclosed in interview"}</p>
+                  </div>
+                  <div>
+                    <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                      <FiBriefcase size={10} />
+                      <span>Job Arrangement</span>
+                    </h4>
+                    <p className="font-bold text-slate-700 text-sm mt-0.5">{getJobTypeLabel(selectedJob.job_type)}</p>
+                  </div>
                 </div>
-                <div>
-                   <h4 className="text-[9px] font-black text-stone-400 uppercase tracking-widest mb-1">Assigned Salary</h4>
-                   <p className="font-black text-amber-600 text-sm">{selectedJob.salary || "Disclosed Securely Upon Panel Phase"}</p>
+
+                <div className="space-y-2">
+                  <h4 className="text-slate-800 font-bold uppercase text-[10px] tracking-wider flex items-center gap-1">
+                    <FiAward size={12} className="text-indigo-600" />
+                    <span>Required Core Stack</span>
+                  </h4>
+                  <div className="text-slate-600 font-medium text-xs bg-slate-50/30 border border-slate-100 p-4 rounded-xl">
+                    {selectedJob.skills || "Standard toolset evaluations apply."}
+                  </div>
+                </div>
+
+                <div className="space-y-2 pt-2">
+                  <h4 className="text-slate-800 font-bold uppercase text-[10px] tracking-wider flex items-center gap-1">
+                    <FiInfo size={12} className="text-indigo-600" />
+                    <span>Role context</span>
+                  </h4>
+                  <p className="text-slate-500 leading-relaxed text-sm whitespace-pre-line font-medium">
+                    {selectedJob.description || "Description index details not cataloged."}
+                  </p>
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <h4 className="text-stone-800 font-black uppercase text-[10px] tracking-widest">Required Structural Toolsets</h4>
-                <p className="text-stone-700 font-bold text-sm bg-amber-50/40 border border-amber-200/60 p-4 rounded-xl">
-                  {selectedJob.skills || "General asset profile verification rules apply."}
-                </p>
-              </div>
-
-              <div className="prose prose-slate max-w-none pt-2">
-                <h4 className="text-stone-800 font-black uppercase text-[10px] tracking-widest mb-2">Role Blueprint & Context</h4>
-                <p className="text-stone-600 leading-relaxed text-sm whitespace-pre-line font-medium">
-                  {selectedJob.description || "Detailed workflow blueprint indices not explicitly cataloged."}
-                </p>
+              <div className="flex gap-4 pt-6 border-t border-slate-100 mt-auto">
+                <button 
+                  onClick={(e) => handleApply(e, selectedJob.id)}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider shadow-md transition-all active:scale-98 cursor-pointer flex-1 md:flex-initial"
+                >
+                  Apply to this position
+                </button>
+                <button 
+                  onClick={() => navigate(`/jobdetails/${selectedJob.id}`)}
+                  className="px-6 py-3.5 border border-slate-200 text-slate-600 hover:text-slate-900 rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-slate-50 transition-all cursor-pointer bg-white"
+                >
+                  View Details
+                </button>
               </div>
             </div>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center text-stone-300">
-              <span className="text-5xl mb-3"></span>
-              <p className="font-black uppercase tracking-widest text-[10px] text-amber-600">Select an job tile</p>
+            <div className="flex-1 flex flex-col items-center justify-center text-slate-300 p-8">
+              <FiBriefcase size={48} className="text-slate-200 mb-2 animate-bounce" />
+              <p className="font-semibold text-xs tracking-wider text-slate-400">Select a job from the deck to preview details</p>
             </div>
           )}
         </div>

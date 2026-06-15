@@ -1,14 +1,15 @@
 import json
+import os
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, status
 
 from app.services.rag_system.chunking import chunk_text
 from app.services.rag_system.embedding import embed
-from app.services.rag_system.vector_store import create_transient_index, search_dynamic_index
+from app.services.rag_system.vector_store import store_in_qdrant
+from app.services.rag_system.retriever import retrieve
 from app.services.rag_system.generator import generate_answer
 from app.utils.pdf import extract_text
 
 router = APIRouter()
-
 
 @router.post("/upload")
 async def handle_upload(file: UploadFile = File(...)):
@@ -19,6 +20,7 @@ async def handle_upload(file: UploadFile = File(...)):
                 detail="Only PDF files are supported."
             )
 
+        # Ensure text extractor handles the uploaded SpooledTemporaryFile cleanly
         raw_text = extract_text(file.file)
 
         if not raw_text:
@@ -27,7 +29,13 @@ async def handle_upload(file: UploadFile = File(...)):
                 detail="Could not extract any readable text from this PDF."
             )
 
-        return {"extracted_text": raw_text, "status": "Ready"}
+        chunks = chunk_text(raw_text)
+        if chunks:
+            vectors = [embed(chunk, task_type="RETRIEVAL_DOCUMENT") for chunk in chunks]
+            # Save blocks directly into persistent Qdrant using filename as tracking string
+            store_in_qdrant(vectors, chunks, file_name=file.filename)
+
+        return {"filename": file.filename, "status": "Ready and Indexed"}
 
     except HTTPException:
         raise
@@ -39,29 +47,18 @@ async def handle_upload(file: UploadFile = File(...)):
 
 
 @router.post("/message")
-async def handle_chat(message: str = Form(...), doc_text: str = Form(...)):
+async def handle_chat(message: str = Form(...), filename: str = Form(...)):
     try:
-        chunks = chunk_text(doc_text)
+        # Use our clean updated retrieval service layer to capture context array
+        matched_chunks = retrieve(query=message, filename=filename, k=4)
 
-        if not chunks:
+        if not matched_chunks:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="No usable document chunks found."
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No context matching this document found in the database store."
             )
 
-        vectors = [
-            embed(chunk, task_type="RETRIEVAL_DOCUMENT")
-            for chunk in chunks
-        ]
-
-        index = create_transient_index(chunks, vectors)
-
-        query_vector = embed(
-            message,
-            task_type="RETRIEVAL_QUERY"
-        )
-
-        context = search_dynamic_index(index, query_vector, chunks, k=4)
+        context = "\n\n".join(matched_chunks)
 
         reply = generate_answer(
             query=message,
@@ -81,29 +78,18 @@ async def handle_chat(message: str = Form(...), doc_text: str = Form(...)):
 
 
 @router.post("/generate-kit")
-async def handle_generate_kit(doc_text: str = Form(...), job_description: str = Form(...)):
+async def handle_generate_kit(filename: str = Form(...), job_description: str = Form(...)):
     try:
-        chunks = chunk_text(doc_text)
+        # Pull down context chunks scoped by document filename using description as search vector
+        matched_chunks = retrieve(query=job_description, filename=filename, k=5)
 
-        if not chunks:
+        if not matched_chunks:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="No usable document chunks found."
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No relevant matching text blocks found to process this interview kit."
             )
 
-        vectors = [
-            embed(chunk, task_type="RETRIEVAL_DOCUMENT")
-            for chunk in chunks
-        ]
-
-        index = create_transient_index(chunks, vectors)
-
-        query_vector = embed(
-            job_description,
-            task_type="RETRIEVAL_QUERY"
-        )
-
-        context = search_dynamic_index(index, query_vector, chunks, k=5)
+        context = "\n\n".join(matched_chunks)
 
         prompt_directive = f"""
 Target Job Criteria:

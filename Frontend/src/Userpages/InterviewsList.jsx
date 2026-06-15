@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/instance';
 import { toast } from 'react-hot-toast';
+import { FiCalendar, FiClock, FiUser, FiMessageSquare, FiInfo } from 'react-icons/fi';
 
 const CandidateInterviews = () => {
   const navigate = useNavigate();
@@ -15,8 +16,8 @@ const CandidateInterviews = () => {
         const res = await api.get('interviews/candidateinterviews/');
         setInterviews(res.data);
       } catch (err) {
-        console.log("found error :",err)
-        toast.error("Failed to sync structural console schedule");
+        console.log("found error :", err);
+        toast.error("Failed to load interview calendar.");
       } finally {
         setLoading(false);
       }
@@ -26,100 +27,116 @@ const CandidateInterviews = () => {
 
   const getStatusStyle = (status) => {
     switch (status?.toUpperCase()) {
-      case 'SCHEDULED': return 'bg-amber-100 text-amber-900 border-amber-400/40';
-      case 'COMPLETED': return 'bg-stone-100 text-stone-500 border-stone-200';
-      case 'CANCELLED': return 'bg-orange-100 text-orange-950 border-orange-300/40';
-      default: return 'bg-yellow-100 text-yellow-900 border-yellow-300';
+      case 'SCHEDULED': 
+        return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+      case 'COMPLETED': 
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+      case 'CANCELLED': 
+        return 'bg-rose-50 text-rose-600 border-rose-100';
+      default: 
+        return 'bg-slate-50 text-slate-600 border-slate-200';
     }
   };
 
   return (
-    <div className="min-h-[80vh] p-4 lg:p-8 bg-stone-50/30">
-      <div className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-amber-100 pb-6">
+    <div className="min-h-[80vh] p-2 lg:p-4 bg-transparent font-sans">
+      
+      {/* Header Block */}
+      <div className="mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-6">
         <div>
-          <h1 className="text-3xl font-black text-stone-950 tracking-tighter italic uppercase">
-           Assigned Interviews
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+            Scheduled Interviews
           </h1>
-          <p className="text-xs font-bold text-stone-400 uppercase tracking-[0.3em] mt-1">
-            check the interviews -- @{user?.username}
+          <p className="text-xs text-slate-400 font-semibold mt-1">
+            Review and attend your upcoming evaluation loops, @{user?.username}
           </p>
         </div>
-        <div className="bg-white px-6 py-3 rounded-2xl border border-amber-100 shadow-sm flex items-center gap-3">
-            <span className="w-2.5 h-2.5 bg-orange-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.4)]"></span>
-            <span className="text-[10px] font-black text-stone-700 uppercase tracking-widest">
-                {interviews.length} interview Scheduled
-            </span>
+        
+        <div className="bg-white px-5 py-3 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-2.5 self-start sm:self-auto">
+          <span className="w-2.5 h-2.5 bg-indigo-600 rounded-full animate-ping shadow-[0_0_8px_rgba(99,102,241,0.5)]"></span>
+          <span className="text-xs font-bold text-slate-600 tracking-wide">
+            {interviews.length} Scheduled Node{interviews.length === 1 ? '' : 's'}
+          </span>
         </div>
       </div>
 
       {loading ? (
-        <div className="h-64 flex items-center justify-center italic text-amber-700 font-black uppercase tracking-widest animate-pulse">
-          Retrieving securely encrypted enterprise calendar assets...
+        <div className="h-64 flex items-center justify-center text-slate-400 font-semibold text-sm animate-pulse">
+          Retrieving secure calendar slots...
         </div>
       ) : interviews.length === 0 ? (
-        <div className="bg-white border-2 border-dashed border-amber-200 rounded-[2.5rem] p-20 text-center">
-          <p className="text-stone-400 font-bold uppercase text-xs tracking-widest">No evaluation nodes found in current pipeline tracks.</p>
+        <div className="bg-white border border-dashed border-slate-200 rounded-[2rem] p-16 text-center shadow-sm">
+          <p className="text-slate-400 font-semibold text-sm">No interviews scheduled in your active track.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-          {interviews.map((interview) => (
-            <div 
-              key={interview.id}
-              className="bg-white group rounded-[2.5rem] p-8 border border-orange-100/60 shadow-sm hover:shadow-xl hover:border-amber-400 transition-all duration-500 relative overflow-hidden"
-            >
-              <div className={`absolute top-8 right-8 px-4 py-1.5 rounded-full border-2 text-[9px] font-black uppercase tracking-widest shadow-sm ${getStatusStyle(interview.status)}`}>
-                {interview.status}
-              </div>
-
-              <div className="flex items-start gap-6">
-                <div className="flex-shrink-0 w-16 h-20 bg-stone-50 rounded-2xl flex flex-col items-center justify-center border border-stone-200 group-hover:border-amber-400 group-hover:bg-amber-50/50 transition-colors shadow-inner">
-                  <span className="text-[10px] font-black text-stone-400 uppercase group-hover:text-amber-700">
-                    {new Date(interview.sheduled_date).toLocaleString('default', { month: 'short' })}
-                  </span>
-                  <span className="text-2xl font-black text-stone-900 group-hover:text-orange-600 transition-colors">
-                    {new Date(interview.sheduled_date).getDate()}
-                  </span>
+          {interviews.map((interview) => {
+            const dateObj = new Date(interview.sheduled_date);
+            const formattedMonth = dateObj.toLocaleString('default', { month: 'short' }).toUpperCase();
+            const formattedDay = dateObj.getDate();
+            const formattedTime = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            return (
+              <div 
+                key={interview.id}
+                className="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm hover:shadow-md hover:border-slate-200/50 transition-all duration-300 relative overflow-hidden group"
+              >
+                <div className={`absolute top-6 right-6 px-3 py-1 rounded-full border text-[10px] font-bold uppercase tracking-wider ${getStatusStyle(interview.status)}`}>
+                  {interview.status}
                 </div>
 
-                <div className="flex-1">
-                  <h3 className="text-lg font-black text-stone-900 tracking-tight mb-1 group-hover:text-amber-800 transition-colors">
-                    {interview.job_title || "Technical System Architecture Matrix Assessment"}
-                  </h3>
-                  <div className="flex flex-wrap gap-y-2 gap-x-4 mt-2">
-                    <div className="flex items-center gap-2">
-                      <ClockIcon />
-                      <span className="text-[11px] font-bold text-stone-500">{new Date(interview.sheduled_date).toLocaleTimeString([], {hour: '2-digit',minute: '2-digit'})}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <PeopleIcon />
-                      <span className="text-[11px] font-bold text-stone-500 text-amber-900/80">Panel: {interview.interviewer_name}</span>
+                <div className="flex items-start gap-5">
+                  {/* Calendar Widget Graphic */}
+                  <div className="flex-shrink-0 w-16 h-18 bg-slate-50 border border-slate-100 rounded-2xl flex flex-col items-center justify-center group-hover:border-indigo-200 transition-colors shadow-inner">
+                    <span className="text-[10px] font-bold text-slate-400 tracking-wider">
+                      {formattedMonth}
+                    </span>
+                    <span className="text-2xl font-extrabold text-slate-800 tracking-tight group-hover:text-indigo-600 transition-colors mt-0.5">
+                      {formattedDay}
+                    </span>
+                  </div>
+
+                  {/* Info Column */}
+                  <div className="flex-1 min-w-0 pr-16">
+                    <h3 className="text-base font-bold text-slate-900 truncate group-hover:text-indigo-600 transition-colors">
+                      {interview.job_title || "Technical System Architecture Matrix Assessment"}
+                    </h3>
+                    
+                    <div className="flex flex-col gap-2 mt-4 text-xs text-slate-500 font-semibold">
+                      <div className="flex items-center gap-2">
+                        <FiClock className="text-indigo-500" size={14} />
+                        <span>{formattedTime}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <FiUser className="text-indigo-500" size={14} />
+                        <span>Panelist: {interview.interviewer_name}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="mt-8 pt-6 border-t border-stone-100 flex items-center justify-between">
-                
-                <div className="flex gap-3">
-                    <button 
-                        onClick={() => navigate(`/chat/${interview.id}`)}
-                        className="px-6 py-3 rounded-xl bg-gradient-to-r from-stone-950 to-stone-800 border border-amber-500/20 text-amber-400 text-[10px] font-black uppercase tracking-widest hover:from-amber-500 hover:to-orange-500 hover:text-stone-950 transition-all shadow-md active:scale-95 flex items-center gap-2"
-                    >
-                        <ChatIcon />
-                        Open  Chat Room
-                    </button>
+                {/* Bottom Action Area */}
+                <div className="mt-6 pt-5 border-t border-slate-50 flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold">
+                    <FiInfo size={13} className="text-slate-300" />
+                    <span>Evaluation session link</span>
+                  </div>
+
+                  <button 
+                    onClick={() => navigate(`/chat/${interview.id}`)}
+                    className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-indigo-600 text-white hover:text-white text-xs font-bold uppercase tracking-wider transition-all shadow-sm active:scale-98 cursor-pointer flex items-center gap-2 border-none"
+                  >
+                    <FiMessageSquare size={13} />
+                    <span>Enter Chat Room</span>
+                  </button>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
   );
 };
-
-const ClockIcon = () => <svg className="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
-const PeopleIcon = () => <svg className="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>;
-const ChatIcon = () => <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>;
 
 export default CandidateInterviews;

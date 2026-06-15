@@ -1,18 +1,15 @@
-import numpy as np
-from .vector_store import index, chunks_store
-from .embedding import embed
+from app.services.rag_system.embedding import embed
+from app.services.rag_system.vector_store import search_qdrant  
 
-def retrieve(query, k=5):
-    query_vector = embed(query)
+def retrieve(query: str, filename: str, k=5):
+    """
+    Converts user prompt to vector coordinate array and extracts matching contexts
+    filtered specifically to the active file name.
+    """
+    # 1. Convert user's question into a 768-dim Gemini vector
+    query_vector = embed(query, task_type="RETRIEVAL_QUERY")
 
-    _, indices = index.search(
-        np.array([query_vector]).astype("float32"), k
-    )
-
-    results = []
-
-    for i in indices[0]:
-        if i < len(chunks_store):
-            results.append(chunks_store[i])
+    # 2. Query Qdrant with both vector coordinates and payload source key filters
+    results = search_qdrant(query_vector, file_name=filename, k=k)
 
     return results

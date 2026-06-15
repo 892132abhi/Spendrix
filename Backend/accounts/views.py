@@ -1,4 +1,5 @@
 import requests
+import os
 from django.db.models import Q
 from google.auth.transport import requests as google_requests
 from django.utils import timezone
@@ -378,7 +379,10 @@ class ProfileUpdateView(APIView):
     parser_classes = [MultiPartParser, FormParser]
 
     def patch(self, request):
-        profile = Profile.objects.get(user=request.user)
+        try:
+            profile = Profile.objects.get(user=request.user)
+        except Profile.DoesNotExist:
+            return Response({"detail": "Profile not found."}, status=status.HTTP_404_NOT_FOUND)
 
         serializer = ProfileSerializer(
             profile,
@@ -389,18 +393,30 @@ class ProfileUpdateView(APIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+        # 1. Save the serializer updates (including any new files) first
         profile = serializer.save()
 
-        if "resume" in request.FILES:
+        # 2. Process background file text extraction cleanly
+        if "resume" in request.FILES and profile.resume:
             try:
-                resume_text = extract_resume_text(profile.resume.path)
-                profile.resume_text = resume_text
-                profile.save(update_fields=["resume_text"])
-
+                # Ensure the file path exists on disk before reading
+                if os.path.exists(profile.resume.path):
+                    resume_text = extract_resume_text(profile.resume.path)
+                    
+                    if resume_text:
+                        profile.resume_text = resume_text
+                        # Explicitly save only the resume fields to prevent dropping name details
+                        profile.save(update_fields=["resume_text"])
+                        print("✨ Resume text successfully parsed and indexed.")
             except Exception as error:
-                print("Resume text extraction error:", error)
+                # Logging this ensures a broken PDF layout won't revert the user's name updates!
+                print("❌ Non-blocking resume text extraction error:", error)
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        # 3. Refresh from database to ensure return data reflects true database state
+        profile.refresh_from_db()
+        updated_serializer = ProfileSerializer(profile)
+        
+        return Response(updated_serializer.data, status=status.HTTP_200_OK)
 
 
 class ProfileCount(APIView):

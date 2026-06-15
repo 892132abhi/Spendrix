@@ -1,8 +1,13 @@
 import { useState, useEffect } from 'react';
 import api from '../api/instance';
 import { toast } from 'react-hot-toast';
+import { 
+  FiBell, FiCalendar, FiCheck, FiInfo, FiArrowLeft 
+} from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
 
 const InterviewerNotificationPage = () => {
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -11,9 +16,6 @@ const InterviewerNotificationPage = () => {
   const fetchData = async () => {
     try {
       const res = await api.get('notifications/notificationslist/'); 
-      
-      // Assumes your Django view returns an object with these exact keys.
-      // If your view returns a direct array, adjust to res.data accordingly.
       setNotifications(res.data.notifications || res.data);
       setUnreadCount(res.data.unread_count || 0);
     } catch (err) {
@@ -26,21 +28,16 @@ const InterviewerNotificationPage = () => {
 
   // 2. Modified useEffect handling both initial load AND live WebSocket events
   useEffect(() => {
-    // Run initial history sync
     const initialSync = setTimeout(fetchData, 0);
 
-    // Establish WebSocket pipe to your Django routing path
-    // Replace with your exact protocol routing link configuration
     const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
     const wsUrl = `${wsProtocol}://localhost:8000/ws/notifications/`;
     const socket = new WebSocket(wsUrl);
 
-    // Triggered instantly when backend consumer executes self.send()
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
 
       if (data.type === 'notification') {
-        // Prepend new incoming item instantly onto the UI view array stream
         setNotifications((prev) => [
           {
             id: data.id,
@@ -52,10 +49,8 @@ const InterviewerNotificationPage = () => {
           ...prev
         ]);
         
-        // Increment the unread total count counter badge
         setUnreadCount((prevCount) => prevCount + 1);
         
-        // Fire an on-screen visual toast chime pop-up
         toast(`📢 ${data.title}: ${data.message}`, {
           duration: 4000,
           position: 'top-right',
@@ -71,12 +66,11 @@ const InterviewerNotificationPage = () => {
       console.error("Socket pipeline threw connection error metrics: ", err);
     };
 
-    // CLEANUP: Drop WebSocket pipe cleanly if user navigates away from the page
     return () => {
       clearTimeout(initialSync);
       socket.close();
     };
-  }, []); // Empty dependency matrix ensures connection opens exactly once on mount
+  }, []);
 
   const markAsRead = async (id) => {
     try {
@@ -92,68 +86,99 @@ const InterviewerNotificationPage = () => {
     }
   };
 
-  if (loading) return <div className="p-20 text-center font-black animate-pulse text-slate-300">SYNCHRONIZING...</div>;
+  if (loading) return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50/50">
+      <div className="w-12 h-12 border-4 border-indigo-650 border-t-transparent rounded-full animate-spin mb-4"></div>
+      <div className="animate-pulse text-slate-400 font-black uppercase tracking-widest text-xs">Retrieving Alerts Stream...</div>
+    </div>
+  );
 
   return (
-    <div className="max-w-4xl mx-auto p-8 space-y-12 animate-in fade-in duration-700">
-      
-      {/* HEADER */}
-      <header className="flex justify-between items-end border-b border-slate-100 pb-10">
-        <div>
-          <h1 className="text-4xl font-black text-slate-900 tracking-tighter uppercase italic">Alert Stream</h1>
-          <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.3em] mt-2">Personal Session Intelligence</p>
-        </div>
-        <div className="flex items-center gap-4">
-          <span className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-4 py-2 rounded-full uppercase">
-            {unreadCount} Unread
-          </span>
-        </div>
-      </header>
-
-      {/* NOTIFICATION LIST */}
-      <div className="space-y-6">
-        {notifications && notifications.length > 0 ? notifications.map((n) => (
-          <div 
-            key={n.id} 
-            className={`relative group bg-white border border-slate-100 p-8 rounded-[3rem] transition-all duration-500 hover:shadow-2xl hover:border-slate-900 ${n.is_read ? 'opacity-40 grayscale-[0.8]' : ''}`}
-          >
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div className="flex gap-6 items-start">
-                <div className="w-14 h-14 bg-slate-50 rounded-[1.5rem] flex items-center justify-center text-xl shadow-inner group-hover:bg-indigo-50 transition-colors">
-                  {n.title.toLowerCase().includes('interview') ? '🕒' : '📢'}
-                </div>
-                <div className="space-y-1">
-                  <div className="flex items-center gap-3">
-                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                       {new Date(n.created_at).toLocaleDateString()}
-                    </span>
-                    {!n.is_read && <span className="w-1.5 h-1.5 bg-indigo-600 rounded-full"></span>}
-                  </div>
-                  <h3 className="text-xl font-black text-slate-900 uppercase tracking-tighter italic">{n.title}</h3>
-                  <p className="text-sm text-slate-500 font-medium max-w-xl leading-relaxed">{n.message}</p>
-                </div>
-              </div>
-
-              {!n.is_read && (
-                <button 
-                  onClick={() => markAsRead(n.id)}
-                  className="px-6 py-3 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-lg active:scale-95"
-                >
-                  Mark Read
-                </button>
-              )}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100/30 to-slate-200/20 py-12 px-6 font-sans">
+      <div className="max-w-3xl mx-auto space-y-8 animate-in fade-in duration-500">
+        
+        {/* HEADER */}
+        <header className="flex justify-between items-center bg-white/80 backdrop-blur-md border border-slate-200/60 p-6 rounded-3xl shadow-sm">
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => navigate(-1)}
+              className="p-2 hover:bg-slate-100 rounded-xl text-slate-500 hover:text-slate-800 transition-colors cursor-pointer border-0 bg-transparent"
+            >
+              <FiArrowLeft className="w-4 h-4" />
+            </button>
+            <div>
+              <h1 className="text-xl font-extrabold text-slate-900 tracking-tight">Alert Stream</h1>
+              <p className="text-[9px] text-slate-450 font-black uppercase tracking-widest mt-0.5">Personal Session Intelligence</p>
             </div>
-            
-            {/* Timestamp Footer */}
-            <p className="absolute bottom-6 right-10 text-[8px] font-black text-slate-300 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
-               Received at {new Date(n.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-            </p>
           </div>
-        )) : (
-          <div className="py-32 text-center rounded-[4rem] border-4 border-dashed border-slate-50">
-            <p className="text-sm font-black text-slate-200 uppercase tracking-[0.5em]">No alerts found</p>
+          <div className="flex items-center gap-4">
+            <span className="text-[10px] font-black text-indigo-650 bg-indigo-50 border border-indigo-100 px-4 py-2 rounded-full uppercase tracking-wider shadow-sm">
+              {unreadCount} Unread
+            </span>
           </div>
-        )}
+        </header>
+
+        {/* NOTIFICATION LIST */}
+        <div className="space-y-4">
+          {notifications && notifications.length > 0 ? (
+            notifications.map((n) => (
+              <div 
+                key={n.id} 
+                className={`relative group bg-white border border-slate-200/50 p-6 rounded-3xl transition-all duration-300 flex flex-col justify-between ${
+                  n.is_read 
+                    ? 'opacity-60 bg-slate-50/50 border-slate-200/30' 
+                    : 'hover:shadow-md hover:border-slate-300 shadow-sm border-transparent'
+                }`}
+              >
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="flex gap-4 items-start">
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-lg shadow-sm shrink-0 border transition-colors ${
+                      n.is_read 
+                        ? 'bg-slate-100 border-slate-200 text-slate-400' 
+                        : 'bg-indigo-50 border-indigo-100 text-indigo-600'
+                    }`}>
+                      {n.title.toLowerCase().includes('interview') ? (
+                        <FiCalendar className="w-5 h-5" />
+                      ) : (
+                        <FiBell className="w-5 h-5" />
+                      )}
+                    </div>
+                    
+                    <div className="space-y-1 min-w-0">
+                      <div className="flex items-center gap-2.5">
+                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider">
+                          {new Date(n.created_at).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </span>
+                        {!n.is_read && <span className="w-1.5 h-1.5 bg-indigo-650 rounded-full"></span>}
+                      </div>
+                      <h3 className="font-extrabold text-slate-900 text-sm">{n.title}</h3>
+                      <p className="text-xs text-slate-500 font-medium leading-relaxed max-w-xl pr-4">{n.message}</p>
+                    </div>
+                  </div>
+
+                  {!n.is_read && (
+                    <button 
+                      onClick={() => markAsRead(n.id)}
+                      className="px-4.5 py-2.5 bg-slate-905 hover:bg-slate-800 text-white rounded-xl text-[10px] font-black uppercase tracking-wider bg-slate-900 shadow-md hover:shadow-indigo-600/5 transition-all active:scale-95 cursor-pointer self-start md:self-center shrink-0 border-0"
+                    >
+                      Mark Read
+                    </button>
+                  )}
+                </div>
+                
+                {/* Timestamp Footer */}
+                <p className="absolute bottom-4 right-6 text-[9px] font-bold text-slate-350 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
+                  Received at {new Date(n.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </p>
+              </div>
+            ))
+          ) : (
+            <div className="py-24 text-center rounded-3xl border-2 border-dashed border-slate-200 bg-white/50 shadow-sm flex flex-col items-center justify-center gap-2">
+              <FiInfo className="w-8 h-8 text-slate-300" />
+              <p className="text-xs font-black text-slate-400 uppercase tracking-widest">No alerts found</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

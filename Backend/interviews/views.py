@@ -51,7 +51,7 @@ class InterviewList(APIView):
             date_filter = request.query_params.get('date')
             
             Interview_list = Interview.objects.all().order_by('-created_at')
-            if status_filter and status_filter !='ALL':
+            if status_filter and status_filter.strip() not in ['', 'ALL']:
                 Interview_list = Interview_list.filter(status=status_filter)
             if date_filter:
                 Interview_list = Interview_list.filter(sheduled_date__date= date_filter)

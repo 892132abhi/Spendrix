@@ -22,8 +22,9 @@ const CandidateNotifications = () => {
   useEffect(() => {
     const initialSync = setTimeout(fetchNotifications, 0);
 
+    // --- FIXED: Use dynamic window parameters instead of hardcoded port bounds ---
     const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    const wsUrl = `${wsProtocol}://localhost:8000/ws/notifications/`;
+    const wsUrl = `${wsProtocol}://${window.location.host}/ws/notifications/`;
     const socket = new WebSocket(wsUrl);
 
     socket.onmessage = (event) => {
@@ -73,7 +74,6 @@ const CandidateNotifications = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-amber-100 pb-6">
         <div>
           <h1 className="text-4xl font-black text-stone-950 tracking-tighter uppercase italic">Ecosystem Broadcast Signals</h1>

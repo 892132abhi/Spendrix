@@ -14,13 +14,19 @@ from pathlib import Path
 from datetime import timedelta
 from celery.schedules import crontab
 import os
+
 from dotenv import load_dotenv
 load_dotenv()
+
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+FIREBASE_CRED_PATH = os.path.join(
+    BASE_DIR,
+    "firebase-credentials.json"
+)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
@@ -150,7 +156,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.getenv('DB_NAME', 'spendrix_db'),
         'USER': os.getenv('DB_USER', 'postgres'),
-        'PASSWORD': os.getenv('DB_PASSWORD', '2003'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
         'HOST': os.getenv('DB_HOST', 'db'),
         'PORT': os.getenv('DB_PORT', '5432'),
     }

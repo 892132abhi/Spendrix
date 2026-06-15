@@ -1,7 +1,8 @@
-import  { useState, useEffect, useRef} from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import api from '../api/instance';
 import { toast } from 'react-hot-toast';
+import { FiSend, FiArrowLeft, FiUser, FiPaperclip, FiSmile, FiActivity, FiMessageSquare } from 'react-icons/fi';
 
 const ChatPageHR = () => {
   const { target, sessionId } = useParams(); 
@@ -14,9 +15,9 @@ const ChatPageHR = () => {
   const [chatInfo, setChatInfo] = useState({ name: "Loading...", role: "HR Administrator" });
   const [loading, setLoading] = useState(true);
   const [participants, setParticipants] = useState({
-  candidate_name: "Candidate",
-  interviewer_name: "Interviewer"
-});
+    candidate_name: "Candidate",
+    interviewer_name: "Interviewer"
+  });
 
   const socket = useRef(null);
   const scrollRef = useRef(null);
@@ -92,7 +93,7 @@ const ChatPageHR = () => {
           }]);
         };
       } catch (err) {
-        console.log("error found :",err)
+        console.log("error found :", err);
         toast.error("Security handshake failed");
       } finally {
         setLoading(false);
@@ -118,89 +119,118 @@ const ChatPageHR = () => {
   };
 
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden font-sans">
+    <div className="flex h-[calc(100vh-64px)] bg-slate-50 overflow-hidden font-sans border border-slate-200/50 rounded-3xl m-4 shadow-xl">
       
-      <aside className="w-80 bg-white border-r border-slate-200 flex flex-col shadow-2xl z-20">
-        <div className="p-8 border-b border-slate-100 bg-slate-900 text-white">
+      {/* SIDE PANEL */}
+      <aside className="w-80 bg-slate-900 flex flex-col z-20 shrink-0 border-r border-slate-800">
+        <div className="p-6 border-b border-slate-800 bg-slate-950 text-white">
           <button 
             onClick={() => navigate('/interviews')}
-            className="text-[9px] font-black text-indigo-400 uppercase tracking-widest flex items-center gap-2 mb-4 hover:text-white transition-all"
+            className="text-[10px] font-black text-indigo-400 hover:text-white uppercase tracking-widest flex items-center gap-2 mb-4 transition-all cursor-pointer"
           >
-            ← Close Console
+            <FiArrowLeft className="w-3.5 h-3.5" />
+            Close Chat Console
           </button>
-          <h2 className="text-xl font-black tracking-tighter italic uppercase">
+          <h2 className="text-lg font-black tracking-tight flex items-center gap-2">
+            <FiMessageSquare className="text-indigo-400" />
             Hiring Console
           </h2>
-          <div className="mt-2 flex items-center gap-2">
-            <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+          <div className="mt-2 flex items-center gap-2 bg-slate-900 px-3 py-1.5 rounded-xl border border-slate-850">
+            <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
             <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Admin Privileges Active</span>
           </div>
         </div>
 
-        <div className="flex-1 p-6 space-y-8">
+        <div className="flex-1 p-5 space-y-8 overflow-y-auto">
+          {/* TARGET INFO CARD */}
           <section>
-            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3">Target Participant</p>
-            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200">
-              <p className="text-sm font-black text-slate-900">{chatInfo.name}</p>
-              <p className="text-[10px] font-bold text-indigo-600 uppercase mt-0.5">{chatInfo.role}</p>
+            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-3 ml-1">Active Participant</p>
+            <div className="bg-slate-950 p-4.5 rounded-2xl border border-slate-850 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white flex items-center justify-center font-black text-sm uppercase">
+                {chatInfo.name?.charAt(0)}
+              </div>
+              <div>
+                <p className="text-xs font-black text-white">{chatInfo.name}</p>
+                <p className="text-[9px] font-bold text-indigo-400 uppercase mt-0.5">{chatInfo.role}</p>
+              </div>
             </div>
           </section>
 
+          {/* CHANNELS SELECTORS */}
           <section className="space-y-3">
-            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3">Communication Channels</p>
+            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-3 ml-1">Communication Channels</p>
             
             <button 
               onClick={() => navigate(`/hr/chat/candidate/${sessionId}`)}
-              className={`w-full flex flex-col p-4 rounded-2xl transition-all border ${
-                target=== 'candidate'
-                ? 'bg-indigo-50 border-indigo-200 shadow-sm' 
-                : 'bg-white border-slate-100 hover:border-slate-300 opacity-60'
+              className={`w-full text-left flex items-center gap-3 p-3.5 rounded-2xl transition-all border cursor-pointer ${
+                target === 'candidate'
+                ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-900/20' 
+                : 'bg-slate-950 border-slate-850 hover:bg-slate-900 text-slate-400 hover:text-slate-200'
               }`}
             >
-              <span className={`text-[10px] font-black uppercase ${target ==='candidate' ? 'text-indigo-600' : 'text-slate-400'}`}>{participants.candidate_name}</span>
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs uppercase ${target === 'candidate' ? 'bg-indigo-550 text-white' : 'bg-slate-900 text-slate-300'}`}>
+                C
+              </div>
+              <div>
+                <span className="text-xs font-black block truncate max-w-[170px]">{participants.candidate_name}</span>
+                <span className={`text-[8px] font-extrabold uppercase mt-0.5 block ${target === 'candidate' ? 'text-indigo-200' : 'text-slate-500'}`}>Candidate Channel</span>
+              </div>
             </button>
 
             <button 
               onClick={() => navigate(`/hr/chat/interviewer/${sessionId}`)}
-              className={`w-full flex flex-col p-4 rounded-2xl transition-all border ${
+              className={`w-full text-left flex items-center gap-3 p-3.5 rounded-2xl transition-all border cursor-pointer ${
                 target === 'interviewer' 
-                ? 'bg-slate-900 border-slate-800 shadow-lg text-white' 
-                : 'bg-white border-slate-100 hover:border-slate-300 opacity-60'
+                ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-900/20' 
+                : 'bg-slate-950 border-slate-850 hover:bg-slate-900 text-slate-400 hover:text-slate-200'
               }`}
             >
-              <span className={`text-[10px] font-black uppercase ${target ==='interviewer' ? 'text-white' : 'text-slate-400'}`}>{participants.interviewer_name}</span>
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs uppercase ${target === 'interviewer' ? 'bg-indigo-550 text-white' : 'bg-slate-900 text-slate-300'}`}>
+                I
+              </div>
+              <div>
+                <span className="text-xs font-black block truncate max-w-[170px]">{participants.interviewer_name}</span>
+                <span className={`text-[8px] font-extrabold uppercase mt-0.5 block ${target === 'interviewer' ? 'text-indigo-200' : 'text-slate-500'}`}>Interviewer Channel</span>
+              </div>
             </button>
           </section>
         </div>
       </aside>
 
-      <main className="flex-1 flex flex-col relative bg-[#f8fafc]">
-        <div className="h-16 bg-white border-b border-slate-200 flex items-center px-10 justify-between">
+      {/* CHAT MAIN CONTENT */}
+      <main className="flex-1 flex flex-col relative bg-slate-50/50">
+        
+        {/* UPPER BAR */}
+        <div className="h-16 bg-white border-b border-slate-200/60 flex items-center px-8 justify-between shrink-0 shadow-sm shadow-slate-100/50">
            <div className="flex items-center gap-3">
-              <div className={`w-2 h-2 rounded-full ${target ==='interviewer'? 'bg-amber-500' : 'bg-indigo-500'}`}></div>
-              <h3 className="text-[11px] font-black uppercase tracking-widest text-slate-700">
-                {target ==='interviewer' ? 'Internal Staff Only' : 'Direct Candidate Messaging'}
+              <span className={`w-2 h-2 rounded-full ${target === 'interviewer' ? 'bg-amber-500 animate-pulse' : 'bg-indigo-500 animate-pulse'}`}></span>
+              <h3 className="text-[10px] font-black uppercase tracking-wider text-slate-600">
+                {target === 'interviewer' ? 'Internal Evaluator Channel • Staff-Only' : 'Direct Dialogue Portal • External candidate'}
               </h3>
            </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-12 space-y-8">
+        {/* MESSAGES LIST */}
+        <div className="flex-1 overflow-y-auto p-8 space-y-6">
           {loading ? (
-            <div className="flex h-full items-center justify-center italic text-slate-400 text-xs font-black uppercase tracking-[0.3em]">Establishing Link...</div>
+            <div className="flex h-full flex-col items-center justify-center">
+              <div className="w-10 h-10 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin mb-3"></div>
+              <p className="text-[10px] font-black text-slate-450 uppercase tracking-widest animate-pulse">Establishing Secure Sync...</p>
+            </div>
           ) : (
             messages.map((msg, idx) => (
-              <div key={idx} className={`flex flex-col ${msg.is_me ? 'items-end' : 'items-start'}`}>
-                <div className={`max-w-md p-5 rounded-3xl text-sm font-medium shadow-sm ${
+              <div key={idx} className={`flex flex-col ${msg.is_me ? 'items-end' : 'items-start'} animate-in fade-in duration-200`}>
+                <div className={`max-w-md p-4 rounded-3xl text-sm font-medium shadow-sm leading-relaxed ${
                   msg.is_me 
-                  ? 'bg-slate-900 text-white rounded-br-none' 
-                  : 'bg-white border border-slate-200 text-slate-800 rounded-bl-none'
+                  ? 'bg-gradient-to-br from-indigo-600 to-indigo-750 text-white rounded-tr-none' 
+                  : 'bg-white border border-slate-200/80 text-slate-800 rounded-tl-none'
                 }`}>
                   {msg.text}
                 </div>
-                <div className="mt-2 flex items-center gap-2 px-2">
-                  <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{msg.is_me ? 'You (HR)' : msg.sender}</span>
-                  <span className="text-[8px] text-slate-300">•</span>
-                  <span className="text-[8px] font-medium text-slate-300">{msg.timestamp}</span>
+                <div className="mt-1.5 flex items-center gap-1.5 px-2">
+                  <span className="text-[8px] font-black text-slate-400 uppercase tracking-wider">{msg.is_me ? 'You (HR)' : msg.sender}</span>
+                  <span className="text-[8px] text-slate-350">•</span>
+                  <span className="text-[8px] font-bold text-slate-355">{msg.timestamp}</span>
                 </div>
               </div>
             ))
@@ -208,25 +238,37 @@ const ChatPageHR = () => {
           <div ref={scrollRef} />
         </div>
 
-        <footer className="p-10 bg-white border-t border-slate-200">
-          <div className="max-w-5xl mx-auto flex items-center gap-4">
-            <div className="flex-1 relative">
+        {/* INPUT BOX FOOTER */}
+        <footer className="p-6 bg-white border-t border-slate-200/60 shrink-0">
+          <div className="max-w-4xl mx-auto flex items-center gap-3">
+            <div className="flex-1 flex items-center bg-slate-50 border border-slate-200 rounded-2xl py-1 px-3 focus-within:bg-white focus-within:ring-4 focus-within:ring-indigo-50 focus-within:border-indigo-400 transition-all">
+              <button className="p-2 text-slate-400 hover:text-slate-600 transition-colors">
+                <FiPaperclip className="w-4.5 h-4.5" />
+              </button>
+              
               <input 
                 type="text" 
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                placeholder={target === 'interviewer' ? "Type internal observation..." : "Send candidate instructions..."}
-                className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-6 text-sm font-medium focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:bg-white transition-all"
+                placeholder={target === 'interviewer' ? "Type internal observations..." : "Send candidate instructions..."}
+                className="flex-1 bg-transparent border-none py-3.5 px-3 text-sm font-medium focus:outline-none text-slate-800"
               />
+
+              <button className="p-2 text-slate-400 hover:text-slate-600 transition-colors">
+                <FiSmile className="w-4.5 h-4.5" />
+              </button>
             </div>
+
             <button 
               onClick={handleSend}
-              className={`px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl transition-all active:scale-95 ${
-                target === 'interviewer' ? 'bg-amber-600 hover:bg-amber-700 text-white' : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+              className={`p-4 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 text-white cursor-pointer ${
+                target === 'interviewer' 
+                ? 'bg-amber-600 hover:bg-amber-700 shadow-amber-600/15' 
+                : 'bg-indigo-650 hover:bg-indigo-750 shadow-indigo-600/15'
               }`}
             >
-              Send
+              <FiSend className="w-4 h-4" />
             </button>
           </div>
         </footer>

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import api from '../api/instance';
+import { FiArrowLeft, FiBriefcase, FiMapPin, FiCalendar, FiDollarSign, FiAward, FiFileText, FiUpload, FiSettings } from 'react-icons/fi';
 
 const CreateJobPage = () => {
   const navigate = useNavigate();
@@ -55,44 +56,46 @@ const CreateJobPage = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20 font-sans">
+    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20 font-sans px-4">
 
       {/* HEADER */}
-      <header className="flex items-center justify-between text-left">
+      <header className="flex items-center justify-between text-left mt-6">
         <div>
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] hover:text-indigo-600 transition-colors mb-2 flex items-center gap-2"
+            className="text-[10px] font-black text-slate-400 hover:text-indigo-650 uppercase tracking-[0.2em] transition-colors mb-2.5 flex items-center gap-2 cursor-pointer"
           >
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path d="M15 19l-7-7 7-7" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+            <FiArrowLeft className="w-3.5 h-3.5" />
             Back to List
           </button>
 
-          <h1 className="text-3xl font-black text-slate-800 tracking-tight">
+          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
             Post a New Position
           </h1>
+          <p className="text-xs text-slate-400 mt-1">Add new vacancies and specify skill requirements for candidates.</p>
         </div>
       </header>
 
       {/* FORM */}
       <form
         onSubmit={handleSubmit}
-        className="bg-white/70 backdrop-blur-xl border border-white rounded-[3rem] p-10 shadow-2xl shadow-slate-200/50 space-y-10 text-left"
+        className="bg-white/80 backdrop-blur-xl border border-slate-200/60 rounded-3xl p-8 md:p-10 shadow-xl space-y-10 text-left"
       >
 
         {/* BASIC INFO */}
         <section className="space-y-6">
-          <h3 className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.3em]">
-            Basic Information
-          </h3>
+          <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+            <FiBriefcase className="text-indigo-500 w-4.5 h-4.5" />
+            <h3 className="text-[11px] font-black text-slate-700 uppercase tracking-widest">
+              Basic Information
+            </h3>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
             <div className="md:col-span-2">
-              <label className="block text-xs font-black text-slate-700 uppercase tracking-widest mb-2">
+              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2 ml-1">
                 Job Title
               </label>
               <input
@@ -102,40 +105,46 @@ const CreateJobPage = () => {
                 required
                 type="text"
                 placeholder="e.g. Senior Python Developer"
-                className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
+                className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200/70 rounded-2xl text-sm font-medium focus:bg-white focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-black text-slate-700 uppercase tracking-widest mb-2">
+              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2 ml-1">
                 Job Type
               </label>
-              <select
-                name="job_type"
-                value={formData.job_type}
-                onChange={handleChange}
-                className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold text-slate-600 focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
-              >
-                <option value="FULL_TIME">Full Time</option>
-                <option value="PART_TIME">Part Time</option>
-                <option value="INTERN_SHIP">Internship</option>
-                <option value="REMOTE">Remote</option>
-              </select>
+              <div className="relative">
+                <select
+                  name="job_type"
+                  value={formData.job_type}
+                  onChange={handleChange}
+                  className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200/70 rounded-2xl text-sm font-bold text-slate-600 focus:bg-white focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none appearance-none cursor-pointer"
+                >
+                  <option value="FULL_TIME">Full Time</option>
+                  <option value="PART_TIME">Part Time</option>
+                  <option value="INTERN_SHIP">Internship</option>
+                  <option value="REMOTE">Remote</option>
+                </select>
+                <div className="absolute right-4 top-4.5 pointer-events-none border-l-4 border-r-4 border-t-4 border-transparent border-t-slate-500 w-0 h-0"></div>
+              </div>
             </div>
 
             <div>
-              <label className="block text-xs font-black text-slate-700 uppercase tracking-widest mb-2">
+              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2 ml-1">
                 Location
               </label>
-              <input
-                name="location"
-                value={formData.location}
-                onChange={handleChange}
-                required
-                type="text"
-                placeholder="e.g. Bengaluru, India"
-                className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
-              />
+              <div className="relative">
+                <FiMapPin className="absolute left-4.5 top-4 text-slate-450 w-4 h-4" />
+                <input
+                  name="location"
+                  value={formData.location}
+                  onChange={handleChange}
+                  required
+                  type="text"
+                  placeholder="e.g. Bengaluru, India"
+                  className="w-full pl-11 pr-5 py-3.5 bg-slate-50 border border-slate-200/70 rounded-2xl text-sm font-medium focus:bg-white focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none"
+                />
+              </div>
             </div>
 
           </div>
@@ -143,14 +152,17 @@ const CreateJobPage = () => {
 
         {/* REQUIREMENTS */}
         <section className="space-y-6">
-          <h3 className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.3em]">
-            Requirements & Compensation
-          </h3>
+          <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+            <FiAward className="text-indigo-500 w-4.5 h-4.5" />
+            <h3 className="text-[11px] font-black text-slate-700 uppercase tracking-widest">
+              Requirements & Compensation
+            </h3>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
             <div>
-              <label className="block text-xs font-black text-slate-700 uppercase tracking-widest mb-2">
+              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2 ml-1">
                 Years of Experience
               </label>
               <input
@@ -159,42 +171,47 @@ const CreateJobPage = () => {
                 onChange={handleChange}
                 type="number"
                 min="0"
-                className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
+                className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200/70 rounded-2xl text-sm font-medium focus:bg-white focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-black text-slate-700 uppercase tracking-widest mb-2">
+              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2 ml-1">
                 Salary Range
               </label>
-              <input
-                name="salary"
-                value={formData.salary}
-                onChange={handleChange}
-                type="text"
-                placeholder="e.g. ₹12L - ₹18L"
-                className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
-              />
+              <div className="relative">
+                <FiDollarSign className="absolute left-4.5 top-4 text-slate-450 w-4 h-4" />
+                <input
+                  name="salary"
+                  value={formData.salary}
+                  onChange={handleChange}
+                  type="text"
+                  placeholder="e.g. ₹12L - ₹18L"
+                  className="w-full pl-11 pr-5 py-3.5 bg-slate-50 border border-slate-200/70 rounded-2xl text-sm font-medium focus:bg-white focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none"
+                />
+              </div>
             </div>
 
-            {/* ✅ UPDATED TO NUMBER INPUT */}
             <div>
-              <label className="block text-xs font-black text-slate-700 uppercase tracking-widest mb-2">
+              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2 ml-1">
                 Job Expiry (Days)
               </label>
-              <input
-                name="expiry_days"
-                value={formData.expiry_days}
-                onChange={handleChange}
-                type="number"
-                min="1"
-                placeholder="e.g. 7"
-                className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
-              />
+              <div className="relative">
+                <FiCalendar className="absolute left-4.5 top-4 text-slate-450 w-4 h-4" />
+                <input
+                  name="expiry_days"
+                  value={formData.expiry_days}
+                  onChange={handleChange}
+                  type="number"
+                  min="1"
+                  placeholder="e.g. 7"
+                  className="w-full pl-11 pr-5 py-3.5 bg-slate-50 border border-slate-200/70 rounded-2xl text-sm font-medium focus:bg-white focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none"
+                />
+              </div>
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-xs font-black text-slate-700 uppercase tracking-widest mb-2">
+              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2 ml-1">
                 Required Qualification
               </label>
               <input
@@ -203,13 +220,13 @@ const CreateJobPage = () => {
                 onChange={handleChange}
                 type="text"
                 placeholder="e.g. B.Tech, MCA, or relevant Certification"
-                className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
+                className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200/70 rounded-2xl text-sm font-medium focus:bg-white focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none"
               />
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-xs font-black text-slate-700 uppercase tracking-widest mb-2">
-                Required Skills
+              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2 ml-1">
+                Required Skills (Comma Separated)
               </label>
               <textarea
                 name="skills"
@@ -217,7 +234,7 @@ const CreateJobPage = () => {
                 onChange={handleChange}
                 required
                 placeholder="List skills separated by commas (e.g. Python, Django, AWS)"
-                className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 min-h-[100px] outline-none"
+                className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200/70 rounded-2xl text-sm font-medium focus:bg-white focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 min-h-[100px] outline-none resize-y transition-all"
               />
             </div>
 
@@ -226,9 +243,12 @@ const CreateJobPage = () => {
 
         {/* DESCRIPTION */}
         <section className="space-y-4">
-          <h3 className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.3em]">
-            Role Description
-          </h3>
+          <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+            <FiFileText className="text-indigo-500 w-4.5 h-4.5" />
+            <h3 className="text-[11px] font-black text-slate-700 uppercase tracking-widest">
+              Role Description
+            </h3>
+          </div>
 
           <textarea
             name="description"
@@ -236,16 +256,15 @@ const CreateJobPage = () => {
             onChange={handleChange}
             required
             placeholder="Describe the responsibilities and day-to-day tasks..."
-            className="w-full px-6 py-4 bg-slate-50 border-none rounded-[2rem] text-sm font-medium focus:ring-2 focus:ring-indigo-500 min-h-[200px] outline-none"
+            className="w-full px-5 py-4 bg-slate-50 border border-slate-200/70 rounded-2xl text-sm font-medium focus:bg-white focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 min-h-[180px] outline-none resize-y transition-all"
           />
         </section>
 
         {/* BUTTONS */}
-        <div className="pt-10 border-t border-slate-100 flex flex-col md:flex-row gap-4">
-
+        <div className="pt-8 border-t border-slate-100 flex flex-col sm:flex-row gap-4">
           <button
             type="submit"
-            className="flex-1 bg-indigo-600 text-white py-5 rounded-2xl text-xs font-black uppercase tracking-[0.2em] shadow-xl shadow-indigo-100 hover:bg-indigo-700 hover:-translate-y-1 transition-all"
+            className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-4 px-6 rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg shadow-indigo-600/15 transition-all active:scale-95 cursor-pointer"
           >
             Publish Job Posting
           </button>
@@ -253,15 +272,14 @@ const CreateJobPage = () => {
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="px-10 py-5 bg-slate-100 text-slate-500 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-slate-200 transition-all"
+            className="px-8 py-4 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-2xl text-xs font-black uppercase tracking-wider transition-colors cursor-pointer"
           >
             Cancel
           </button>
-
         </div>
       </form>
     </div>
   );
 };
 
-export default CreateJobPage;
+export default CreateJobPage;
