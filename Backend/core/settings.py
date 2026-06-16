@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'storages',
     'interviews',
     'notifications',
+    'anymail',
     'chat',
     'channels'
 ]
@@ -201,16 +202,12 @@ STATIC_URL = os.getenv('STATIC_URL')
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 AUTH_USER_MODEL ='accounts.CustomUser'
 
-
-
-
-EMAIL_BACKEND = os.getenv('SMTP_EMAIL_BACKEND')
-EMAIL_HOST = os.getenv('SMTP_EMAIL_HOST')
-EMAIL_PORT = os.getenv('SMTP_EMAIL_PORT')
-EMAIL_USE_TLS = os.getenv('SMTP_EMAIL_USE_TLS')
-EMAIL_HOST_USER = os.getenv('SMTP_EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.getenv('SMTP_EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = os.getenv('SMTP_DEFAULT_FROM_EMAIL')
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
+ANYMAIL = {
+    "BREVO_API_KEY": os.getenv("BREVO_API_KEY"),
+}
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "Spendrix <abhiram41@gmail.com>")
 
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://redis:6379/0")
 CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://redis:6379/0")
@@ -235,11 +232,14 @@ AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
 AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
 AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME", "ap-south-1")
 
+
 AWS_S3_SIGNATURE_VERSION = "s3v4"
 AWS_S3_FILE_OVERWRITE = False
 AWS_DEFAULT_ACL = None
 AWS_QUERYSTRING_AUTH = True
 AWS_QUERYSTRING_EXPIRE = 3600
+
+AWS_SNS_TOPIC_ARN = os.getenv('AWS_SNS_TOPIC_ARN')
 
 AWS_S3_OBJECT_PARAMETERS = {
     "CacheControl": "max-age=86400",

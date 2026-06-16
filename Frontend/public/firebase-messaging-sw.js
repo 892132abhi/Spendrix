@@ -21,10 +21,10 @@ const messaging = firebase.messaging();
 messaging.onBackgroundMessage((payload) => {
   console.log('[firebase-messaging-sw.js] Background message received: ', payload);
   
-  const notificationTitle = payload.notification.title;
+  const notificationTitle = payload.notification.title || "Spendrix";
   const notificationOptions = {
-    body: payload.notification.body,
-    icon: '/favicon.svg' // Uses the icon you have defined in your index.html
+    body: payload.notification.body || "You have a new notification",
+    icon: '/favicon.ico' // Uses the icon you have defined in your index.html
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);

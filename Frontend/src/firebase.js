@@ -1,5 +1,7 @@
-import { initializeApp } from "firebase/app";
+
+imp
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
+import api from "./api/instance";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAxOEgpDadidoPy5kCbi39fe3sUDiG4aSk",
@@ -11,38 +13,51 @@ const firebaseConfig = {
   measurementId: "G-TTE68FD3YX"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
 
-// Request user permission and retrieve the FCM Token
 export const requestForToken = async () => {
   try {
     const permission = await Notification.requestPermission();
-    if (permission === 'granted') {
-      const token = await getToken(messaging, { 
-        // Replace this string with the actual VAPID key from Firebase console
-        vapidKey: 'BPPnGd_mPw8dQTT3VxDu15pGJgnVXamfBmGPHJZ8X6ipwpn4WJ3_k_aYGf1d6paBRtDli7Llk6sVBPOy3CpTJKE' 
-      });
-      if (token) {
-        console.log('FCM Token generated successfully:', token);
-        // Next step: Send this token to your backend API to save it
-        return token;
-      } else {
-        console.log('No registration token available.');
-      }
-    } else {
-      console.log('Notification permission denied.');
+
+    if (permission !== "granted") {
+      console.log("Notification permission denied");
+      return null;
     }
+
+    const token = await getToken(messaging, {
+      vapidKey:
+        "BPPnGd_mPw8dQTT3VxDu15pGJgnVXamfBmGPHJZ8X6ipwpn4WJ3_k_aYGf1d6paBRtDli7Llk6sVBPOy3CpTJKE",
+    });
+
+    if (!token) {
+      console.log("No FCM token generated");
+      return null;
+    }
+
+    console.log("FCM Token:", token);
+
+    // Save token in Django
+    await api.post("notifications/save-fcm-token/", {
+      token: token,
+    });
+
+    console.log("FCM Token saved successfully");
+
+    return token;
   } catch (error) {
-    console.error('Error fetching FCM token:', error);
+    console.error("FCM Error:", error);
+    return null;
   }
 };
 
-// Foreground listener: Captures incoming pushes while the user is actively viewing your app
 export const onMessageListener = () =>
   new Promise((resolve) => {
     onMessage(messaging, (payload) => {
+      console.log("Foreground Notification:", payload);
+
       resolve(payload);
     });
   });
+
+export default messaging;

@@ -34,17 +34,20 @@ def process_expired_jobs():
         )
 
         print(result)
+        if "error" not in result:
+            job.ai_processed = True
+            job.job_status = "CLOSED"
 
-        job.ai_processed = True
-        job.job_status = "CLOSED"
-
-        job.save(
+            
+            job.save(
             update_fields=[
                 "ai_processed",
                 "job_status"
             ]
         )
-
+        else:
+            print(f"skipping job update for {job.title} due to scheduler failure : {result.get('error')}")
+           
     print(
         "===== Completed =====\n"
     )

@@ -11,6 +11,7 @@ from applications.models import Application
 from interviews.models import Interview
 from django.core.mail import send_mail
 from django.conf import settings
+from notifications.aws_notifications import send_push_notification
 User = get_user_model()
 
 AI_SERVICE_URL = "http://ai_service:8001/interview/auto-schedule"
@@ -41,7 +42,7 @@ def run_ai_interview_scheduler(job_id, hr_user):
 
     interviewers_queryset = User.objects.filter(
         role="INTERVIEWER",
-        profile__company=hr_user.profile.company
+        profile__company=job.company
     )
 
     if not interviewers_queryset.exists():
@@ -276,9 +277,16 @@ def run_ai_interview_scheduler(job_id, hr_user):
                 app.save(
                     update_fields=["status","interview_status"]
                 )
-
+                send_push_notification(
+                    user = app.candidate,
+                    title = "Interview Scheduled",
+                    message=(
+                        f"Your Interview is Scheduled on "
+                        f"{staggered_time.strftime('%d-%m-%Y %I:%M %p')}"
+                    )
+                )
                 interviews_booked += 1
-
+                
         except Exception as exc:
 
             print(

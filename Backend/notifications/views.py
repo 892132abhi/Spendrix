@@ -3,8 +3,18 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status  
-from .models import Notification
+from .models import Notification,FCMToken
 from .serializers import NotificationSerializer
+
+class SaveFCMTokenView(APIView):
+    permission_classes=[IsAuthenticated]
+
+    def post(self,request):
+        token = request.data.get("token")
+        if not token:
+            return Response({"message":"token is required"},status=400)
+        FCMToken.objects.update_or_create(token=token,defaults={"user":request.user})
+        return Response({"message":"Token Saved"})
 
 class NotificationView(APIView):
     permission_classes = [IsAuthenticated]

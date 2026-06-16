@@ -30,7 +30,7 @@ class InterviewSerializer(serializers.ModelSerializer):
             'interviewer_email',
             'interviewer_name',
             'candidate_name',
-            'scheduled_date',  # Fixed spelling from 'sheduled_date'
+            'sheduled_date',  # Fixed spelling from 'sheduled_date'
             'note',
             'meeting_link',
             'status',
@@ -45,7 +45,7 @@ class InterviewSerializer(serializers.ModelSerializer):
             return invitation.email
         return "Pending invitation"
 
-    def validate_scheduled_date(self, value):  # Fixed spelling validation hook
+    def validate_sheduled_date(self, value):  # Fixed spelling validation hook
         if value < timezone.now():
             raise serializers.ValidationError("This date is not available")
         return value
@@ -125,7 +125,7 @@ class AssignedInterviewCandidateSerializer(serializers.ModelSerializer):
             'role',
             'skills',
             'status',
-            'scheduled_date',  # Fixed spelling from 'sheduled_date'
+            'sheduled_date',  # Fixed spelling from 'sheduled_date'
             'phone',
             'experience_years',
             'meeting_link',
@@ -146,7 +146,7 @@ class CandidateInterviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Interview
-        fields = ['id', 'hr_id', 'job_title', 'interviewer_name', 'scheduled_date', 'meeting_link', 'status']
+        fields = ['id', 'hr_id', 'job_title', 'interviewer_name', 'sheduled_date', 'meeting_link', 'status']
 
     def get_interviewer_name(self, obj):
         if obj.interviewer and hasattr(obj.interviewer, "profile"):

@@ -22,3 +22,14 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"Notification for {self.recipient.get_username()}: {self.title}"
+
+
+class FCMToken(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE,related_name='fcm_tokens')
+
+    token = models.TextField(unique=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.user.username

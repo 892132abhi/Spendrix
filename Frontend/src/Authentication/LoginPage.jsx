@@ -4,6 +4,7 @@ import api from '../api/instance';
 import { toast } from 'react-hot-toast';
 import { useGoogleLogin } from '@react-oauth/google';
 import { FiUser, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
+import { requestForToken } from '../firebase';
 
 const LoginPage = () => {
   const [credentials, setCredentials] = useState({ username: '', password: '' });
@@ -51,7 +52,7 @@ const LoginPage = () => {
 
       // Save user object (ID, Username, Email, and crucial ROLE) to localStorage
       localStorage.setItem('user', JSON.stringify(response.data.user));
-
+      await requestForToken();
       toast.success(`Welcome back, ${response.data.user.username}!`);
       redirectByRole(response.data.user);
     } catch (err) {
@@ -72,6 +73,7 @@ const LoginPage = () => {
         });
 
         localStorage.setItem('user', JSON.stringify(response.data.user));
+        await requestForToken();
         toast.success('Signed in with Google');
         redirectByRole(response.data.user);
       } catch (err) {
