@@ -5,13 +5,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
-if not GEMINI_API_KEY:
-    raise ValueError("GEMINI_API_KEY is missing")
-
-genai.configure(api_key=GEMINI_API_KEY)
-
+# Use system_instruction to force Gemini to follow strict behavior rules
 model = genai.GenerativeModel(
     "gemini-2.5-flash",
     generation_config={
@@ -19,33 +15,52 @@ model = genai.GenerativeModel(
         "top_p": 1,
         "top_k": 1,
     },
+    system_instruction=(
+        "You are an advanced recruitment AI assistant.\n"
+        "Use BOTH the provided Conversation History and Document Context to formulate responses.\n"
+        "Rules:\n"
+        "- Highly prefer matching data found inside the Document Context block.\n"
+        "- Refer to Conversation History when the user asks follow-up questions about previous terms.\n"
+        "- Do not invent outside facts or extrapolate fields beyond your data context parameters.\n"
+        "- If information cannot be extracted from the material, say exactly:\n"
+        "\"I could not find that information in the uploaded document.\""
+    )
 )
 
-
-def generate_answer(query, context, force_json=False):
+def generate_answer(query: str, context: str, chat_history: str = "", force_json: bool = False):
+    """Queries Gemini combining vector space documents alongside MongoDB memory parameters."""
     output_rule = ""
-
     if force_json:
-        output_rule = "Return ONLY valid JSON. Do not include markdown or explanation."
+        output_rule = "Return ONLY valid raw JSON. Do not include markdown structural accents like triple backticks."
 
     prompt = f"""
-You are an advanced recruitment AI assistant.
+{output_rule}
 
-Context extracted from the uploaded document:
+--------------------------------------------------
+Conversation History:
+{chat_history}
+
+--------------------------------------------------
+Document Context:
 {context}
 
-User question or task:
+--------------------------------------------------
+Current User Question:
 {query}
 
-{output_rule}
+--------------------------------------------------
+Answer:
 """
 
-    response = model.generate_content(prompt)
+    try:
+        response = model.generate_content(prompt)
+        result = response.text.strip()
 
-    result = response.text.strip()
+        if force_json:
+            result = result.replace("```json", "").replace("```", "").strip()
+            json.loads(result)  # Validate json integrity
 
-    if force_json:
-        result = result.replace("```json", "").replace("```", "").strip()
-        json.loads(result)
-
-    return result
+        return result
+    except Exception as e:
+        print(f"Gemini generation failure tracking error log: {str(e)}")
+        raise Exception(f"Gemini generation failed: {str(e)}")

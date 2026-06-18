@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost/api/',
+  baseURL: `${window.location.origin}/api/`,
   // CRITICAL: This allows the browser to send/receive cookies (access & refresh tokens)
   withCredentials: true, 
   headers: {

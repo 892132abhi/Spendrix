@@ -30,6 +30,7 @@ urlpatterns = [
     path('api/interviews/',include('interviews.urls')),
     path('api/notifications/',include('notifications.urls')),
     path('api/chat/',include('chat.urls')),
+    path('api/ai/',include('ai_gateway.urls')),
 ]
 
 if settings.DEBUG and settings.MEDIA_URL:

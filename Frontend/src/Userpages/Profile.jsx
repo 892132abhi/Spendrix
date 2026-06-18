@@ -12,7 +12,7 @@ const ProfilePage = () => {
   // Dynamic origin calculation to protect against CORS errors and hardcoded string typos
   const getMediaUrl = (path) => {
     if (!path) return null;
-    return path.startsWith('http') ? path : `http://localhost${path}`;
+    return path.startsWith('http') ? path : `${window.location.origin}${path}`;
   };
 
   useEffect(() => {
@@ -191,7 +191,7 @@ const ProfilePage = () => {
                     className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-50 transition-all shadow-sm active:scale-98 cursor-pointer"
                   >
                     <FiDownload size={14} />
-                    <span>Download CV</span>
+                    <span>View CV</span>
                   </button>
                 </div>
               ) : (

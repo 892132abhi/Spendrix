@@ -14,11 +14,18 @@ def send_push_notification(user, title, message):
     tokens = user.fcm_tokens.all()
 
     for token_obj in tokens:
+        payload_data = {
+            "token": token_obj.token,
+            "title": title,
+            "message": message
+        }
+        
+        
         sns.publish(
             TopicArn=settings.AWS_SNS_TOPIC_ARN,
             Message=json.dumps({
-                "token": token_obj.token,
-                "title": title,
-                "message": message
-            })
+                "default": json.dumps(payload_data) 
+            }),
+            MessageStructure="json" 
         )
+        

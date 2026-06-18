@@ -5,13 +5,14 @@ import { toast } from 'react-hot-toast';
 import { 
   FiSearch, FiSliders, FiCalendar, FiClock, FiCheckCircle, 
   FiXCircle, FiMessageSquare, FiDownload, FiUser, FiPhone, 
-  FiMapPin, FiBriefcase, FiCheck, FiChevronRight, FiAlertCircle
+  FiMapPin, FiBriefcase, FiCheck, FiChevronRight, FiAlertCircle,
+  FiEdit3
 } from 'react-icons/fi';
 
 const getMediaUrl = (url) => {
   if (!url) return "";
   if (url.startsWith("http")) return url;
-  return `http://127.0.0.1:8000${url}`;
+  return `${window.location.origin}${url}`;
 };
 
 const getCandidateAssessment = (candidate) => ({
@@ -39,6 +40,12 @@ const InterviewerCandidates = () => {
     decision_note: ""
   });
 
+  // --- RESCHEDULE INTERVIEW MODAL STATES ---
+  const [isRescheduling, setIsRescheduling] = useState(false);
+  const [editDate, setEditDate] = useState("");
+  const [editTime, setEditTime] = useState("");
+  const [rescheduleLoading, setRescheduleLoading] = useState(false);
+
   // --- PAGINATION STATES ---
   const [page, setPage] = useState(1);
   const [paginationData, setPaginationData] = useState({
@@ -49,61 +56,63 @@ const InterviewerCandidates = () => {
 
   const user = JSON.parse(localStorage.getItem('user'));
 
-  // Reset page parameter to 1 whenever parent global filters mutate
   const handleFilterChange = (setter, value) => {
     setPage(1);
     setter(value);
   };
 
-  useEffect(() => {
-    const fetchDossiers = async () => {
-      try {
-        setLoading(true);
-        const res = await api.get('interviews/assignedcandidatelist/', {
-          params: {
-            search: searchTerm,
-            status: activeTab,
-            role: selectedRole,
-            round: selectedRound,
-            sort: sortBy,
-            page: page,
-          }
-        });
-        
-        const dataPayload = res.data;
-        const resultsArray = dataPayload.results !== undefined ? dataPayload.results : dataPayload;
-        const data = Array.isArray(resultsArray) ? resultsArray : [];
-        
-        const mappedData = data.map(item => ({
-          ...item,
-          recruiter_name: item.recruiter_name || item.created_by_name || "HR System Coordinator"
-        }));
-        
-        setCandidates(mappedData);
-
-        setPaginationData({
-          next: dataPayload.next || null,
-          previous: dataPayload.previous || null,
-          totalCount: dataPayload.count || mappedData.length
-        });
-
-        if (mappedData.length > 0) {
-          setSelectedCandidate(mappedData[0]);
-          setAssessment(getCandidateAssessment(mappedData[0]));
-        } else {
-          setSelectedCandidate(null);
-          setAssessment(getCandidateAssessment(null));
+  const fetchDossiers = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get('interviews/assignedcandidatelist/', {
+        params: {
+          search: searchTerm,
+          status: activeTab,
+          role: selectedRole,
+          round: selectedRound,
+          sort: sortBy,
+          page: page,
         }
-      } catch (err) {
-        console.error("Dossier Fetch Error:", err);
-        toast.error("Failed to sync candidate directory");
-        setCandidates([]);
+      });
+      
+      const dataPayload = res.data;
+      const resultsArray = dataPayload.results !== undefined ? dataPayload.results : dataPayload;
+      const data = Array.isArray(resultsArray) ? resultsArray : [];
+      
+      const mappedData = data.map(item => ({
+        ...item,
+        recruiter_name: item.recruiter_name || item.created_by_name || "HR System Coordinator"
+      }));
+      
+      setCandidates(mappedData);
+
+      setPaginationData({
+        next: dataPayload.next || null,
+        previous: dataPayload.previous || null,
+        totalCount: dataPayload.count || mappedData.length
+      });
+
+      if (mappedData.length > 0) {
+        const stillExists = mappedData.find(c => c.id === selectedCandidate?.id);
+        const nextSelection = stillExists || mappedData[0];
+        setSelectedCandidate(nextSelection);
+        setAssessment(getCandidateAssessment(nextSelection));
+      } else {
         setSelectedCandidate(null);
         setAssessment(getCandidateAssessment(null));
-      } finally {
-        setLoading(false);
       }
-    };
+    } catch (err) {
+      console.error("Dossier Fetch Error:", err);
+      toast.error("Failed to sync candidate directory");
+      setCandidates([]);
+      setSelectedCandidate(null);
+      setAssessment(getCandidateAssessment(null));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchDossiers();
   }, [searchTerm, activeTab, selectedRole, selectedRound, sortBy, page]);
 
@@ -133,6 +142,53 @@ const InterviewerCandidates = () => {
   const handleSelectCandidate = (candidate) => {
     setSelectedCandidate(candidate);
     setAssessment(getCandidateAssessment(candidate));
+    setIsRescheduling(false); 
+  };
+
+  const initRescheduleFields = () => {
+    if (!selectedCandidate?.sheduled_date) return;
+    try {
+      const dt = new Date(selectedCandidate.sheduled_date);
+      const tzOffset = dt.getTimezoneOffset() * 60000;
+      const localISO = new Date(dt.getTime() - tzOffset).toISOString();
+      
+      setEditDate(localISO.split('T')[0]);
+      setEditTime(localISO.split('T')[1].slice(0, 5));
+      setIsRescheduling(true);
+    } catch (e) {
+      setEditDate("");
+      setEditTime("");
+    }
+  };
+
+  const handleRescheduleSubmit = async (e) => {
+    e.preventDefault();
+    if (!editDate || !editTime) return;
+
+    setRescheduleLoading(true);
+    try {
+      const combinedISOString = `${editDate}T${editTime}:00`;
+      
+      const response = await api.patch(`interviews/candidate/${selectedCandidate.id}/reschedule/`, {
+        sheduled_date: combinedISOString
+      });
+
+      if (response.status === 200) {
+        toast.success("Interview Schedule Updated");
+        setIsRescheduling(false);
+        
+        setCandidates(prev => prev.map(c => 
+          c.id === selectedCandidate.id ? { ...c, sheduled_date: combinedISOString, status: 'SHEDULED' } : c
+        ));
+        setSelectedCandidate(prev => ({ ...prev, sheduled_date: combinedISOString, status: 'SHEDULED' }));
+      }
+    } catch (err) {
+      console.error("Reschedule Request Crash:", err);
+      const serverErr = err.response?.data?.error || "Failed to update interview date.";
+      toast.error(serverErr);
+    } finally {
+      setRescheduleLoading(false);
+    }
   };
 
   const handleSaveAssessment = async () => {
@@ -403,26 +459,86 @@ const InterviewerCandidates = () => {
                 </div>
               </div>
 
-              {/* Status Context metrics */}
-              <div className="mx-6 mt-4 p-4.5 bg-slate-50 border border-slate-200/50 rounded-2xl grid grid-cols-3 gap-4 items-center shrink-0">
-                <div>
-                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Session Context</span>
-                  <span className="text-xs font-black text-slate-700 mt-0.5 block">
-                    {selectedCandidate.sheduled_date ? new Date(selectedCandidate.sheduled_date).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }) : "N/A"}
-                  </span>
-                </div>
-                <div className="text-center border-x border-slate-200 px-2">
-                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Assigned HR</span>
-                  <span className="text-xs font-black text-slate-700 mt-0.5 block truncate">
-                    {selectedCandidate.recruiter_name}
-                  </span>
-                </div>
-                <div className="text-right">
-                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Scheduled Time</span>
-                  <span className="text-xs font-mono font-black text-indigo-600 block mt-0.5">
-                    {selectedCandidate.sheduled_date ? new Date(selectedCandidate.sheduled_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "N/A"}
-                  </span>
-                </div>
+              {/* ── INTERACTIVE BANNER: CONTROL SWITCH LAYER ── */}
+              <div className="mx-6 mt-4 p-4.5 bg-slate-50 border border-slate-200/50 rounded-2xl shadow-sm shrink-0">
+                {!isRescheduling ? (
+                  /* Read-Only Mode view structure */
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-[fadeIn_0.15s_ease]">
+                    <div className="grid grid-cols-3 gap-6 flex-1 items-center text-left">
+                      <div>
+                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Session Context</span>
+                        <span className="text-xs font-black text-slate-700 mt-0.5 block">
+                          {selectedCandidate.sheduled_date ? new Date(selectedCandidate.sheduled_date).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }) : "N/A"}
+                        </span>
+                      </div>
+                      <div className="text-center border-x border-slate-200 px-2">
+                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Assigned HR</span>
+                        <span className="text-xs font-black text-slate-700 mt-0.5 block truncate">
+                          {selectedCandidate.recruiter_name}
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Scheduled Time</span>
+                        <span className="text-xs font-mono font-black text-indigo-600 block mt-0.5">
+                          {selectedCandidate.sheduled_date ? new Date(selectedCandidate.sheduled_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "N/A"}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {/* Clear, explicit modification click handler toggle */}
+                    {selectedCandidate.status === 'SHEDULED' && (
+                      <button
+                        onClick={initRescheduleFields}
+                        className="flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-[10px] font-black uppercase tracking-wider text-slate-700 shadow-sm transition-all hover:bg-slate-50 hover:text-indigo-600 active:scale-95 shrink-0"
+                      >
+                        <FiEdit3 className="w-3.5 h-3.5" />
+                        Reschedule
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  /* Active Editing Layout Interface Form Wrapper */
+                  <form onSubmit={handleRescheduleSubmit} className="flex flex-col md:flex-row md:items-end justify-between gap-4 animate-[fadeIn_0.15s_ease]">
+                    <div className="flex-1 grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">New Session Date</label>
+                        <input
+                          type="date"
+                          value={editDate}
+                          onChange={(e) => setEditDate(e.target.value)}
+                          className="w-full bg-white border border-slate-250 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-700 outline-none focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-100 transition-all shadow-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">New Start Time</label>
+                        <input
+                          type="time"
+                          value={editTime}
+                          onChange={(e) => setEditTime(e.target.value)}
+                          className="w-full bg-white border border-slate-250 rounded-xl px-3 py-1.5 text-xs font-mono font-bold text-slate-700 outline-none focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-100 transition-all shadow-sm"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <button
+                        type="button"
+                        disabled={rescheduleLoading}
+                        onClick={() => setIsRescheduling(false)}
+                        className="px-3 py-2 border border-slate-200 hover:bg-slate-100 text-slate-500 hover:text-slate-700 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all disabled:opacity-40"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={rescheduleLoading || !editDate || !editTime}
+                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-all shadow-md active:scale-95 disabled:bg-slate-200 disabled:text-slate-400"
+                      >
+                        {rescheduleLoading ? 'Saving...' : 'Confirm'}
+                      </button>
+                    </div>
+                  </form>
+                )}
               </div>
 
               {/* Tabs list */}
@@ -582,12 +698,6 @@ const InterviewerCandidates = () => {
                   >
                     Reject Candidate
                   </button>
-                  <button 
-                    onClick={() => handleDecision("SHORT_LISTED")} 
-                    className="px-4.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all shadow-sm active:scale-95"
-                  >
-                    Shortlist
-                  </button>
                 </div>
                 <button 
                   onClick={handleSaveAssessment} 
@@ -619,6 +729,10 @@ const InterviewerCandidates = () => {
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
           background: rgba(148, 163, 184, 0.3);
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: scale(0.98); }
+          to { opacity: 1; transform: scale(1); }
         }
       `}</style>
     </div>

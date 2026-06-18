@@ -27,7 +27,7 @@ const CandidateChat = () => {
           return;
         }
 
-        const profileRes = await api.get('accounts/profiledata/');
+        const profileRes = await api.get('accounts/profile/');
         const currentUserId = profileRes.data.user_id;
 
         const roomRes = await api.post('chat/room/', {
@@ -44,7 +44,7 @@ const CandidateChat = () => {
         setMessages(history);
 
         const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-        const wsUrl = `${wsProtocol}://localhost/ws/chat/${roomId}/`;
+        const wsUrl = `${wsProtocol}://${window.location.host}/ws/chat/${roomId}/`;
         socket.current = new WebSocket(wsUrl);
 
         socket.current.onmessage = (e) => {

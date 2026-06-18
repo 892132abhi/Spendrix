@@ -12,20 +12,58 @@ from rest_framework.pagination import PageNumberPagination
 import uuid
 from jobs.models import Job
 from .service import run_ai_interview_scheduler
+from notifications.aws_notifications import send_push_notification
 # Create your views here.
 User =get_user_model()
 class InterviewCreateView(APIView):
-    permission_classes=[IsAuthenticated]
-    def post(self,request):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
         serializer = InterviewSerializer(data=request.data)
+
         if serializer.is_valid():
+            # Persist the interview instance
             interview = serializer.save(hr_name=request.user)
             application = interview.application
-            application.status='INTERVIEW'
+
+            # Advance the candidate status step
+            application.status = "INTERVIEW"
             application.save()
-            return Response(serializer.data,status=status.HTTP_201_CREATED)
-        print(serializer.errors)
-        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+
+            # Format uniform timestamp for the notifications
+            formatted_date = interview.sheduled_date.strftime('%d-%m-%Y %I:%M %p') if interview.sheduled_date else "N/A"
+
+            # ── 1. SEND PUSH NOTIFICATION TO CANDIDATE ──
+            if application.candidate:
+                try:
+                    send_push_notification(
+                        user=application.candidate,
+                        title="Interview Scheduled",
+                        message=f"Your interview is scheduled on {formatted_date}"
+                    )
+                except Exception as err:
+                    print(f"Non-fatal candidate push failure: {err}")
+
+            # ── 2. SEND PUSH NOTIFICATION TO ASSIGNED INTERVIEWER ──
+            if interview.interviewer:
+                try:
+                    send_push_notification(
+                        user=interview.interviewer,
+                        title="New Interview Assigned",
+                        message=f"You have been assigned an interview with {application.candidate.username} on {formatted_date}"
+                    )
+                except Exception as err:
+                    print(f"Non-fatal interviewer push failure: {err}")
+
+            return Response(
+                serializer.data,
+                status=status.HTTP_201_CREATED
+            )
+
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
     
 class InterViewerLookUp(APIView):
     permission_classes=[IsAuthenticated]
@@ -194,3 +232,49 @@ class CandidateInterview(APIView):
         serializer = CandidateInterviewSerializer(interviews,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
 
+class RescheduleInterviewView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, id):
+        """
+        Allows the assigned interviewer to update the sheduled_date 
+        timestamp for an interview.
+        """
+        try:
+            # Secure lookup: Make sure only the assigned interviewer can reschedule it
+            interview = Interview.objects.get(id=id, interviewer=request.user)
+            
+            # Expects a combined ISO format string from React (e.g., "2026-06-25T14:30:00")
+            new_schedule_str = request.data.get('sheduled_date')
+            
+            if not new_schedule_str:
+                return Response(
+                    {"error": "A new sheduled_date timestamp is required."}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Update and persist the change
+            interview.sheduled_date = new_schedule_str
+            
+            # Explicit code normalization check: force state back to 'SHEDULED' if it was altered
+            if interview.status == 'CANCELLED':
+                interview.status = 'SHEDULED'
+                
+            interview.save()
+            
+            return Response({
+                "message": "Interview rescheduled successfully.",
+                "id": interview.id,
+                "sheduled_date": interview.sheduled_date
+            }, status=status.HTTP_200_OK)
+            
+        except Interview.DoesNotExist:
+            return Response(
+                {"error": "Interview not found or you are not authorized to modify it."}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {"error": str(e)}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )

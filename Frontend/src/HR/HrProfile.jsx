@@ -11,7 +11,7 @@ const HrProfilePage = () => {
 
   const getMediaUrl = (path) => {
     if (!path) return null;
-    return path.startsWith('http') ? path : `http://localhost${path}`;
+    return path.startsWith('http') ? path : `${window.location.origin}${path}`;
   };
 
   useEffect(() => {

@@ -19,6 +19,7 @@ const messaging = firebase.messaging();
 
 // Background push notification event listener
 messaging.onBackgroundMessage((payload) => {
+  console.log("FULL PAYLOAD:", payload);
   console.log('[firebase-messaging-sw.js] Background message received: ', payload);
   
   const notificationTitle = payload.notification.title || "Spendrix";

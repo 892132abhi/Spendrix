@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'interviews',
     'notifications',
     'anymail',
+    'ai_gateway',
     'chat',
     'channels'
 ]
@@ -268,3 +269,9 @@ else:
     
     MEDIA_URL = "/media/"
     MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+
+AI_SERVICE_URL = os.getenv(
+    "AI_SERVICE_URL",
+    "http://ai_service:8001"
+)

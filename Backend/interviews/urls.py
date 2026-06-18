@@ -12,4 +12,5 @@ urlpatterns=[
     path('candidateinterviews/',views.CandidateInterview.as_view(),name='candidate-interviews'),
     path('candidate/<int:id>/assessment/',views.CandidateNoteupdates.as_view(),name='candidate-assessment'),
     path('candidate/<int:id>/decision/',views.CandidateDecisionUpdate.as_view(),name='candidate-decision'),
+    path('candidate/<int:id>/reschedule/', views.RescheduleInterviewView.as_view(), name='candidate-reschedule'),
 ]   

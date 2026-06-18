@@ -10,12 +10,10 @@ class Company(models.Model):
     description = models.TextField(blank=True,null=True)
     is_verified = models.BooleanField(default=False)
     is_approved = models.BooleanField(default=False)
-    is_approved = models.BooleanField(default=False)
-    is_approved = models.BooleanField(default=False)
+
     otp = models.CharField(max_length=6,blank=True,null=True)
     otp_expiry = models.DateTimeField(blank=True, null=True)
-    otp_expiry = models.DateTimeField(blank=True, null=True)
-    otp_expiry = models.DateTimeField(blank=True, null=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):

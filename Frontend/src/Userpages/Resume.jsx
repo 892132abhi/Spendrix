@@ -26,7 +26,7 @@ const ResumeAnalyzer = () => {
 
     setLoading(true);
     try {
-      const response = await axios.post("http://localhost/ai/resume/analyze_resume", formData);
+      const response = await axios.post(`${window.location.origin}/ai/resume/analyze_resume`, formData);
       setAnalysis(response.data);
       toast.success("Resume analyzed successfully!");
     } catch (error) {

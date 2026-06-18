@@ -210,3 +210,5 @@ class InviteStaffView(APIView):
 
         except Exception as e:
             return Response({"detail": f"Failed to safely package invitation delivery payload: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+

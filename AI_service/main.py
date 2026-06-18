@@ -5,7 +5,10 @@ from app.api.resume_analyzer import router as resume_router
 from app.api.job_recommender import router as job_router
 from app.api.interview_schedule import router as interview_router
 from app.api.rag_chat import router as rag_router
-app = FastAPI()
+
+app = FastAPI(
+    root_path="/ai"
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -35,6 +38,7 @@ app.include_router(
     prefix="/workspace",
     tags=["AI RAG workspace"]
 )
+
 @app.get("/")
 def home():
     return {"message": "AI Service Running"}
