@@ -121,7 +121,7 @@ const Navbar = () => {
               <span className="text-white font-black text-xl italic">H</span>
             </div>
             <div>
-              <h1 className="text-lg font-black tracking-tight text-slate-800 leading-tight">HireHub</h1>
+              <h1 className="text-lg font-black tracking-tight text-slate-800 leading-tight">Spendrix Hiring platform</h1>
               <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-widest leading-none">{role} Portal</p>
             </div>
           </div>
