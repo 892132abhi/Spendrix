@@ -22,7 +22,7 @@ api.interceptors.response.use(
     // Detect 401 Unauthorized (Access Token expired)
     // Avoid retrying if it's already a login or refresh request
     const isAuthRequest = 
-      originalRequest.url.includes('accounts/login/') || 
+      originalRequest.url.includes('accounts/login/') ||
       originalRequest.url.includes('accounts/token/refresh/');
 
     if (error.response?.status === 401 && !originalRequest._retry && !isAuthRequest) {

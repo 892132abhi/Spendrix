@@ -8,7 +8,6 @@ services:
       - django_static:/app/staticfiles:ro
       - ./Backend/media:/app/media:ro
     depends_on:
-      - frontend
       - backend
       - ai_service
 
@@ -30,6 +29,7 @@ services:
       - "6333:6333"
     volumes:
       - qdrant_data:/qdrant/storage
+
   mongodb:
     image: mongo:8
     container_name: spendrix-mongodb
@@ -102,17 +102,6 @@ services:
       - celery
       - ai_service
 
-  frontend:
-    build: ./Frontend
-    image: spendrix-frontend:latest
-    volumes:
-      - ./Frontend:/app
-      - frontend_node_modules:/app/node_modules
-    environment:
-      VITE_API_URL: /api
-    depends_on:
-      - backend
-
   ai_service:
     build: ./AI_service
     image: spendrix-ai-service:latest
@@ -134,6 +123,5 @@ services:
 volumes:
   postgres_data:
   django_static:
-  frontend_node_modules:
   qdrant_data:
   mongodb_data:
