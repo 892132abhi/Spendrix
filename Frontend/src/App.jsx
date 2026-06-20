@@ -43,7 +43,7 @@ import CompanyDetail from "./HR/CompanyDetail";
 import InterviewerProfile from './Interviewer/InterviewerProfile'
 import InterviewerEditprofile from './Interviewer/EditIntervieweProfile'
 import ResumeAnalyzer from './Userpages/Resume'
-import WorkspacePage from './Userpages/AIWorkspace'
+import WorkspacePage from "./Userpages/AiWorkSpace";
 function App() {
 
   return (
