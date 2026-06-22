@@ -31,7 +31,7 @@ const InterviewerNotificationPage = () => {
     const initialSync = setTimeout(fetchData, 0);
 
     const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    const wsUrl = `${wsProtocol}://${window.location.host}/ws/notifications/`;
+    const wsUrl = `${import.meta.env.VITE_WS_URL}/ws/notifications/`;
     const socket = new WebSocket(wsUrl);
 
     socket.onmessage = (event) => {

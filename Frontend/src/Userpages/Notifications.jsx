@@ -24,7 +24,7 @@ const CandidateNotifications = () => {
 
     // --- FIXED: Use dynamic window parameters instead of hardcoded port bounds ---
     const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    const wsUrl = `${wsProtocol}://${window.location.host}/ws/notifications/`;
+    const wsUrl = `${import.meta.env.VITE_WS_URL}/ws/notifications/`;
     const socket = new WebSocket(wsUrl);
 
     socket.onmessage = (event) => {

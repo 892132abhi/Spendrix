@@ -60,7 +60,7 @@ const InterviewerChat = () => {
         setMessages(history);
 
         const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-        const wsUrl = `${wsProtocol}://${window.location.host}/ws/chat/${roomId}/`;
+        const wsUrl = `${import.meta.env.VITE_WS_URL}/ws/chat/${roomId}/`;
 
         socket.current = new WebSocket(wsUrl);
 
