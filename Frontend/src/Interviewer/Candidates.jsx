@@ -42,6 +42,7 @@ const InterviewerCandidates = () => {
 
   // --- RESCHEDULE INTERVIEW MODAL STATES ---
   const [isRescheduling, setIsRescheduling] = useState(false);
+  const [showMobileDetail, setShowMobileDetail] = useState(false);
   const [editDate, setEditDate] = useState("");
   const [editTime, setEditTime] = useState("");
   const [rescheduleLoading, setRescheduleLoading] = useState(false);
@@ -139,11 +140,13 @@ const InterviewerCandidates = () => {
     setAssessment(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSelectCandidate = (candidate) => {
+const handleSelectCandidate = (candidate) => {
     setSelectedCandidate(candidate);
     setAssessment(getCandidateAssessment(candidate));
-    setIsRescheduling(false); 
-  };
+    setIsRescheduling(false);
+    setShowMobileDetail(true);
+};
+
 
   const initRescheduleFields = () => {
     if (!selectedCandidate?.sheduled_date) return;
@@ -436,6 +439,12 @@ const InterviewerCandidates = () => {
               
               {/* Header profile info */}
               <div className="p-6 bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950 text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0">
+<button 
+    onClick={() => setShowMobileDetail(false)}
+    className="lg:hidden mb-2 text-xs text-slate-400 hover:text-white font-bold uppercase tracking-wider"
+>
+    ← Back to list
+</button>
                 <div className="flex items-center gap-4">
                   <div className="w-16 h-16 bg-white/10 border border-white/20 rounded-2xl flex-shrink-0 overflow-hidden flex items-center justify-center font-extrabold text-2xl shadow-inner">
                     {selectedCandidate.profile_pic ? <img src={getMediaUrl(selectedCandidate.profile_pic)} className="w-full h-full object-cover animate-in fade-in-50" alt={selectedCandidate.name || "Candidate"}/> : (selectedCandidate.name || "C").charAt(0).toUpperCase()}
