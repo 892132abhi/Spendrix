@@ -343,7 +343,7 @@ const handleSelectCandidate = (candidate) => {
       <div className="flex-1 flex gap-6 overflow-hidden min-h-0">
         
         {/* Left Side: Cards Stream Container */}
-        <div className="w-full lg:w-[420px] h-full flex flex-col gap-4">
+        <div className={`w-full lg:w-[420px] h-full flex flex-col gap-4 ${showMobileDetail ? 'hidden lg:flex' : 'flex'}`}>
           <div className="flex-1 overflow-y-auto space-y-3.5 pr-2 custom-scrollbar">
             {loading ? (
               <div className="space-y-4">
@@ -433,7 +433,7 @@ const handleSelectCandidate = (candidate) => {
         </div>
 
         {/* Right Side: Detail View Container */}
-        <div className="hidden lg:flex flex-1 bg-white rounded-3xl border border-slate-200/60 shadow-sm overflow-hidden flex flex-col min-w-0">
+        <div className={`${showMobileDetail ? 'flex' : 'hidden'} lg:flex flex-1 bg-white rounded-3xl border border-slate-200/60 shadow-sm overflow-hidden flex flex-col min-w-0`}>
           {selectedCandidate ? (
             <div className="flex flex-col h-full min-h-0">
               
