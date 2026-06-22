@@ -143,10 +143,12 @@ class CandidateInterviewSerializer(serializers.ModelSerializer):
     hr_id = serializers.IntegerField(source='hr_name.id', read_only=True)
     interviewer_name = serializers.SerializerMethodField()
     job_title = serializers.CharField(source='application.job.title', read_only=True)
+    candidate_name = serializers.CharField(source='application.candidate.profile.full_name', read_only=True)
+    recruiter_name = serializers.CharField(source='hr_name.profile.full_name', read_only=True)
 
     class Meta:
         model = Interview
-        fields = ['id', 'hr_id', 'job_title', 'interviewer_name', 'sheduled_date', 'meeting_link', 'status']
+        fields = ['id', 'hr_id', 'job_title', 'interviewer_name', 'sheduled_date', 'meeting_link', 'status', 'candidate_name', 'recruiter_name']
 
     def get_interviewer_name(self, obj):
         if obj.interviewer and hasattr(obj.interviewer, "profile"):

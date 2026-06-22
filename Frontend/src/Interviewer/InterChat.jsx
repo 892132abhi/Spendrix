@@ -13,6 +13,7 @@ const InterviewerChat = () => {
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [candidateName, setCandidateName] = useState("");
+  const [hrName, setHrName] = useState("");
   
   const socket = useRef(null);
   const scrollRef = useRef(null);
@@ -33,6 +34,7 @@ const InterviewerChat = () => {
         }
 
         setCandidateName(interview.candidate_name || "Candidate");
+        setHrName(interview.recruiter_name || "HR Coordinator");
 
         if (!interview.hr_id) {
           toast.error("HR coordinator not found for this interview.");
@@ -130,9 +132,8 @@ const InterviewerChat = () => {
 
           <div className="space-y-4">
             <div className="p-5 bg-slate-50 border border-slate-150 rounded-2xl shadow-sm">
-              <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Evaluation Target</span>
-              <p className="text-base font-extrabold text-slate-950 truncate">{candidateName}</p>
-              <p className="text-[11px] font-extrabold text-indigo-600 uppercase tracking-wider mt-1.5">Room ID: #{sessionId}</p>
+              <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">HR Coordinator</span>
+              <p className="text-base font-extrabold text-slate-950 truncate">{hrName}</p>
             </div>
 
             <div className="p-5 bg-indigo-50/40 border border-indigo-100 rounded-2xl flex gap-3 shadow-sm">
