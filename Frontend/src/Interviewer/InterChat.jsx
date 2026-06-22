@@ -135,24 +135,7 @@ const InterviewerChat = () => {
               <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">HR</span>
               <p className="text-base font-extrabold text-slate-950 truncate">{hrName}</p>
             </div>
-
-            <div className="p-5 bg-indigo-50/40 border border-indigo-100 rounded-2xl flex gap-3 shadow-sm">
-              <FiLock className="w-4 h-4 text-indigo-500 shrink-0 mt-0.5" />
-              <div>
-                <span className="text-[9px] font-black text-indigo-600 uppercase tracking-wider block">Internal Channel</span>
-                <p className="text-[10px] font-semibold text-indigo-700 leading-relaxed mt-1 uppercase tracking-wide">
-                  This direct line to the recruiter is completely private and hidden from the candidate.
-                </p>
-              </div>
-            </div>
           </div>
-        </div>
-
-        <div className="p-4 bg-amber-50/60 border border-amber-100 rounded-2xl flex gap-2.5 shadow-sm">
-          <FiInfo className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-          <p className="text-[9px] font-bold text-amber-800 leading-relaxed uppercase tracking-wider">
-            Log your immediate evaluations, tech alignment observations, and follow-up round recommendations directly with the HR panel here.
-          </p>
         </div>
       </aside>
 
