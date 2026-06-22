@@ -47,7 +47,7 @@ const EditProfilePage = () => {
           experience_years: data.experience_years || 0,
         });
 
-        if (data.profile_pic) setPreview(`${window.location.origin}${data.profile_pic}`);
+        if (data.profile_pic) setPreview(`${import.meta.env.VITE_API_URL}${data.profile_pic}`);
       } catch (err) {
         toast.error("Failed to load profile data");
       } finally {
