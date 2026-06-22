@@ -11,7 +11,7 @@ const HrProfilePage = () => {
 
   const getMediaUrl = (path) => {
     if (!path) return null;
-    return path.startsWith('http') ? path : `${window.location.origin}${path}`;
+    return path.startsWith('http') ? path : `${import.meta.env.VITE_API_URL}${path}`;
   };
 
   useEffect(() => {

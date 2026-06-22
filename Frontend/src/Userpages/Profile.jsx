@@ -12,7 +12,7 @@ const ProfilePage = () => {
   // Dynamic origin calculation to protect against CORS errors and hardcoded string typos
   const getMediaUrl = (path) => {
     if (!path) return null;
-    return path.startsWith('http') ? path : `${window.location.origin}${path}`;
+    return path.startsWith('http') ? path : `${import.meta.env.VITE_API_URL}${path}`;
   };
 
   useEffect(() => {
