@@ -132,7 +132,7 @@ const InterviewerChat = () => {
 
           <div className="space-y-4">
             <div className="p-5 bg-slate-50 border border-slate-150 rounded-2xl shadow-sm">
-              <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">HR Coordinator</span>
+              <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">HR</span>
               <p className="text-base font-extrabold text-slate-950 truncate">{hrName}</p>
             </div>
 
