@@ -9,11 +9,6 @@ jobs:
   deploy-backend:
     name: Deploy Backend
     runs-on: ubuntu-latest
-    if: |
-      contains(github.event.commits[0].modified, 'Backend/') ||
-      contains(github.event.commits[0].added, 'Backend/') ||
-      contains(github.event.commits[0].modified, 'docker-compose.yml') ||
-      contains(github.event.commits[0].modified, 'nginx/')
     steps:
       - name: Deploy to Backend EC2
         uses: appleboy/ssh-action@v1.0.0
@@ -29,9 +24,6 @@ jobs:
   deploy-ai:
     name: Deploy AI Service
     runs-on: ubuntu-latest
-    if: |
-      contains(github.event.commits[0].modified, 'AI_service/') ||
-      contains(github.event.commits[0].added, 'AI_service/')
     steps:
       - name: Deploy to AI EC2
         uses: appleboy/ssh-action@v1.0.0
