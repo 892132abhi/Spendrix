@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../api/instance';
 import { toast } from 'react-hot-toast';
 import { 
@@ -23,6 +23,7 @@ const getCandidateAssessment = (candidate) => ({
 
 const InterviewerCandidates = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   
   const [candidates, setCandidates] = useState([]);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
@@ -94,10 +95,19 @@ const InterviewerCandidates = () => {
       });
 
       if (mappedData.length > 0) {
-        const stillExists = mappedData.find(c => c.id === selectedCandidate?.id);
-        const nextSelection = stillExists || mappedData[0];
+        let nextSelection = null;
+        if (location.state?.selectCandidateId) {
+          nextSelection = mappedData.find(c => c.id === Number(location.state.selectCandidateId));
+        }
+        if (!nextSelection) {
+          const stillExists = mappedData.find(c => c.id === selectedCandidate?.id);
+          nextSelection = stillExists || mappedData[0];
+        }
         setSelectedCandidate(nextSelection);
         setAssessment(getCandidateAssessment(nextSelection));
+        if (location.state?.selectCandidateId && nextSelection) {
+          setActiveDetailTab("notes");
+        }
       } else {
         setSelectedCandidate(null);
         setAssessment(getCandidateAssessment(null));
