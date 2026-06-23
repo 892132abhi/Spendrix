@@ -81,7 +81,19 @@ const DashboardPage = () => {
       }));
     } catch (err) {
       console.error("Application error:", err);
-      const errMsg = err.response?.data?.detail || "Application failed to transmit.";
+      let errMsg = "Application failed to transmit.";
+      if (err.response?.data) {
+        const data = err.response.data;
+        if (data.detail) {
+          errMsg = data.detail;
+        } else {
+          const values = Object.values(data);
+          if (values.length > 0) {
+            const firstError = values[0];
+            errMsg = Array.isArray(firstError) ? firstError[0] : String(firstError);
+          }
+        }
+      }
       toast.error(errMsg);
     }
   };

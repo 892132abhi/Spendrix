@@ -34,10 +34,10 @@ const InterviewerDashboard = () => {
           ? assignedRes.data 
           : (assignedRes.data?.results || []);
 
-        // Filter upcoming interviews: sheduled or scheduled status
+        // Filter upcoming interviews: sheduled or scheduled status, sorted by sheduled_date ascending
         const upcoming = allAssigned.filter(item => 
           item.status?.toUpperCase() === 'SHEDULED' || item.status?.toUpperCase() === 'SCHEDULED'
-        );
+        ).sort((a, b) => new Date(a.sheduled_date) - new Date(b.sheduled_date));
         setUpcomingSessions(upcoming);
 
         // Filter pending evaluations: completed status and missing evaluation logs
@@ -114,7 +114,7 @@ const InterviewerDashboard = () => {
           
           <div className="space-y-4">
             {upcomingSessions.length > 0 ? (
-              upcomingSessions.map((interview) => (
+              upcomingSessions.slice(0, 3).map((interview) => (
                 <div key={interview.id} className="bg-white border border-slate-100 p-8 rounded-[3rem] hover:border-slate-905 hover:shadow-md transition-all group relative overflow-hidden text-left">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div className="flex gap-6 items-center">

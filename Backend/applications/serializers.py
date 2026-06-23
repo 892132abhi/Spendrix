@@ -19,5 +19,6 @@ class ApplicationSerializer(serializers.ModelSerializer):
         model = Application
         fields=['id','candidate','candidate_name','candidate_email','job','job_title','job_location','status','resume','applied_at_date','ai_score','interview_status']
         read_only_fields=['status','applied_at','candidate','job']
+        validators = []
         
 

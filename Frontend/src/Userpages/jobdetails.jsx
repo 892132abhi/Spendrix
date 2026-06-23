@@ -27,11 +27,24 @@ const JobDetailsPage = () => {
   const handleApply = async () => {
     const loadingToast = toast.loading("Submitting verification profile dossier...");
     try {
-      await api.post(`applications/applyjob/${id}/`);
-      toast.success("Dossier Synced to Operational Platform Ledger!", { id: loadingToast });
+      const res = await api.post(`applications/applyjob/${id}/`);
+      toast.success(res.data?.detail || "Dossier Synced to Operational Platform Ledger!", { id: loadingToast });
     } catch (error) {
-      const msg = error.response?.data?.detail || "Profile verification path already exists for this track.";
-      toast.error(msg, { id: loadingToast });
+      console.error("Application error:", error);
+      let errMsg = "Profile verification path already exists for this track.";
+      if (error.response?.data) {
+        const data = error.response.data;
+        if (data.detail) {
+          errMsg = data.detail;
+        } else {
+          const values = Object.values(data);
+          if (values.length > 0) {
+            const firstError = values[0];
+            errMsg = Array.isArray(firstError) ? firstError[0] : String(firstError);
+          }
+        }
+      }
+      toast.error(errMsg, { id: loadingToast });
     }
   };
 

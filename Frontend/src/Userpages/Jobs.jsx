@@ -62,10 +62,24 @@ const JobListPage = () => {
     if (!jobId) return;
     const loadingToast = toast.loading("Filing application...");
     try {
-      await api.post(`applications/applyjob/${jobId}/`);
-      toast.success("Applied successfully!", { id: loadingToast });
+      const res = await api.post(`applications/applyjob/${jobId}/`);
+      toast.success(res.data?.detail || "Applied successfully!", { id: loadingToast });
     } catch (error) {
-      toast.error("You have already applied to this job.", { id: loadingToast });
+      console.error("Application error:", error);
+      let errMsg = "You have already applied to this job.";
+      if (error.response?.data) {
+        const data = error.response.data;
+        if (data.detail) {
+          errMsg = data.detail;
+        } else {
+          const values = Object.values(data);
+          if (values.length > 0) {
+            const firstError = values[0];
+            errMsg = Array.isArray(firstError) ? firstError[0] : String(firstError);
+          }
+        }
+      }
+      toast.error(errMsg, { id: loadingToast });
     }
   };
 
