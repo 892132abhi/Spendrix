@@ -109,17 +109,26 @@ const InterviewerProfilePage = () => {
               <span className="text-[9px] font-black px-2 py-1 bg-emerald-50 text-emerald-600 rounded">PDF DOCUMENT</span>
             </div>
             {profile?.resume ? (
-              <div className="flex items-center p-6 bg-indigo-50/50 rounded-3xl border-2 border-dashed border-indigo-100">
-                <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-indigo-600 shadow-sm mr-6">
-                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              <div className="space-y-6">
+                <div className="flex items-center p-6 bg-indigo-50/50 rounded-3xl border border-dashed border-indigo-100">
+                  <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-indigo-600 shadow-sm mr-6">
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                  </div>
+                  <div className="flex-1 text-left">
+                    <p className="text-sm font-black text-slate-800">Professional_Resume.pdf</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase">Verified Professional Resume</p>
+                  </div>
+                  <a href={getMediaUrl(profile.resume)} target="_blank" rel="noreferrer" className="px-6 py-2.5 bg-white text-indigo-600 font-black text-[10px] uppercase rounded-xl border border-indigo-100 shadow-sm hover:bg-indigo-600 hover:text-white transition-all cursor-pointer">
+                    Open in New Tab
+                  </a>
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm font-black text-slate-800">Professional_Resume.pdf</p>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase">Verified Professional Resume</p>
+                <div className="w-full h-[600px] border border-slate-200 rounded-[2rem] overflow-hidden shadow-sm">
+                  <iframe 
+                    src={getMediaUrl(profile.resume)} 
+                    className="w-full h-full" 
+                    title="Resume Preview"
+                  />
                 </div>
-                <a href={getMediaUrl(profile.resume)} target="_blank" rel="noreferrer" className="px-6 py-2.5 bg-white text-indigo-600 font-black text-[10px] uppercase rounded-xl border border-indigo-100 shadow-sm hover:bg-indigo-600 hover:text-white transition-all">
-                  View
-                </a>
               </div>
             ) : (
               <div className="text-center py-12 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-100">

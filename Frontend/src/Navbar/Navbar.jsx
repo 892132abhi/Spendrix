@@ -72,9 +72,7 @@ const Navbar = () => {
       { path: "/admin-dashboard", label: "Dashboard", icon: <DashboardIcon /> },
       { path: "/admin-usermanagement", label: "Management", icon: <ProfileIcon /> },
       { path: "/company-list", label: "Departments", icon: <FlowIcon /> },
-      // { path: "/reports", label: "System Reports", icon: <ReportIcon /> },
       { path: "/hrjob-management", label: "Job management", icon: <JobsIcon /> },
-      // { path: "/settings", label: "Settings", icon: <SettingsIcon /> },
     ],
     HR: [
       { path: "/hr-dashboard", label: "Dashboard", icon: <DashboardIcon /> },
@@ -86,14 +84,11 @@ const Navbar = () => {
       { path: "/interviews", label: "Interviews", icon: <CalendarIcon /> },
       { path: "/hr-profile", label: "My Profile", icon: <ProfileIcon /> },
       { path: "/hr-notification", label: "Notifications", icon: <NotifyIcon /> },
-      // { path: "/settings", label: "Settings", icon: <SettingsIcon /> },
     ],
     INTERVIEWER: [
       { path: "/interviewer-dashboard", label: "Dashboard", icon: <DashboardIcon /> },
       { path: "/candidate-list", label: "Candidates", icon: <ProfileIcon /> },
-      // { path: "/assigned-interviews", label: "Interviews", icon: <CalendarIcon /> },
       { path: "/interviewer-profile", label: "My Profile", icon: <ProfileIcon /> },
-      // { path: "/feedback", label: "Feedback", icon: <ChatIcon /> },
       { path: "/interviewer-notification", label: "Notifications", icon: <NotifyIcon /> },
     ],
     CANDIDATE: [
@@ -104,7 +99,6 @@ const Navbar = () => {
       { path: "/joblist", label: "Job Listings", icon: <JobsIcon /> },
       { path: "/interviewslsit", label: "Interviews", icon: <CalendarIcon /> },
       { path: "/myjoblist", label: "My Applications", icon: <ApplicationsIcon /> },
-      // { path: `/chat/room_cand_${user?.id}`, label: "Chat", icon: <ChatIcon /> }
     ]
   };
 
