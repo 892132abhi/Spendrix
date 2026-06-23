@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   FiArrowRight, FiCpu, FiTrendingUp, FiShield, 
-  FiLayers, FiZap, FiCompass, FiCheckCircle, FiSearch, FiBriefcase
+  FiLayers, FiZap, FiCompass, FiCheckCircle, FiSearch, FiBriefcase,
+  FiFileText, FiTarget, FiTerminal, FiSliders
 } from 'react-icons/fi';
 
 const DashboardPage = () => {
@@ -119,6 +120,81 @@ const DashboardPage = () => {
             </p>
           </div>
 
+        </section>
+
+        {/* AI INTELLIGENCE TILES SECTION */}
+        <section className="space-y-6 text-left">
+          <div>
+            <span className="text-[9px] font-mono font-bold text-emerald-400 uppercase tracking-widest block">Cognitive Middleware Layers</span>
+            <h3 className="text-xl font-bold text-white tracking-tight">AI Deployment Modules</h3>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            {/* TILE 1: AI RESUME ANALYZER */}
+            <div 
+              onClick={() => navigate(user ? '/resume-analyzer' : '/registerpage?redirect=analyzer')}
+              className="p-6 bg-[#0c0d14] border border-slate-800/80 rounded-2xl relative overflow-hidden shadow-xl hover:border-indigo-500/30 transition-all cursor-pointer group flex flex-col justify-between"
+            >
+              <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/[0.02] blur-xl rounded-full pointer-events-none" />
+              <div>
+                <div className="w-10 h-10 rounded-xl bg-indigo-500/5 border border-indigo-500/20 flex items-center justify-center text-indigo-400 mb-4 shadow-inner group-hover:scale-105 transition-transform">
+                  <FiFileText className="w-4 h-4" />
+                </div>
+                <h4 className="text-sm font-bold text-white tracking-tight group-hover:text-indigo-300 transition-colors">AI Resume Analyzer</h4>
+                <p className="text-slate-400 text-xs mt-2 leading-relaxed">
+                  Deconstruct static resumes into executable data profiles. Detect hidden matching criteria, skill density, and project scopes autonomously.
+                </p>
+              </div>
+              <div className="mt-6 flex items-center gap-1.5 text-[10px] font-mono font-bold uppercase tracking-wider text-indigo-400 group-hover:text-indigo-300 transition-colors">
+                <span>Execute Matrix</span>
+                <FiArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+              </div>
+            </div>
+
+            {/* TILE 2: PREDICTIVE VECTOR MATCHING */}
+            <div 
+              onClick={() => navigate(user ? '/vector-match' : '/registerpage?redirect=vector')}
+              className="p-6 bg-[#0c0d14] border border-slate-800/80 rounded-2xl relative overflow-hidden shadow-xl hover:border-emerald-500/30 transition-all cursor-pointer group flex flex-col justify-between"
+            >
+              <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/[0.02] blur-xl rounded-full pointer-events-none" />
+              <div>
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/5 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-4 shadow-inner group-hover:scale-105 transition-transform">
+                  <FiTarget className="w-4 h-4 shadow-[0_0_10px_rgba(52,211,153,0.1)]" />
+                </div>
+                <h4 className="text-sm font-bold text-white tracking-tight group-hover:text-emerald-300 transition-colors">Predictive Vector Matching</h4>
+                <p className="text-slate-400 text-xs mt-2 leading-relaxed">
+                  Map tech candidates directly into enterprise neural layers. Calculates real-world capability scoring indices past keyword filters.
+                </p>
+              </div>
+              <div className="mt-6 flex items-center gap-1.5 text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-400 group-hover:text-emerald-300 transition-colors">
+                <span>Compute Affinity</span>
+                <FiArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+              </div>
+            </div>
+
+            {/* TILE 3: AUTOMATED SANDBOX ASSESSOR */}
+            <div 
+              onClick={() => navigate(user ? '/sandbox-assess' : '/registerpage?redirect=sandbox')}
+              className="p-6 bg-[#0c0d14] border border-slate-800/80 rounded-2xl relative overflow-hidden shadow-xl hover:border-purple-500/30 transition-all cursor-pointer group flex flex-col justify-between"
+            >
+              <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/[0.02] blur-xl rounded-full pointer-events-none" />
+              <div>
+                <div className="w-10 h-10 rounded-xl bg-purple-500/5 border border-purple-500/20 flex items-center justify-center text-purple-400 mb-4 shadow-inner group-hover:scale-105 transition-transform">
+                  <FiTerminal className="w-4 h-4" />
+                </div>
+                <h4 className="text-sm font-bold text-white tracking-tight group-hover:text-purple-300 transition-colors">Automated Sandbox Assessor</h4>
+                <p className="text-slate-400 text-xs mt-2 leading-relaxed">
+                  Deploy live code execution evaluation modules. Evaluates architectural patterns, error boundaries, and design systems automatically.
+                </p>
+              </div>
+              <div className="mt-6 flex items-center gap-1.5 text-[10px] font-mono font-bold uppercase tracking-wider text-purple-400 group-hover:text-purple-300 transition-colors">
+                <span>Initialize Loop</span>
+                <FiArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+              </div>
+            </div>
+
+          </div>
         </section>
 
         {/* CENTRAL PREVIEW: INTERACTIVE PLATFORM SIMULATOR */}
