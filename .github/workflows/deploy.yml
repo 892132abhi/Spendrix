@@ -1,0 +1,45 @@
+name: Deploy Spendrix
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-backend:
+    name: Deploy Backend
+    runs-on: ubuntu-latest
+    if: |
+      contains(github.event.commits[0].modified, 'Backend/') ||
+      contains(github.event.commits[0].added, 'Backend/') ||
+      contains(github.event.commits[0].modified, 'docker-compose.yml') ||
+      contains(github.event.commits[0].modified, 'nginx/')
+    steps:
+      - name: Deploy to Backend EC2
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.BACKEND_HOST }}
+          username: ubuntu
+          key: ${{ secrets.BACKEND_SSH_KEY }}
+          script: |
+            cd ~/Spendrix
+            git pull origin main
+            sudo docker compose restart backend celery celery_beat nginx
+
+  deploy-ai:
+    name: Deploy AI Service
+    runs-on: ubuntu-latest
+    if: |
+      contains(github.event.commits[0].modified, 'AI_service/') ||
+      contains(github.event.commits[0].added, 'AI_service/')
+    steps:
+      - name: Deploy to AI EC2
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.AI_HOST }}
+          username: ubuntu
+          key: ${{ secrets.AI_SSH_KEY }}
+          script: |
+            cd ~/Spendrix
+            git pull origin main
+            sudo docker compose restart ai_service
