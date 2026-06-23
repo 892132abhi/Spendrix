@@ -22,6 +22,7 @@ const Navbar = () => {
   };
 
   useEffect(() => {
+    if (!user) return;
     const initialSync = setTimeout(fetchUnreadCount, 0);
     const interval = setInterval(fetchUnreadCount, 30000);
 
@@ -41,6 +42,10 @@ const Navbar = () => {
       socket.close();
     };
   }, []);
+
+  if (!user || !role) {
+    return <Outlet />;
+  }
 
   const handleLogout = async () => {
     try {

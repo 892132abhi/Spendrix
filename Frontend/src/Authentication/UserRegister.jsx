@@ -10,6 +10,8 @@ function Register() {
 
   const inviteToken = searchParams.get("invite_token");
   const isInviteRegistration = Boolean(inviteToken);
+  const typeParam = searchParams.get("type");
+  const defaultRole = typeParam?.toUpperCase() === "EMPLOYER" ? "HR" : "CANDIDATE";
 
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -20,7 +22,7 @@ function Register() {
     email: "",
     password: "",
     confirm_password: "",
-    role: "CANDIDATE",
+    role: defaultRole,
   });
 
   const handleChange = (e) => {

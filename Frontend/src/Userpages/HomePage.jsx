@@ -9,6 +9,7 @@ const DashboardPage = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("JOBS"); // JOBS, INTERVIEWS
   const [activeMetric, setActiveMetric] = useState('ACCURACY');
+  const user = JSON.parse(localStorage.getItem('user'));
 
   // Static high-fidelity sample datasets to simulate the premium platform layout live
   const sampleJobs = [
@@ -36,33 +37,35 @@ const DashboardPage = () => {
     <div className="min-h-screen bg-[#06070a] text-slate-100 font-sans antialiased pb-20 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-950/20 via-[#06070a] to-[#06070a]">
       
       {/* LANDING NAVIGATION BAR */}
-      <nav className="w-full bg-[#0c0d14]/60 backdrop-blur-xl border-b border-indigo-500/10 py-5 sticky top-0 z-50 shadow-[0_4px_30px_rgba(0,0,0,0.4)]">
-        <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-          <div className="text-left flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center font-mono text-xs font-black text-indigo-400 shadow-inner">
-              Ω
+      {!user && (
+        <nav className="w-full bg-[#0c0d14]/60 backdrop-blur-xl border-b border-indigo-500/10 py-5 sticky top-0 z-50 shadow-[0_4px_30px_rgba(0,0,0,0.4)]">
+          <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
+            <div className="text-left flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center font-mono text-xs font-black text-indigo-400 shadow-inner">
+                Ω
+              </div>
+              <div>
+                <h1 className="text-base font-extrabold tracking-tight text-white leading-none">SPENDRIX</h1>
+                <p className="text-[8px] font-mono font-black text-emerald-400 uppercase tracking-[0.18em] mt-1">Autonomous Sourcing Engine</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-base font-extrabold tracking-tight text-white leading-none">SPENDRIX</h1>
-              <p className="text-[8px] font-mono font-black text-emerald-400 uppercase tracking-[0.18em] mt-1">Autonomous Sourcing Engine</p>
+            <div className="flex items-center gap-6">
+              <button 
+                onClick={() => navigate('/loginpage')} 
+                className="text-xs font-mono font-bold uppercase text-slate-400 hover:text-white tracking-wider bg-transparent border-0 cursor-pointer outline-none transition-colors"
+              >
+                System Login
+              </button>
+              <button 
+                onClick={() => navigate('/registerpage')} 
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-mono font-bold uppercase text-[10px] tracking-widest rounded-xl transition-all shadow-[0_0_20px_rgba(99,102,241,0.3)] border-0 cursor-pointer active:scale-95"
+              >
+                Initialize Node
+              </button>
             </div>
           </div>
-          <div className="flex items-center gap-6">
-            <button 
-              onClick={() => navigate('/login')} 
-              className="text-xs font-mono font-bold uppercase text-slate-400 hover:text-white tracking-wider bg-transparent border-0 cursor-pointer outline-none transition-colors"
-            >
-              System Login
-            </button>
-            <button 
-              onClick={() => navigate('/register')} 
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-mono font-bold uppercase text-[10px] tracking-widest rounded-xl transition-all shadow-[0_0_20px_rgba(99,102,241,0.3)] border-0 cursor-pointer active:scale-95"
-            >
-              Initialize Node
-            </button>
-          </div>
-        </div>
-      </nav>
+        </nav>
+      )}
 
       <main className="max-w-7xl mx-auto px-6 mt-16 space-y-16">
         
@@ -164,10 +167,10 @@ const DashboardPage = () => {
                     </div>
                   </div>
                   <button 
-                    onClick={() => navigate('/register')}
+                    onClick={() => navigate(user ? '/joblist' : '/registerpage')}
                     className="px-5 py-2.5 bg-slate-900 hover:bg-slate-850 text-white border border-slate-800 rounded-xl text-[10px] font-mono font-bold uppercase tracking-widest transition-all cursor-pointer relative z-10"
                   >
-                    View Parameters
+                    {user ? "View Job Listings" : "View Parameters"}
                   </button>
                 </div>
               ))}
@@ -226,10 +229,10 @@ const DashboardPage = () => {
                 Gain entry into direct tracking indexes. Upload your verifiable credentials vector card and connect straight to tech leads, skipping screening loops.
               </p>
               <button 
-                onClick={() => navigate('/register?type=candidate')}
+                onClick={() => navigate(user ? '/joblist' : '/registerpage?type=candidate')}
                 className="mt-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-mono font-bold text-[10px] uppercase tracking-widest rounded-xl transition-all shadow-[0_4px_20px_rgba(99,102,241,0.2)] flex items-center gap-2 group cursor-pointer border-0 outline-none"
               >
-                Access Candidate Network
+                {user ? "View Job Listings" : "Access Candidate Network"}
                 <FiArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
               </button>
             </div>
@@ -245,10 +248,10 @@ const DashboardPage = () => {
                 Deploy exact computational project goals. Tap into pre-evaluated technical portfolios tailored natively to your operational tech arrays.
               </p>
               <button 
-                onClick={() => navigate('/register?type=employer')}
+                onClick={() => navigate(user ? (user.role === 'HR' ? '/hr-dashboard' : '/hr-profile') : '/registerpage?type=employer')}
                 className="mt-2 px-5 py-2.5 bg-slate-900 hover:bg-slate-850 text-white font-mono font-bold text-[10px] uppercase tracking-widest rounded-xl border border-slate-800 transition-all flex items-center gap-2 group cursor-pointer outline-none"
               >
-                Provision Corporate Seat
+                {user ? "View HR Console" : "Provision Corporate Seat"}
                 <FiArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1 text-emerald-400" />
               </button>
             </div>
