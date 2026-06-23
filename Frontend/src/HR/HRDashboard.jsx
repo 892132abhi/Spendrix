@@ -1,17 +1,24 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../api/instance';
 import { toast } from 'react-hot-toast';
 import { FiUsers, FiShield, FiUserCheck, FiUser, FiBriefcase, FiCalendar, FiActivity, FiArrowRight, FiClock, FiPlusCircle } from 'react-icons/fi';
 
 const HRDashboard = () => {
+  const navigate = useNavigate();
   const [statsData, setStatsData] = useState(null);
+  const [interviews, setInterviews] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const response = await api.get('accounts/profiledata/');
-        setStatsData(response.data);
+        const [statsRes, interviewsRes] = await Promise.all([
+          api.get('accounts/profiledata/'),
+          api.get('interviews/interviewlist/').catch(err => { console.error(err); return { data: [] }; })
+        ]);
+        setStatsData(statsRes.data);
+        setInterviews(Array.isArray(interviewsRes.data) ? interviewsRes.data : []);
       } catch (err) {
         console.error("HR Dashboard Sync Failed:", err);
         toast.error("Failed to sync HR metrics");
@@ -85,6 +92,7 @@ const HRDashboard = () => {
     },
   ];
 
+  const latestInterviews = interviews.slice(0, 3);
 
   return (
     <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in duration-500 px-6 pb-16 font-sans">
@@ -142,10 +150,57 @@ const HRDashboard = () => {
               <FiClock className="text-indigo-500 w-5 h-5" />
               Recruitment Activity Feed
             </h3>
-            <button className="text-[10px] font-black text-indigo-600 hover:text-indigo-850 transition-colors uppercase tracking-wider flex items-center gap-1 cursor-pointer">
+            <button 
+              onClick={() => navigate('/interviews')}
+              className="text-[10px] font-black text-indigo-650 hover:text-indigo-850 transition-colors uppercase tracking-wider flex items-center gap-1 cursor-pointer bg-transparent border-0"
+            >
               <span>Full Talent Audit</span>
               <FiArrowRight className="w-3.5 h-3.5" />
             </button>
+        </div>
+
+        <div className="grid gap-4">
+            {latestInterviews.length > 0 ? (
+              latestInterviews.map((interview) => (
+                <div 
+                  key={interview.id} 
+                  onClick={() => navigate('/interviews')}
+                  className="flex flex-col sm:flex-row sm:items-center justify-between p-5 bg-slate-50/70 hover:bg-slate-50 border border-slate-100 rounded-2xl hover:border-slate-200 transition-all cursor-pointer group gap-4 text-left"
+                >
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-indigo-550/10 border border-indigo-100 flex items-center justify-center text-indigo-650 shrink-0">
+                        🗓️
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-slate-705 group-hover:text-indigo-650 transition-colors">
+                          Interview with <span className="font-extrabold text-slate-900">{interview.candidate_name || 'Candidate'}</span>
+                        </p>
+                        <p className="text-[10px] font-bold text-slate-450 mt-0.5">
+                          Assigned to: {interview.interviewer_name || 'Pending'} • Session Details: {interview.note || 'Assessment Round'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-3 self-start sm:self-center shrink-0">
+                      <span className="text-[10px] font-bold text-slate-500 bg-slate-100 border border-slate-200 px-3 py-1 rounded-lg">
+                        {interview.sheduled_date ? new Date(interview.sheduled_date).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A'}
+                      </span>
+                      <span className={`text-[8px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md border ${
+                        interview.status === 'SHEDULED' || interview.status === 'scheduled' 
+                          ? 'bg-blue-50 border-blue-100 text-blue-650' 
+                          : interview.status === 'COMPLETED' 
+                            ? 'bg-emerald-50 border-emerald-100 text-emerald-600'
+                            : 'bg-rose-50 border-rose-100 text-rose-600'
+                      }`}>
+                        {interview.status === 'SHEDULED' ? 'scheduled' : interview.status?.toLowerCase()}
+                      </span>
+                    </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-12 bg-slate-50/30 rounded-[1.5rem] border-2 border-dashed border-slate-200 italic font-bold text-slate-400">
+                No active interview schedules detected.
+              </div>
+            )}
         </div>
       </section>
     </div>
