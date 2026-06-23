@@ -54,13 +54,13 @@ const DashboardPage = () => {
                 onClick={() => navigate('/loginpage')} 
                 className="text-xs font-mono font-bold uppercase text-slate-400 hover:text-white tracking-wider bg-transparent border-0 cursor-pointer outline-none transition-colors"
               >
-                System Login
+                 Login
               </button>
               <button 
                 onClick={() => navigate('/registerpage')} 
                 className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-mono font-bold uppercase text-[10px] tracking-widest rounded-xl transition-all shadow-[0_0_20px_rgba(99,102,241,0.3)] border-0 cursor-pointer active:scale-95"
               >
-                Initialize Node
+                Register
               </button>
             </div>
           </div>
