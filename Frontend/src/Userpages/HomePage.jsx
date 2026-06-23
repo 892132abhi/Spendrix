@@ -1,365 +1,261 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../api/instance';
-import { toast } from 'react-hot-toast';
+import { 
+  FiArrowRight, FiCpu, FiTrendingUp, FiShield, 
+  FiLayers, FiZap, FiCompass, FiCheckCircle, FiSearch, FiBriefcase
+} from 'react-icons/fi';
 
 const DashboardPage = () => {
   const navigate = useNavigate();
-  
-  // --- CORE DATA STATES ---
-  const [profile, setProfile] = useState(null);
-  const [jobs, setJobs] = useState([]);
-  const [applications, setApplications] = useState([]);
-  const [interviews, setInterviews] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("JOBS"); // JOBS, INTERVIEWS
+  const [activeMetric, setActiveMetric] = useState('ACCURACY');
 
-  // --- API HANDSHAKE SYNC ---
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        setLoading(true);
-        
-        // Fetch matching jobs, candidate applications, and scheduled interviews concurrently
-        const [profileRes, jobsRes, applicationsRes, interviewsRes] = await Promise.all([
-          api.get('accounts/profile/').catch(err => { console.error("Profile Error:", err); return { data: null }; }),
-          api.get('jobs/availablejob/').catch(err => { console.error("Jobs Error:", err); return { data: [] }; }),
-          api.get('applications/applicationlist/').catch(err => { console.error("Applications Error:", err); return { data: [] }; }),
-          api.get('interviews/candidateinterviews/').catch(err => { console.error("Interviews Error:", err); return { data: [] }; })
-        ]);
-        
-        if (profileRes.data) {
-          setProfile(profileRes.data);
-        }
-        
-        const availableJobs = Array.isArray(jobsRes.data) ? jobsRes.data : jobsRes.data?.results || [];
-        const apps = Array.isArray(applicationsRes.data) ? applicationsRes.data : [];
-        
-        const mappedJobs = availableJobs.map(job => {
-          const matchedApp = apps.find(app => app.job === job.id);
-          return {
-            id: job.id,
-            title: job.title,
-            company: job.company_name || 'Spendrix Partner',
-            location: job.location,
-            salary: job.salary || 'Not Specified',
-            status: matchedApp ? matchedApp.status : 'EXPLORING',
-            applied_date: matchedApp ? matchedApp.applied_at_date : null
-          };
-        });
-        
-        setJobs(mappedJobs);
-        setApplications(apps);
-        setInterviews(Array.isArray(interviewsRes.data) ? interviewsRes.data : interviewsRes.data?.results || []);
-      } catch (err) {
-        console.error("Candidate Dashboard Sync Error:", err);
-        toast.error("Failed to sync candidate directory");
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchDashboardData();
-  }, []);
+  // Static high-fidelity sample datasets to simulate the premium platform layout live
+  const sampleJobs = [
+    { id: 1, title: 'Lead Quantitative Systems Engineer', company: 'Spendrix Engine Core', location: 'Remote / NY', salary: '$190K - $240K', status: 'SHORTLISTED' },
+    { id: 2, title: 'Senior Blockchain Infrastructure Architect', company: 'Decentralized Capital Corp', location: 'Hybrid / SF', salary: '$210K - $260K', status: 'EXPLORING' },
+    { id: 3, title: 'Fintech Full-Stack Protocol Developer', company: 'Nexus Yield Labs', location: 'Remote', salary: '$160K - $195K', status: 'APPLIED' }
+  ];
 
-  const handleApplyJob = async (jobId) => {
-    try {
-      const res = await api.post(`applications/applyjob/${jobId}/`);
-      toast.success(res.data?.detail || "Application transmitted cleanly to the corporate portal!");
-      
-      // Update state by refetching applications
-      const appsRes = await api.get('applications/applicationlist/');
-      const apps = Array.isArray(appsRes.data) ? appsRes.data : [];
-      setApplications(apps);
-      setJobs(prev => prev.map(job => {
-        const matchedApp = apps.find(app => app.job === job.id) || (job.id === jobId ? { status: 'APPLIED', applied_at_date: new Date().toLocaleDateString() } : null);
-        return {
-          ...job,
-          status: matchedApp ? matchedApp.status : 'EXPLORING',
-          applied_date: matchedApp ? matchedApp.applied_at_date : null
-        };
-      }));
-    } catch (err) {
-      console.error("Application error:", err);
-      let errMsg = "Application failed to transmit.";
-      if (err.response?.data) {
-        const data = err.response.data;
-        if (data.detail) {
-          errMsg = data.detail;
-        } else {
-          const values = Object.values(data);
-          if (values.length > 0) {
-            const firstError = values[0];
-            errMsg = Array.isArray(firstError) ? firstError[0] : String(firstError);
-          }
-        }
-      }
-      toast.error(errMsg);
-    }
-  };
+  const sampleInterviews = [
+    { id: 1, job_title: 'Lead Quantitative Systems Engineer', interviewer_name: 'Dr. Evelyn Vance (Core Architect)', dateString: 'Fri, Jul 10', timeString: '14:00 UTC', status: 'SHEDULED' },
+    { id: 2, job_title: 'Fintech Full-Stack Protocol Developer', interviewer_name: 'Marcus Brody (VP Engineering)', dateString: 'Mon, Jul 13', timeString: '17:30 UTC', status: 'SHEDULED' }
+  ];
 
-  // Status mapping helper for premium badges
+  // Accent mapping helpers
   const getStatusBadge = (status) => {
     const styles = {
-      APPLIED: 'bg-indigo-50 border-indigo-100 text-indigo-650',
-      SHORT_LISTED: 'bg-emerald-50 border-emerald-100 text-emerald-600',
-      SHORTLISTED: 'bg-emerald-50 border-emerald-100 text-emerald-600',
-      INTERVIEW: 'bg-violet-50 border-violet-100 text-violet-650',
-      HIRED: 'bg-teal-50 border-teal-100 text-teal-600',
-      REJECTED: 'bg-rose-50 border-rose-100 text-rose-600',
-      EXPLORING: 'bg-slate-50 border-slate-200 text-slate-400'
+      APPLIED: 'bg-indigo-500/10 border-indigo-500/30 text-indigo-300',
+      SHORTLISTED: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.05)]',
+      EXPLORING: 'bg-slate-800/40 border-slate-700/60 text-slate-400'
     };
-    return styles[status] || 'bg-slate-50 border-slate-200 text-slate-500';
+    return styles[status] || 'bg-slate-800/40 border-slate-700/60 text-slate-450';
   };
-
-  const getStatusLabel = (status) => {
-    const labels = {
-      APPLIED: 'Applied',
-      SHORT_LISTED: 'Shortlisted',
-      SHORTLISTED: 'Shortlisted',
-      INTERVIEW: 'Interviewing',
-      HIRED: 'Hired',
-      REJECTED: 'Rejected',
-      EXPLORING: 'Exploring'
-    };
-    return labels[status] || status;
-  };
-
-  // --- STATISTICAL CALCULATORS ---
-  const appliedCount = applications.length;
-  const upcomingInterviewsCount = interviews.filter(i => i.status === 'SHEDULED' || i.status === 'scheduled').length;
-  const shortlistedCount = applications.filter(app => app.status === 'SHORT_LISTED' || app.status === 'SHORTLISTED' || app.status === 'HIRED').length;
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] pb-12 font-sans antialiased text-slate-800">
+    <div className="min-h-screen bg-[#06070a] text-slate-100 font-sans antialiased pb-20 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-950/20 via-[#06070a] to-[#06070a]">
       
-      {/* Top Profile Header Block */}
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200/50 py-5 mb-8 shadow-sm">
+      {/* LANDING NAVIGATION BAR */}
+      <nav className="w-full bg-[#0c0d14]/60 backdrop-blur-xl border-b border-indigo-500/10 py-5 sticky top-0 z-50 shadow-[0_4px_30px_rgba(0,0,0,0.4)]">
         <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-          <div>
-            <h1 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-              Welcome Back, {profile?.full_name || 'Executive'}
-            </h1>
-            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Candidate Professional Terminal</p>
+          <div className="text-left flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center font-mono text-xs font-black text-indigo-400 shadow-inner">
+              Ω
+            </div>
+            <div>
+              <h1 className="text-base font-extrabold tracking-tight text-white leading-none">SPENDRIX</h1>
+              <p className="text-[8px] font-mono font-black text-emerald-400 uppercase tracking-[0.18em] mt-1">Autonomous Sourcing Engine</p>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span className="text-[10px] font-black uppercase text-slate-500 bg-slate-100 px-3.5 py-1.5 rounded-xl border border-slate-200/60">Live Profile Safe</span>
+          <div className="flex items-center gap-6">
+            <button 
+              onClick={() => navigate('/login')} 
+              className="text-xs font-mono font-bold uppercase text-slate-400 hover:text-white tracking-wider bg-transparent border-0 cursor-pointer outline-none transition-colors"
+            >
+              System Login
+            </button>
+            <button 
+              onClick={() => navigate('/register')} 
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-mono font-bold uppercase text-[10px] tracking-widest rounded-xl transition-all shadow-[0_0_20px_rgba(99,102,241,0.3)] border-0 cursor-pointer active:scale-95"
+            >
+              Initialize Node
+            </button>
           </div>
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-6 space-y-8">
+      <main className="max-w-7xl mx-auto px-6 mt-16 space-y-16">
         
-        {/* Missing Resume Alert Banner */}
-        {profile && !profile.resume && (
-          <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-rose-600 p-6 rounded-[2rem] text-white shadow-md flex flex-col md:flex-row items-center justify-between gap-6 transition-all duration-300 hover:scale-[1.005] hover:shadow-lg animate-[pulse_3s_infinite]">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center text-xl backdrop-blur-md">
-                ⚠️
-              </div>
-              <div className="text-left">
-                <h3 className="font-extrabold text-sm uppercase tracking-wider">Curriculum Vitae Missing</h3>
-                <p className="text-xs text-orange-50 font-medium mt-0.5">Please upload your resume in the profile section to apply for vacancies.</p>
-              </div>
-            </div>
-            <button 
-              onClick={() => navigate('/profile')} 
-              className="px-6 py-3 bg-white text-orange-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-orange-50 hover:scale-105 active:scale-95 transition-all shadow-sm shrink-0 cursor-pointer"
-            >
-              Configure Profile
-            </button>
+        {/* HERO HEADER CALLOUT */}
+        <section className="text-center max-w-3xl mx-auto space-y-5">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-500/5 border border-indigo-500/20 rounded-full">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]" />
+            <span className="text-[9px] font-mono font-black uppercase tracking-[0.2em] text-indigo-400">Recruitment Decentralized</span>
           </div>
-        )}
+          <h2 className="text-4xl md:text-6xl font-extrabold tracking-tight text-white leading-[1.1]">
+            Hiring metrics built for <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-slate-200 to-emerald-400">high-velocity squads.</span>
+          </h2>
+          <p className="text-slate-400 text-sm md:text-base font-medium leading-relaxed max-w-2xl mx-auto">
+            Spendrix maps algorithmic skill telemetry, clean financial alignment values, and technical sandbox performance validation straight into a unified, bento-grid platform dashboard.
+          </p>
+        </section>
 
-        {/* Metric Overview Panels */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white p-8 rounded-[2rem] border border-slate-200/60 shadow-sm hover:shadow-md transition-all text-left relative overflow-hidden group">
-            <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-xl mb-4 text-indigo-650">
-              💼
-            </div>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Tracked Applications</p>
-            <h2 className="text-3xl font-black text-slate-800 tracking-tight leading-none mt-2">{appliedCount}</h2>
-            <div className="absolute right-0 bottom-0 text-slate-100/40 text-8xl font-black translate-x-4 translate-y-4 select-none pointer-events-none group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
-              💼
-            </div>
-          </div>
+        {/* HIGH-RESOLUTION BENTO MATRIX HIGHLIGHTS */}
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
-          <div className="bg-white p-8 rounded-[2rem] border border-slate-200/60 shadow-sm hover:shadow-md transition-all text-left relative overflow-hidden group">
-            <div className="w-12 h-12 rounded-2xl bg-violet-50 border border-violet-100 flex items-center justify-center text-xl mb-4 text-violet-600">
-              🗓️
+          <div className="bg-[#0c0d14] p-6 rounded-2xl border border-slate-800/80 relative overflow-hidden text-left shadow-xl group">
+            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent" />
+            <div className="w-10 h-10 rounded-xl bg-indigo-500/5 border border-indigo-500/20 flex items-center justify-center text-indigo-400 mb-4 shadow-inner">
+              <FiBriefcase className="w-4 h-4" />
             </div>
-            <p className="text-[10px] font-black text-violet-500 uppercase tracking-widest mb-1">Upcoming Interviews</p>
-            <h2 className="text-3xl font-black text-violet-600 tracking-tight leading-none mt-2">{upcomingInterviewsCount}</h2>
-            <div className="absolute right-0 bottom-0 text-slate-100/40 text-8xl font-black translate-x-4 translate-y-4 select-none pointer-events-none group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
-              🗓️
+            <h3 className="text-sm font-bold font-mono uppercase tracking-wider text-white">01 / Vector Matching</h3>
+            <p className="text-slate-400 text-xs mt-2 leading-relaxed">
+              Bypass broken keyword matching filters. Spendrix directly assesses coding frameworks and quantitative engineering capabilities via secure pipeline tests.
+            </p>
+          </div>
+
+          <div className="bg-[#0c0d14] p-6 rounded-2xl border border-slate-800/80 relative overflow-hidden text-left shadow-xl group">
+            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent shadow-[0_0_15px_rgba(52,211,153,0.1)]" />
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/5 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-4 shadow-inner">
+              <FiTrendingUp className="w-4 h-4 shadow-[0_0_10px_rgba(52,211,153,0.2)]" />
+            </div>
+            <h3 className="text-sm font-bold font-mono uppercase tracking-wider text-white">02 / Clear Capital Yield</h3>
+            <p className="text-slate-400 text-xs mt-2 leading-relaxed">
+              Match target salaries instantly. Transparent financial metrics reduce negotiation lifecycles from average 14-day intervals down to hours.
+            </p>
+          </div>
+
+          <div className="bg-[#0c0d14] p-6 rounded-2xl border border-slate-800/80 relative overflow-hidden text-left shadow-xl group">
+            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-purple-500/30 to-transparent" />
+            <div className="w-10 h-10 rounded-xl bg-purple-500/5 border border-purple-500/20 flex items-center justify-center text-purple-400 mb-4 shadow-inner">
+              <FiShield className="w-4 h-4" />
+            </div>
+            <h3 className="text-sm font-bold font-mono uppercase tracking-wider text-white">03 / Secure Loop Architecture</h3>
+            <p className="text-slate-400 text-xs mt-2 leading-relaxed">
+              Direct telemetry scheduling endpoints synchronize evaluation windows with engineering managers without third-party communication layers.
+            </p>
+          </div>
+
+        </section>
+
+        {/* CENTRAL PREVIEW: INTERACTIVE PLATFORM SIMULATOR */}
+        <section className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-900 pb-4">
+            <div className="text-left">
+              <span className="text-[9px] font-mono font-bold text-indigo-400 uppercase tracking-widest block">Live Sandbox Console</span>
+              <h3 className="text-xl font-bold text-white tracking-tight">Explore the Terminal Blueprint</h3>
+            </div>
+
+            {/* Platform View Workspace Tabs Switcher */}
+            <div className="flex bg-[#0c0d14] p-1.5 border border-slate-800 rounded-xl w-fit space-x-1 shadow-inner font-mono self-start sm:self-auto">
+              <button
+                onClick={() => setActiveTab("JOBS")}
+                className={`px-5 py-2 rounded-lg text-[10px] font-bold tracking-wider uppercase transition-all duration-300 cursor-pointer flex items-center gap-2 ${activeTab === "JOBS" ? 'bg-indigo-600 text-white shadow-[0_0_15px_rgba(99,102,241,0.4)]' : 'text-slate-500 hover:text-slate-400'}`}
+              >
+                <FiCompass className="w-3.5 h-3.5" />
+                Position Matrix Preview ({sampleJobs.length})
+              </button>
+              <button
+                onClick={() => setActiveTab("INTERVIEWS")}
+                className={`px-5 py-2 rounded-lg text-[10px] font-bold tracking-wider uppercase transition-all duration-300 cursor-pointer flex items-center gap-2 ${activeTab === "INTERVIEWS" ? 'bg-indigo-600 text-white shadow-[0_0_15px_rgba(99,102,241,0.4)]' : 'text-slate-500 hover:text-slate-400'}`}
+              >
+                <FiCpu className="w-3.5 h-3.5" />
+                Assessment Loops ({sampleInterviews.length})
+              </button>
             </div>
           </div>
 
-          <div className="bg-white p-8 rounded-[2rem] border border-slate-200/60 shadow-sm hover:shadow-md transition-all text-left relative overflow-hidden group">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-xl mb-4 text-emerald-600">
-              ✨
-            </div>
-            <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1">Shortlisted status</p>
-            <h2 className="text-3xl font-black text-slate-800 tracking-tight leading-none mt-2">
-              {shortlistedCount}
-            </h2>
-            <div className="absolute right-0 bottom-0 text-slate-100/40 text-8xl font-black translate-x-4 translate-y-4 select-none pointer-events-none group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
-              ✨
-            </div>
-          </div>
-        </div>
-
-        {/* Workspace Matrix Tabs */}
-        <div className="flex bg-slate-100/80 p-1.5 border border-slate-200/40 rounded-2xl w-fit space-x-1 shadow-sm">
-          <button
-            onClick={() => setActiveTab("JOBS")}
-            className={`px-6 py-2.5 rounded-xl text-xs font-black tracking-widest uppercase transition-all duration-300 cursor-pointer ${activeTab === "JOBS" ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-400 hover:text-slate-700'}`}
-          >
-            Position Matching Matrix ({jobs.length})
-          </button>
-          <button
-            onClick={() => setActiveTab("INTERVIEWS")}
-            className={`px-6 py-2.5 rounded-xl text-xs font-black tracking-widest uppercase transition-all duration-300 cursor-pointer ${activeTab === "INTERVIEWS" ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-400 hover:text-slate-700'}`}
-          >
-            Interview Schemas ({interviews.length})
-          </button>
-        </div>
-
-        {/* Content Render Blocks */}
-        {loading ? (
-          <div className="space-y-4">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="bg-white p-6 rounded-[2rem] border border-slate-200/50 shadow-sm animate-pulse h-28 flex items-center justify-between">
-                <div className="space-y-2.5 w-1/3">
-                  <div className="h-4 bg-slate-200 rounded-md w-3/4"></div>
-                  <div className="h-3 bg-slate-200 rounded-md w-1/2"></div>
-                </div>
-                <div className="h-10 bg-slate-200 rounded-xl w-28"></div>
-              </div>
-            ))}
-          </div>
-        ) : activeTab === "JOBS" ? (
-          
-          /* --- JOB POSTING CARD GRID --- */
-          <div className="grid grid-cols-1 gap-4 text-left">
-            {jobs.length === 0 ? (
-              <div className="bg-white py-20 text-center rounded-[2.5rem] border border-slate-200 italic font-bold text-slate-400 shadow-sm flex flex-col items-center justify-center p-8">
-                <span className="text-3xl mb-2">🔍</span>
-                <p className="text-xs uppercase tracking-widest">No active job vacancies detected in repository</p>
-              </div>
-            ) : (
-              jobs.map(job => (
-                <div key={job.id} className="bg-white p-6 rounded-[2rem] border border-slate-200/80 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 transition-all duration-300 hover:border-slate-300 hover:shadow-md">
-                  <div className="space-y-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="font-extrabold text-slate-800 text-base tracking-tight">{job.title}</h3>
-                      <span className={`text-[8px] font-black uppercase tracking-wider border px-2.5 py-0.5 rounded-lg ${getStatusBadge(job.status)}`}>
-                        {getStatusLabel(job.status)}
+          {/* ACTIVE WORKSPACE RENDER PREVIEW */}
+          {activeTab === "JOBS" ? (
+            <div className="grid grid-cols-1 gap-4 text-left">
+              {sampleJobs.map(job => (
+                <div key={job.id} className="bg-[#0c0d14] p-6 rounded-2xl border border-slate-800/60 shadow-lg flex flex-col md:flex-row md:items-center justify-between gap-6 group relative overflow-hidden">
+                  <div className="space-y-1.5 relative z-10">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <h4 className="font-bold text-white text-base tracking-tight">{job.title}</h4>
+                      <span className={`text-[8px] font-mono font-bold uppercase tracking-wider border px-2 py-0.5 rounded ${getStatusBadge(job.status)}`}>
+                        {job.status === 'EXPLORING' ? 'Open Entry' : job.status}
                       </span>
                     </div>
-                    <p className="text-indigo-655 text-xs font-black uppercase tracking-widest">{job.company}</p>
-                    
-                    <div className="flex flex-wrap gap-x-4 gap-y-1 pt-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                      <span className="flex items-center"><span className="mr-1">📍</span> {job.location}</span>
-                      <span className="flex items-center"><span className="mr-1">💰</span> {job.salary}</span>
-                      {job.applied_date && (
-                        <span className="text-slate-400 font-medium">Applied On: {new Date(job.applied_date).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                      )}
+                    <p className="text-indigo-400 text-xs font-semibold tracking-wide font-mono">{job.company}</p>
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 pt-1.5 text-[10px] font-mono text-slate-500 uppercase tracking-wider">
+                      <span className="flex items-center gap-1"><span className="text-indigo-500">📍</span> {job.location}</span>
+                      <span className="flex items-center gap-1"><span className="text-emerald-400">💰</span> {job.salary}</span>
                     </div>
                   </div>
-
-                  <div className="flex items-center gap-3 self-end md:self-center shrink-0">
-                    {job.status === 'EXPLORING' ? (
-                      <button
-                        onClick={() => handleApplyJob(job.id)}
-                        className="px-5 py-3 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all hover:bg-slate-850 hover:scale-102 active:scale-98 shadow-md shadow-slate-900/10 cursor-pointer"
-                      >
-                        Transmit Application
-                      </button>
-                    ) : (
-                      <button disabled className="px-5 py-3 bg-slate-50 border border-slate-200/60 text-slate-455 rounded-xl text-[10px] font-black uppercase tracking-widest cursor-not-allowed">
-                        In Review Cycle
-                      </button>
-                    )}
-                  </div>
+                  <button 
+                    onClick={() => navigate('/register')}
+                    className="px-5 py-2.5 bg-slate-900 hover:bg-slate-850 text-white border border-slate-800 rounded-xl text-[10px] font-mono font-bold uppercase tracking-widest transition-all cursor-pointer relative z-10"
+                  >
+                    View Parameters
+                  </button>
                 </div>
-              ))
-            )}
-          </div>
-
-        ) : (
-          
-          /* --- INTERVIEWS DIRECTORY TABLE --- */
-          <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden text-left">
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse text-left">
-                <thead>
-                  <tr className="bg-slate-900 text-slate-400 text-[10px] font-black uppercase tracking-[0.18em] border-b border-slate-800">
-                    <th className="py-5 px-6">Scheduled Assessment</th>
-                    <th className="py-5 px-6">Assigned Interviewer</th>
-                    <th className="py-5 px-6">Timeline Matrix</th>
-                    <th className="py-5 px-6">Method Medium</th>
-                    <th className="py-5 px-6 text-right">Confirmation Status</th>
-                  </tr>
-                </thead>
-                <tbody className="text-xs divide-y divide-slate-100">
-                  {interviews.length === 0 ? (
-                    <tr>
-                      <td colSpan="5" className="py-20 text-center bg-white italic font-bold text-slate-400 p-8">
-                        <span className="text-3xl mb-2 block">🗓️</span>
-                        <p className="text-[10px] uppercase tracking-widest">No active interview loops detected for candidate</p>
-                      </td>
+              ))}
+            </div>
+          ) : (
+            <div className="bg-[#0c0d14] rounded-2xl border border-slate-800/80 shadow-2xl overflow-hidden text-left">
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse text-left">
+                  <thead>
+                    <tr className="bg-slate-950 text-slate-500 text-[10px] font-mono font-bold uppercase tracking-[0.15em] border-b border-slate-900">
+                      <th className="py-4 px-6">System Assessment Node</th>
+                      <th className="py-4 px-6">Assigned Evaluator</th>
+                      <th className="py-4 px-6">Timeline Coordinate</th>
+                      <th className="py-4 px-6 text-right">Verification Sync</th>
                     </tr>
-                  ) : (
-                    interviews.map(interview => (
-                      <tr key={interview.id} className="bg-white transition-colors hover:bg-slate-50/50">
-                        <td className="py-5 px-6">
-                          <div className="font-black text-slate-800 text-sm tracking-tight mb-1">{interview.job_title}</div>
-                          <div className="text-slate-400 text-[9px] font-bold uppercase tracking-wider">Assessment Session</div>
+                  </thead>
+                  <tbody className="text-xs divide-y divide-slate-900 font-mono">
+                    {sampleInterviews.map(interview => (
+                      <tr key={interview.id} className="bg-transparent hover:bg-slate-900/10">
+                        <td className="py-5 px-6 font-sans">
+                          <div className="font-bold text-white text-sm tracking-tight mb-0.5">{interview.job_title}</div>
+                          <div className="text-slate-500 text-[9px] font-mono font-bold uppercase tracking-wider">Assessment Matrix</div>
                         </td>
-                        <td className="py-5 px-6 uppercase tracking-widest text-indigo-650 font-black text-[10px]">
-                          {interview.interviewer_name || "Pending Assignment"}
+                        <td className="py-5 px-6 text-[10px] tracking-wider text-indigo-400 font-bold">
+                          {interview.interviewer_name}
                         </td>
-                        <td className="py-5 px-6 font-bold text-slate-600 whitespace-nowrap">
-                          <div>{new Date(interview.sheduled_date).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</div>
-                          <div className="text-[10px] font-medium text-slate-400 mt-0.5">{new Date(interview.sheduled_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                        <td className="py-5 px-6 text-slate-300">
+                          <div className="text-slate-200">{interview.dateString}</div>
+                          <div className="text-[10px] font-medium text-slate-500 mt-0.5">{interview.timeString}</div>
                         </td>
-                        <td className="py-5 px-6 whitespace-nowrap">
-                          {interview.meeting_link ? (
-                            <a 
-                              href={interview.meeting_link}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="inline-block px-3.5 py-1.5 bg-indigo-50 border border-indigo-150 text-indigo-650 font-bold rounded-lg uppercase text-[9px] tracking-wider hover:bg-indigo-100/70 transition-colors shadow-sm cursor-pointer"
-                            >
-                              🔗 Join Session
-                            </a>
-                          ) : (
-                            <span className="inline-block px-3.5 py-1.5 bg-slate-100 border border-slate-200 text-slate-450 font-bold rounded-lg uppercase text-[9px] tracking-wider select-none">
-                              🖥️ Link Pending
-                            </span>
-                          )}
-                        </td>
-                        <td className="py-5 px-6 text-right whitespace-nowrap">
-                          {interview.status === 'SHEDULED' || interview.status === 'scheduled' ? (
-                            <span className="text-[8px] font-black uppercase tracking-wider bg-emerald-50 border border-emerald-100 text-emerald-600 px-2.5 py-1 rounded-md">
-                              ✓ Scheduled Secure
-                            </span>
-                          ) : (
-                            <span className="text-[8px] font-black uppercase tracking-wider bg-amber-50 border border-amber-100 text-amber-600 px-2.5 py-1 rounded-md">
-                              {interview.status}
-                            </span>
-                          )}
+                        <td className="py-5 px-6 text-right">
+                          <span className="text-[8px] font-bold uppercase tracking-wider bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded shadow-[0_0_15px_rgba(52,211,153,0.05)]">
+                            ● Synchronized
+                          </span>
                         </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </section>
+
+        {/* DUAL GATEWAY ACTION CARDS */}
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 text-left">
+          
+          <div className="p-8 bg-gradient-to-b from-[#0e111a] to-[#0c0d14] border border-indigo-500/10 rounded-3xl relative overflow-hidden shadow-xl group">
+            <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-600/[0.01] blur-3xl rounded-full pointer-events-none" />
+            <div className="space-y-4">
+              <div className="w-9 h-9 rounded-xl bg-indigo-500/5 border border-indigo-500/20 flex items-center justify-center text-indigo-400 shadow-sm">
+                <FiZap className="w-4 h-4" />
+              </div>
+              <h3 className="text-lg font-bold text-white tracking-tight">For Elite Engineering Talent</h3>
+              <p className="text-slate-400 text-xs leading-relaxed max-w-sm">
+                Gain entry into direct tracking indexes. Upload your verifiable credentials vector card and connect straight to tech leads, skipping screening loops.
+              </p>
+              <button 
+                onClick={() => navigate('/register?type=candidate')}
+                className="mt-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-mono font-bold text-[10px] uppercase tracking-widest rounded-xl transition-all shadow-[0_4px_20px_rgba(99,102,241,0.2)] flex items-center gap-2 group cursor-pointer border-0 outline-none"
+              >
+                Access Candidate Network
+                <FiArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+              </button>
             </div>
           </div>
-        )}
+
+          <div className="p-8 bg-gradient-to-b from-[#0e111a] to-[#0c0d14] border border-slate-800/80 rounded-3xl relative overflow-hidden shadow-xl group">
+            <div className="space-y-4">
+              <div className="w-9 h-9 rounded-xl bg-emerald-500/5 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shadow-sm">
+                <FiLayers className="w-4 h-4" />
+              </div>
+              <h3 className="text-lg font-bold text-white tracking-tight">For Scale Operations</h3>
+              <p className="text-slate-400 text-xs leading-relaxed max-w-sm">
+                Deploy exact computational project goals. Tap into pre-evaluated technical portfolios tailored natively to your operational tech arrays.
+              </p>
+              <button 
+                onClick={() => navigate('/register?type=employer')}
+                className="mt-2 px-5 py-2.5 bg-slate-900 hover:bg-slate-850 text-white font-mono font-bold text-[10px] uppercase tracking-widest rounded-xl border border-slate-800 transition-all flex items-center gap-2 group cursor-pointer outline-none"
+              >
+                Provision Corporate Seat
+                <FiArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1 text-emerald-400" />
+              </button>
+            </div>
+          </div>
+
+        </section>
+
       </main>
     </div>
   );
