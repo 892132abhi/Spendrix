@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import api from "../api/instance";
 import { toast } from "react-hot-toast";
 import { 
   FiUploadCloud, 
@@ -26,7 +26,9 @@ const ResumeAnalyzer = () => {
 
     setLoading(true);
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/ai/resume/analyze_resume`, formData);
+      const response = await api.post(`ai/resume/`, formData, {
+  headers: { "Content-Type": "multipart/form-data" }
+});
       setAnalysis(response.data);
       toast.success("Resume analyzed successfully!");
     } catch (error) {
