@@ -13,15 +13,6 @@ services:
       - backend
       - ai_service
 
-  db:
-    image: postgres:15-alpine
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_DB: spendrix_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 2003
-
   redis:
     image: redis:7-alpine
 
@@ -50,15 +41,9 @@ services:
     env_file:
       - ./Backend/.env
     environment:
-      DB_HOST: db
-      DB_NAME: spendrix_db
-      DB_USER: postgres
-      DB_PASSWORD: 2003
-      DB_PORT: 5432
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_RESULT_BACKEND: redis://redis:6379/0
     depends_on:
-      - db
       - redis
 
   celery:
@@ -69,15 +54,9 @@ services:
     env_file:
       - ./Backend/.env
     environment:
-      DB_HOST: db
-      DB_NAME: spendrix_db
-      DB_USER: postgres
-      DB_PASSWORD: 2003
-      DB_PORT: 5432
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_RESULT_BACKEND: redis://redis:6379/0
     depends_on:
-      - db
       - redis
       - backend
       - ai_service
@@ -90,15 +69,9 @@ services:
     env_file:
       - ./Backend/.env
     environment:
-      DB_HOST: db
-      DB_NAME: spendrix_db
-      DB_USER: postgres
-      DB_PASSWORD: 2003
-      DB_PORT: 5432
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_RESULT_BACKEND: redis://redis:6379/0
     depends_on:
-      - db
       - redis
       - backend
       - celery
@@ -111,19 +84,16 @@ services:
     volumes:
       - ./AI_service:/app
     environment:
-      DB_HOST: db
       REDIS_URL: redis://redis:6379/1
       GEMINI_API_KEY: ${GEMINI_API_KEY}
       QDRANT_HOST: qdrant
       QDRANT_PORT: 6333
       MONGO_URI: mongodb://mongodb:27017
     depends_on:
-      - db
       - redis
       - mongodb
 
 volumes:
-  postgres_data:
   django_static:
   qdrant_data:
   mongodb_data:
