@@ -69,7 +69,9 @@ const HRDashboard = () => {
     },
     { 
       label: 'Total Jobs', 
-      value: statsData?.Total_jobs || 0, 
+     color: 'text-amber-500', 
+      bg: 'bg-amber-50/70 border-amber-100/60',
+       value: statsData?.Total_jobs || 0, 
       icon: <FiBriefcase className="w-6 h-6" />, 
       color: 'text-rose-500', 
       bg: 'bg-rose-50/70 border-rose-100/60',
@@ -79,18 +81,10 @@ const HRDashboard = () => {
       label: 'Active Interviews', 
       value: statsData?.Total_Interviewer || 0, 
       icon: <FiCalendar className="w-6 h-6" />, 
-      color: 'text-amber-500', 
-      bg: 'bg-amber-50/70 border-amber-100/60',
       trend: 'Live' 
     },
   ];
 
-  const activities = [
-    { text: "New applicant applied for Django Developer", type: "apply", time: "Processed Just Now", icon: <FiUser className="w-4.5 h-4.5 text-indigo-650" />, bg: "bg-indigo-550/10 border-indigo-100/50" },
-    { text: "Interview scheduled for React Developer role", type: "schedule", time: "10 mins ago", icon: <FiCalendar className="w-4.5 h-4.5 text-amber-600" />, bg: "bg-amber-500/10 border-amber-100/50" },
-    { text: "Offer sent to Arjun Nair", type: "offer", time: "1 hr ago", icon: <FiUserCheck className="w-4.5 h-4.5 text-emerald-600" />, bg: "bg-emerald-500/10 border-emerald-100/50" },
-    { text: "Backend Developer position closed", type: "close", time: "2 hrs ago", icon: <FiBriefcase className="w-4.5 h-4.5 text-rose-600" />, bg: "bg-rose-500/10 border-rose-100/50" },
-  ];
 
   return (
     <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in duration-500 px-6 pb-16 font-sans">
