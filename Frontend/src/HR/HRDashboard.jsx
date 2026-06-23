@@ -147,26 +147,6 @@ const HRDashboard = () => {
               <FiArrowRight className="w-3.5 h-3.5" />
             </button>
         </div>
-
-        <div className="grid gap-4">
-            {activities.map((activity, index) => (
-                <div 
-                  key={index} 
-                  className="flex items-center gap-5 p-5 bg-slate-50/70 hover:bg-slate-50 border border-slate-100 rounded-2xl hover:border-slate-200 hover:-translate-x-0.5 transition-all cursor-pointer group"
-                >
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center border shadow-sm shrink-0 ${activity.bg}`}>
-                        {activity.icon}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                        <p className="text-sm font-bold text-slate-700 group-hover:text-indigo-650 transition-colors truncate">{activity.text}</p>
-                        <p className="text-[9px] font-extrabold text-slate-400 uppercase mt-1 tracking-wider flex items-center gap-1">
-                          <FiClock className="w-3 h-3" />
-                          {activity.time}
-                        </p>
-                    </div>
-                </div>
-            ))}
-        </div>
       </section>
     </div>
   );
