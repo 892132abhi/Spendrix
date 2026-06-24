@@ -30,7 +30,7 @@ const handleGenerateJD = async () => {
   const loadingToast = toast.loading('Generating job description...');
 
   try {
-    const res = await api.post('ai_gateway/jobs/generate-jd/', {
+    const res = await api.post('ai/jobs/generate-jd/', {
       title,
       job_type,
       experience,
