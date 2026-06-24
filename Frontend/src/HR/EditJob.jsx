@@ -8,6 +8,7 @@ const EditJobPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [generatingJD, setGeneratingJD] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -39,6 +40,37 @@ const EditJobPage = () => {
       ...formData,
       [name]: name === 'experience' ? (value === "" ? 0 : parseInt(value)) : value
     });
+  };
+
+  const handleGenerateJD = async () => {
+    const { title, job_type, experience, skills, location } = formData;
+
+    if (!title || !job_type || !skills) {
+      toast.error("Fill in Job Title, Job Type and Skills first");
+      return;
+    }
+
+    setGeneratingJD(true);
+    const loadingToast = toast.loading('Generating job description...');
+
+    try {
+      const res = await api.post('ai/jobs/generate-jd/', {
+        title,
+        job_type,
+        experience,
+        skills,
+        location,
+      });
+
+      setFormData(prev => ({ ...prev, description: res.data.description }));
+      toast.success('JD generated — review and edit before saving', { id: loadingToast });
+    } catch (err) {
+      console.error("JD generation failed:", err);
+      const msg = err.response?.data?.error || err.response?.data?.detail || "Failed to generate JD";
+      toast.error(msg, { id: loadingToast });
+    } finally {
+      setGeneratingJD(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -184,9 +216,20 @@ const EditJobPage = () => {
 
         {/* ROLE DESCRIPTION */}
         <section className="space-y-4">
-          <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
-            <FiFileText className="text-indigo-500 w-4.5 h-4.5" />
-            <h3 className="text-[11px] font-black text-slate-700 uppercase tracking-widest">Update Description</h3>
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div className="flex items-center gap-2">
+              <FiFileText className="text-indigo-500 w-4.5 h-4.5" />
+              <h3 className="text-[11px] font-black text-slate-700 uppercase tracking-widest">Update Description</h3>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleGenerateJD}
+              disabled={generatingJD}
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+            >
+              {generatingJD ? "Generating..." : "✨ Regenerate with AI"}
+            </button>
           </div>
 
           <textarea
