@@ -6,7 +6,7 @@ import {
   FiSearch, FiSliders, FiCalendar, FiClock, FiCheckCircle, 
   FiXCircle, FiMessageSquare, FiDownload, FiUser, FiPhone, 
   FiMapPin, FiBriefcase, FiCheck, FiChevronRight, FiAlertCircle,
-  FiEdit3
+  FiEdit3,FiVideo
 } from 'react-icons/fi';
 
 const getMediaUrl = (url) => {
