@@ -80,7 +80,6 @@ function App() {
       <Route path='/interviewer-profile' element={<InterviewerProfile/>}/>
       <Route path='/interviewer-editprofile' element={<InterviewerEditprofile/>}/>
       <Route path='candidate-list' element={<InterviewerCandidates/>}/>
-      <Route path='/assigned-interviews' element={<InterviewerSessions/>}/>
       <Route path='/feedback' element={<InterviewerFeedback/>}/>
       <Route path='/interviewer/chat/:sessionId' element={<InterviewerChat/>}/>
       <Route path='/interviewer-notification' element={<InterviewerNotifications/>}/>
