@@ -116,7 +116,7 @@ const InterviewerEditprofile = () => {
         headers: { 'Content-Type': undefined }
       });
       toast.success("Profile updated successfully!", { id: loadingToast });
-      navigate('/profile');
+      navigate('/interviewer-profile');
     } catch (err) {
       console.log(err.response?.data);
       toast.error("Update failed. Check your inputs.", { id: loadingToast });
