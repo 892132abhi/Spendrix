@@ -119,3 +119,40 @@ class AIAutoScheduleView(APIView):
             files=file_payload
         )
         return Response(result)
+    
+
+class JDGeneratorView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        if request.user.role != 'HR':
+            return Response(
+                {"detail": "Access Denied: Only HR can generate job descriptions."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        required = ["title", "job_type", "experience", "skills"]
+        missing = [f for f in required if not request.data.get(f)]
+        if missing:
+            return Response(
+                {"error": f"Missing fields: {', '.join(missing)}"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        company_name = None
+        if hasattr(request.user, 'profile') and request.user.profile.company:
+            company_name = request.user.profile.company.name
+
+        result = AIServiceClient.post(
+            "/jobs/generate",
+            json={
+                "title": request.data.get("title"),
+                "job_type": request.data.get("job_type"),
+                "experience": request.data.get("experience"),
+                "Qualification": request.data.get("Qualification"),
+                "skills": request.data.get("skills"),
+                "location": request.data.get("location"),
+                "company_name": company_name,
+            }
+        )
+        return Response(result)

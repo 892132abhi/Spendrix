@@ -5,6 +5,8 @@ from app.api.resume_analyzer import router as resume_router
 from app.api.job_recommender import router as job_router
 from app.api.interview_schedule import router as interview_router
 from app.api.rag_chat import router as rag_router
+from app.api.jd_generator import router as jd_router
+
 
 app = FastAPI(
     root_path="/ai"
@@ -37,6 +39,11 @@ app.include_router(
     rag_router,
     prefix="/workspace",
     tags=["AI RAG workspace"]
+)
+app.include_router(
+    jd_router,
+    prefix="/jobs",
+    tags=["JD Generator"]
 )
 
 @app.get("/")

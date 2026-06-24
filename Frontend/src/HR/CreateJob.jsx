@@ -6,7 +6,7 @@ import { FiArrowLeft, FiBriefcase, FiMapPin, FiCalendar, FiDollarSign, FiAward, 
 
 const CreateJobPage = () => {
   const navigate = useNavigate();
-
+  const [generatingJD, setGeneratingJD] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -19,7 +19,36 @@ const CreateJobPage = () => {
     job_status: 'OPEN',
     expiry_days: 3   // Default value remains 3
   });
+const handleGenerateJD = async () => {
+  const { title, job_type, experience, Qualification, skills, location } = formData;
 
+  if (!title || !job_type || !skills) {
+    toast.error("Fill in Job Title, Job Type and Skills first");
+    return;
+  }
+   setGeneratingJD(true);
+  const loadingToast = toast.loading('Generating job description...');
+
+  try {
+    const res = await api.post('ai_gateway/jobs/generate-jd/', {
+      title,
+      job_type,
+      experience,
+      Qualification,
+      skills,
+      location,
+    });
+
+    setFormData(prev => ({ ...prev, description: res.data.description }));
+    toast.success('JD generated — review and edit before publishing', { id: loadingToast });
+  } catch (err) {
+    console.error("JD generation failed:", err);
+    const msg = err.response?.data?.error || err.response?.data?.detail || "Failed to generate JD";
+    toast.error(msg, { id: loadingToast });
+  } finally {
+    setGeneratingJD(false);
+  }
+};
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -242,23 +271,34 @@ const CreateJobPage = () => {
         </section>
 
         {/* DESCRIPTION */}
-        <section className="space-y-4">
-          <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
-            <FiFileText className="text-indigo-500 w-4.5 h-4.5" />
-            <h3 className="text-[11px] font-black text-slate-700 uppercase tracking-widest">
-              Role Description
-            </h3>
-          </div>
+<section className="space-y-4">
+  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+    <div className="flex items-center gap-2">
+      <FiFileText className="text-indigo-500 w-4.5 h-4.5" />
+      <h3 className="text-[11px] font-black text-slate-700 uppercase tracking-widest">
+        Role Description
+      </h3>
+    </div>
 
-          <textarea
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            required
-            placeholder="Describe the responsibilities and day-to-day tasks..."
-            className="w-full px-5 py-4 bg-slate-50 border border-slate-200/70 rounded-2xl text-sm font-medium focus:bg-white focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 min-h-[180px] outline-none resize-y transition-all"
-          />
-        </section>
+    <button
+      type="button"
+      onClick={handleGenerateJD}
+      disabled={generatingJD}
+      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+    >
+      {generatingJD ? "Generating..." : "✨ Generate with AI"}
+    </button>
+  </div>
+
+  <textarea
+    name="description"
+    value={formData.description}
+    onChange={handleChange}
+    required
+    placeholder="Describe the responsibilities and day-to-day tasks, or click Generate with AI..."
+    className="w-full px-5 py-4 bg-slate-50 border border-slate-200/70 rounded-2xl text-sm font-medium focus:bg-white focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 min-h-[180px] outline-none resize-y transition-all"
+  />
+</section>
 
         {/* BUTTONS */}
         <div className="pt-8 border-t border-slate-100 flex flex-col sm:flex-row gap-4">
@@ -282,4 +322,4 @@ const CreateJobPage = () => {
   );
 };
 
-export default CreateJobPage;
+export default CreateJobPage;
