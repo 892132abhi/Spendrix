@@ -140,26 +140,6 @@ const InterviewerProfilePage = () => {
               </div>
             </div>
           </section>
-
-          {/* BIOGRAPHY PANEL */}
-          {profile?.bio && (
-            <section className="bg-white rounded-3xl border border-slate-200/60 p-8 shadow-sm">
-              <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
-                <FiMessageSquare className="w-4 h-4 text-slate-400" />
-                Biography
-              </h3>
-              <div className="p-5 bg-slate-50/70 rounded-2xl border border-slate-100 flex items-start gap-3">
-                <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
-                  <FiMessageSquare className="w-4.5 h-4.5" />
-                </div>
-                <div className="flex-1 min-w-0 text-left">
-                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1">Biography</p>
-                  <p className="text-sm font-semibold text-slate-650 leading-relaxed whitespace-pre-line text-slate-600">{profile.bio}</p>
-                </div>
-              </div>
-            </section>
-          )}
-
           {/* CREDENTIALS/RESUME PANEL */}
           <section className="bg-white rounded-3xl border border-slate-200/60 p-8 shadow-sm">
             <div className="flex justify-between items-center mb-6">
