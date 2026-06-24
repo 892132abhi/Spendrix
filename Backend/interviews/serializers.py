@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django.db import transaction
-
+import uuid
 from .models import Interview, InterviewInvitation
 from applications.models import Application
 from .tasks import send_interviewer_invitation_email
@@ -69,7 +69,8 @@ class InterviewSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         interviewer_email = validated_data.pop("interviewer_email", None)
         request = self.context.get("request")
-
+        if not validated_data.get("meeting_link"):
+            validated_data["meeting_link"] = f"https://meet.jit.si/spendrix-{uuid.uuid4().hex[:8]}"
         interview = Interview.objects.create(**validated_data)
 
         if interviewer_email:
