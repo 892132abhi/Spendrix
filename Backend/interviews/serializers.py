@@ -126,17 +126,18 @@ class AssignedInterviewCandidateSerializer(serializers.ModelSerializer):
             'role',
             'skills',
             'status',
-            'sheduled_date',  # Fixed spelling from 'sheduled_date'
+            'sheduled_date',  
             'phone',
             'experience_years',
             'meeting_link',
             'bio',
-            'profile_pic',     # Generates secure, signed AWS URL natively
-            'resume',          # Generates secure, signed AWS URL natively
+            'profile_pic',    
+            'resume',         
             'strength',
             'weakness',
             'decision_note',
-            'recruiter_name'
+            'recruiter_name',
+            'meeting_link'
         ]
 
 
