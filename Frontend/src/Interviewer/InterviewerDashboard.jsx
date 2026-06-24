@@ -159,7 +159,7 @@ const InterviewerDashboard = () => {
         </section>
 
         {/* --- RIGHT: EVALUATION PIPELINE --- */}
-        {/* <section className="lg:col-span-5 space-y-8 text-left">
+        <section className="lg:col-span-5 space-y-8 text-left">
           <div className="bg-slate-900 rounded-[4rem] p-10 shadow-2xl text-white relative overflow-hidden">
             <div className="relative z-10">
               <h3 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em] mb-8">Pending Evaluation</h3>
@@ -189,7 +189,7 @@ const InterviewerDashboard = () => {
               </div>
             </div>
             {/* Background Decoration */}
-            {/* <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-indigo-600 rounded-full blur-[80px] opacity-20"></div>
+            <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-indigo-600 rounded-full blur-[80px] opacity-20"></div>
           </div>
           
           <div className="bg-indigo-50 rounded-[3rem] p-8 border border-indigo-100 text-left">
@@ -198,7 +198,7 @@ const InterviewerDashboard = () => {
                Ensure your meeting environment is stable. Technical dossiers are automatically generated 5 minutes prior to the session start.
              </p>
           </div>
-        </section> */} */}
+        </section>
       </div>
     </div>
   );
