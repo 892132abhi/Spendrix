@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import api from '../api/instance';
 import { toast } from 'react-hot-toast';
 import { 
@@ -12,7 +12,7 @@ import {
 const getMediaUrl = (url) => {
   if (!url) return "";
   if (url.startsWith("http")) return url;
-  return `${window.location.origin}${url}`;
+  return `${import.meta.env.VITE_API_URL}${url}`;
 };
 
 const getCandidateAssessment = (candidate) => ({
@@ -23,7 +23,6 @@ const getCandidateAssessment = (candidate) => ({
 
 const InterviewerCandidates = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   
   const [candidates, setCandidates] = useState([]);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
@@ -43,7 +42,6 @@ const InterviewerCandidates = () => {
 
   // --- RESCHEDULE INTERVIEW MODAL STATES ---
   const [isRescheduling, setIsRescheduling] = useState(false);
-  const [showMobileDetail, setShowMobileDetail] = useState(false);
   const [editDate, setEditDate] = useState("");
   const [editTime, setEditTime] = useState("");
   const [rescheduleLoading, setRescheduleLoading] = useState(false);
@@ -95,19 +93,10 @@ const InterviewerCandidates = () => {
       });
 
       if (mappedData.length > 0) {
-        let nextSelection = null;
-        if (location.state?.selectCandidateId) {
-          nextSelection = mappedData.find(c => c.id === Number(location.state.selectCandidateId));
-        }
-        if (!nextSelection) {
-          const stillExists = mappedData.find(c => c.id === selectedCandidate?.id);
-          nextSelection = stillExists || mappedData[0];
-        }
+        const stillExists = mappedData.find(c => c.id === selectedCandidate?.id);
+        const nextSelection = stillExists || mappedData[0];
         setSelectedCandidate(nextSelection);
         setAssessment(getCandidateAssessment(nextSelection));
-        if (location.state?.selectCandidateId && nextSelection) {
-          setActiveDetailTab("notes");
-        }
       } else {
         setSelectedCandidate(null);
         setAssessment(getCandidateAssessment(null));
@@ -150,13 +139,11 @@ const InterviewerCandidates = () => {
     setAssessment(prev => ({ ...prev, [field]: value }));
   };
 
-const handleSelectCandidate = (candidate) => {
+  const handleSelectCandidate = (candidate) => {
     setSelectedCandidate(candidate);
     setAssessment(getCandidateAssessment(candidate));
-    setIsRescheduling(false);
-    setShowMobileDetail(true);
-};
-
+    setIsRescheduling(false); 
+  };
 
   const initRescheduleFields = () => {
     if (!selectedCandidate?.sheduled_date) return;
@@ -353,7 +340,7 @@ const handleSelectCandidate = (candidate) => {
       <div className="flex-1 flex gap-6 overflow-hidden min-h-0">
         
         {/* Left Side: Cards Stream Container */}
-        <div className={`w-full lg:w-[420px] h-full flex flex-col gap-4 ${showMobileDetail ? 'hidden lg:flex' : 'flex'}`}>
+        <div className="w-full lg:w-[420px] h-full flex flex-col gap-4">
           <div className="flex-1 overflow-y-auto space-y-3.5 pr-2 custom-scrollbar">
             {loading ? (
               <div className="space-y-4">
@@ -443,18 +430,12 @@ const handleSelectCandidate = (candidate) => {
         </div>
 
         {/* Right Side: Detail View Container */}
-        <div className={`${showMobileDetail ? 'flex' : 'hidden'} lg:flex flex-1 bg-white rounded-3xl border border-slate-200/60 shadow-sm overflow-hidden flex flex-col min-w-0`}>
+        <div className="${showMobileDetail ? 'flex' : 'hidden'} lg:flex flex-1 bg-white rounded-3xl border border-slate-200/60 shadow-sm overflow-hidden flex flex-col min-w-0">
           {selectedCandidate ? (
             <div className="flex flex-col h-full min-h-0">
               
               {/* Header profile info */}
               <div className="p-6 bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950 text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0">
-<button 
-    onClick={() => setShowMobileDetail(false)}
-    className="lg:hidden mb-2 text-xs text-slate-400 hover:text-white font-bold uppercase tracking-wider"
->
-    ← Back to list
-</button>
                 <div className="flex items-center gap-4">
                   <div className="w-16 h-16 bg-white/10 border border-white/20 rounded-2xl flex-shrink-0 overflow-hidden flex items-center justify-center font-extrabold text-2xl shadow-inner">
                     {selectedCandidate.profile_pic ? <img src={getMediaUrl(selectedCandidate.profile_pic)} className="w-full h-full object-cover animate-in fade-in-50" alt={selectedCandidate.name || "Candidate"}/> : (selectedCandidate.name || "C").charAt(0).toUpperCase()}
@@ -606,14 +587,14 @@ const handleSelectCandidate = (candidate) => {
                         </p>
                       </div>
 
-                      <div className="bg-slate-50/50 border border-slate-250/50 rounded-2xl p-5 space-y-4">
+                      {/* <div className="bg-slate-50/50 border border-slate-250/50 rounded-2xl p-5 space-y-4">
                         <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-800">Skill Competency Benchmark</h4>
                         <div className="space-y-3.5">
                           <SkillProgress label="System Architecture" percent={82} color="bg-indigo-600" />
                           <SkillProgress label="Code Refactoring" percent={90} color="bg-indigo-600" />
                           <SkillProgress label="Team Synchronicity" percent={75} color="bg-indigo-600" />
                         </div>
-                      </div>
+                      </div> */}
                     </div>
 
                     <div className="border border-slate-200 p-4.5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/30">
