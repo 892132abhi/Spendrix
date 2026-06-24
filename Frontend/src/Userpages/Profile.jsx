@@ -88,7 +88,7 @@ const ProfilePage = () => {
             </p>
 
             <div className="space-y-4 text-left pt-6 border-t border-slate-100">
-              <ProfileContactItem icon={<FiUser size={16} />} label="Username" value={`@${profile?.username}`} />
+              <ProfileContactItem icon={<FiUser size={16} />} label="Username" value={`${profile?.username}`} />
               <ProfileContactItem icon={<FiMail size={16} />} label="Email" value={profile?.email} />
               <ProfileContactItem icon={<FiPhone size={16} />} label="Phone" value={profile?.phone_number || 'Not provided'} />
             </div>

@@ -88,7 +88,7 @@ const InterviewerProfilePage = () => {
             </p>
 
             <div className="space-y-4.5 text-left pt-6 border-t border-slate-100">
-               <DetailItem label="Username" value={`@${profile?.username}`} icon={<FiUser className="w-4 h-4 text-slate-400" />} />
+               <DetailItem label="Username" value={`${profile?.username}`} icon={<FiUser className="w-4 h-4 text-slate-400" />} />
                <DetailItem label="Email" value={profile?.email} icon={<FiMail className="w-4 h-4 text-slate-400" />} />
                <DetailItem label="Phone" value={profile?.phone_number || 'Not provided'} icon={<FiPhone className="w-4 h-4 text-slate-400" />} />
             </div>
