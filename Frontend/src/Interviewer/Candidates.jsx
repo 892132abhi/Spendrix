@@ -587,14 +587,17 @@ const InterviewerCandidates = () => {
                         </p>
                       </div>
 
-                      {/* <div className="bg-slate-50/50 border border-slate-250/50 rounded-2xl p-5 space-y-4">
-                        <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-800">Skill Competency Benchmark</h4>
+                      <div className="bg-slate-50/50 border border-slate-250/50 rounded-2xl p-5 space-y-4">
+                        <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-800">AI Resume Score</h4>
                         <div className="space-y-3.5">
-                          <SkillProgress label="System Architecture" percent={82} color="bg-indigo-600" />
-                          <SkillProgress label="Code Refactoring" percent={90} color="bg-indigo-600" />
-                          <SkillProgress label="Team Synchronicity" percent={75} color="bg-indigo-600" />
+                          <SkillProgress label="Overall Resume Score" percent={selectedCandidate.ai_score || 0} color="bg-indigo-600" />
                         </div>
-                      </div> */}
+                        <p className="text-[10px] text-slate-400 font-semibold">
+                          {selectedCandidate.ai_score 
+                            ? `AI analyzed resume score: ${selectedCandidate.ai_score}/100` 
+                            : "Resume not yet analyzed"}
+                        </p>
+                      </div>
                     </div>
 
                     <div className="border border-slate-200 p-4.5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/30">
