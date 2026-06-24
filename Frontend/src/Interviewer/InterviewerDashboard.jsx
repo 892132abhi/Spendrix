@@ -132,7 +132,7 @@ const InterviewerDashboard = () => {
                         </p>
                       </div>
                     </div>
-                    {interview.meeting_link ? (
+                    {/* {interview.meeting_link ? (
                       <a 
                         href={interview.meeting_link} 
                         target="_blank" 
@@ -145,7 +145,7 @@ const InterviewerDashboard = () => {
                       <button disabled className="px-10 py-4 bg-slate-100 border border-slate-200/60 text-slate-400 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] cursor-not-allowed text-center shrink-0">
                         Link Pending
                       </button>
-                    )}
+                    )} */}
                   </div>
                 </div>
               ))
