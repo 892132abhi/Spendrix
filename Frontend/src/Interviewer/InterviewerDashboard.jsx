@@ -119,7 +119,7 @@ const InterviewerDashboard = () => {
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div className="flex gap-6 items-center">
                       <div className="w-16 h-16 bg-slate-900 text-white rounded-[1.5rem] flex flex-col items-center justify-center shadow-2xl shrink-0">
-                        <span className="text-[8px] font-bold uppercase opacity-60">Start</span>
+                        {/* <span className="text-[8px] font-bold uppercase opacity-60">Start</span> */}
                         <span className="text-lg font-black tracking-tighter italic">
                           {interview.sheduled_date ? new Date(interview.sheduled_date).getHours() : '00'}:00
                         </span>
