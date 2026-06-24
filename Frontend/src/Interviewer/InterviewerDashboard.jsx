@@ -189,7 +189,7 @@ const InterviewerDashboard = () => {
               </div>
             </div>
             {/* Background Decoration */}
-            <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-indigo-600 rounded-full blur-[80px] opacity-20"></div>
+            {/* <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-indigo-600 rounded-full blur-[80px] opacity-20"></div>
           </div>
           
           <div className="bg-indigo-50 rounded-[3rem] p-8 border border-indigo-100 text-left">
@@ -198,7 +198,7 @@ const InterviewerDashboard = () => {
                Ensure your meeting environment is stable. Technical dossiers are automatically generated 5 minutes prior to the session start.
              </p>
           </div>
-        </section> */}
+        </section> */} */}
       </div>
     </div>
   );
