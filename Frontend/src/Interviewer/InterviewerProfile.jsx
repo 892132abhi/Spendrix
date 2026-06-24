@@ -141,53 +141,21 @@ const InterviewerProfilePage = () => {
             </div>
           </section>
 
-          {/* PROFESSIONAL BACKGROUND PANEL */}
-          {(profile?.bio || (profile?.experience_years !== undefined && profile?.experience_years !== null)) && (
+          {/* BIOGRAPHY PANEL */}
+          {profile?.bio && (
             <section className="bg-white rounded-3xl border border-slate-200/60 p-8 shadow-sm">
               <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
-                <FiAward className="w-4 h-4 text-slate-400" />
-                Professional Background
+                <FiMessageSquare className="w-4 h-4 text-slate-400" />
+                Biography
               </h3>
-              <div className="space-y-6">
-                {(profile?.experience_years !== undefined && profile?.experience_years !== null) && (
-                  <div className="p-5 bg-slate-50/70 rounded-2xl border border-slate-100 flex items-start gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
-                      <FiAward className="w-4.5 h-4.5" />
-                    </div>
-                    <div>
-                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-0.5">Years of Experience</p>
-                      <p className="text-base font-extrabold text-slate-800">{profile.experience_years} Years</p>
-                    </div>
-                  </div>
-                )}
-                {profile?.bio && (
-                  <div className="p-5 bg-slate-50/70 rounded-2xl border border-slate-100 flex items-start gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
-                      <FiMessageSquare className="w-4.5 h-4.5" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1">Biography</p>
-                      <p className="text-sm font-semibold text-slate-600 leading-relaxed whitespace-pre-line">{profile.bio}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </section>
-          )}
-
-          {/* SKILLS PANEL */}
-          {profile?.skills && (
-            <section className="bg-white rounded-3xl border border-slate-200/60 p-8 shadow-sm">
-              <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
-                <FiBookOpen className="w-4 h-4 text-slate-400" />
-                Skills & Expertise
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {profile.skills.split(',').map((skill, index) => (
-                  <span key={index} className="px-3.5 py-1.5 bg-indigo-50 border border-indigo-100/60 text-indigo-700 text-[10px] font-black rounded-full shadow-sm">
-                    {skill.trim().toUpperCase()}
-                  </span>
-                ))}
+              <div className="p-5 bg-slate-50/70 rounded-2xl border border-slate-100 flex items-start gap-3">
+                <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                  <FiMessageSquare className="w-4.5 h-4.5" />
+                </div>
+                <div className="flex-1 min-w-0 text-left">
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1">Biography</p>
+                  <p className="text-sm font-semibold text-slate-650 leading-relaxed whitespace-pre-line text-slate-600">{profile.bio}</p>
+                </div>
               </div>
             </section>
           )}
