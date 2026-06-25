@@ -42,8 +42,8 @@ def set_auth_cookies(response, user):
         key='refresh_token',
         value=str(refresh),
         httponly=True,
-        secure=False,
-        samesite='Lax',
+        secure=True,
+        samesite='None',
         path='/api/accounts/token/refresh/',
     )
     return response
