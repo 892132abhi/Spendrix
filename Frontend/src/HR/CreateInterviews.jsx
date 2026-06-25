@@ -18,7 +18,6 @@ const CreateInterviewPage = () => {
     interviewer: '',
     interviewer_email: '',
     sheduled_date: '',
-    meeting_link: '',
     note: '',
     status: 'SHEDULED'
   });
@@ -72,7 +71,6 @@ const CreateInterviewPage = () => {
     const payload = {
       application: formData.application,
       sheduled_date: formData.sheduled_date,
-      meeting_link: formData.meeting_link,
       note: formData.note,
       status: formData.status
     };
@@ -270,26 +268,14 @@ const CreateInterviewPage = () => {
                   )}
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                    Meeting Link
-                  </label>
-                  <input
-                    type="url"
-                    name="meeting_link"
-                    value={formData.meeting_link}
-                    placeholder="https://zoom.us/..."
-                    onChange={handleChange}
-                    className={`w-full px-4 py-3 bg-slate-50 border rounded-2xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none ${
-                      errors.meeting_link ? 'border-red-500' : 'border-slate-100'
-                    }`}
-                  />
-                  {errors.meeting_link && (
-                    <p className="text-[10px] text-red-500 font-bold ml-1 italic">
-                      {errors.meeting_link[0]}
-                    </p>
-                  )}
-                </div>
+<div className="space-y-1">
+  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+    Meeting Link
+  </label>
+  <div className="w-full px-4 py-3 bg-indigo-50 border border-indigo-100 rounded-2xl text-xs text-indigo-600 font-semibold flex items-center gap-2">
+    🎥 A Jitsi video link will be auto-generated
+  </div>
+</div>
               </div>
 
               <div className="space-y-1">
