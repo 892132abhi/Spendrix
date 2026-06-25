@@ -268,14 +268,14 @@ const CreateInterviewPage = () => {
                   )}
                 </div>
 
-<div className="space-y-1">
-  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
-    Meeting Link
-  </label>
-  <div className="w-full px-4 py-3 bg-indigo-50 border border-indigo-100 rounded-2xl text-xs text-indigo-600 font-semibold flex items-center gap-2">
-    🎥 A Jitsi video link will be auto-generated
-  </div>
-</div>
+          <div className="space-y-1">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+           Meeting Link
+          </label>
+          <div className="w-full px-4 py-3 bg-indigo-50 border border-indigo-100 rounded-2xl text-xs text-indigo-600 font-semibold flex items-center gap-2">
+            🎥 A Jitsi video link will be auto-generated
+            </div>
+            </div>
               </div>
 
               <div className="space-y-1">
