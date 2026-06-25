@@ -1,20 +1,21 @@
 import os
-from google import genai
+import google.generativeai as genai
 from dotenv import load_dotenv
 
 load_dotenv()
 
-client = genai.Client(
-    api_key=os.getenv("GEMINI_API_KEY")
-)
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+if not GEMINI_API_KEY:
+    raise ValueError("GEMINI_API_KEY is missing")
 
-EMBEDDING_MODEL = "gemini-embedding-001"
+genai.configure(api_key=GEMINI_API_KEY)
+EMBEDDING_MODEL = "models/gemini-embedding-001"
 
-
-def embed(text: str):
-    response = client.models.embed_content(
+def embed(text: str, task_type: str = "RETRIEVAL_DOCUMENT"):
+    """Generates an vector coordinate array mapping text elements."""
+    response = genai.embed_content(
         model=EMBEDDING_MODEL,
-        contents=text,
+        content=text,
+        task_type=task_type,
     )
-
-    return response.embeddings[0].values
+    return response["embedding"]
