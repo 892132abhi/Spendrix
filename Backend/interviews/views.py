@@ -10,11 +10,16 @@ from django.utils import timezone
 from django.db.models import Q
 from rest_framework.pagination import PageNumberPagination
 import uuid
+import os
+import time
+from agora_token_builder import RtcTokenBuilder
 from jobs.models import Job
 from .service import run_ai_interview_scheduler
 from notifications.aws_notifications import send_push_notification
 # Create your views here.
 User =get_user_model()
+AGORA_APP_ID = os.getenv("AGORA_APP_ID")
+AGORA_APP_CERTIFICATE = os.getenv("AGORA_APP_CERTIFICATE")
 class InterviewCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -64,6 +69,46 @@ class InterviewCreateView(APIView):
             serializer.errors,
             status=status.HTTP_400_BAD_REQUEST
         )
+    
+class AgoraTokenView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, interview_id):
+        try:
+            interview = Interview.objects.get(id=interview_id)
+        except Interview.DoesNotExist:
+            return Response({"error": "Interview not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        user = request.user
+        is_candidate = interview.application.candidate_id == user.id
+        is_interviewer = interview.interviewer_id == user.id
+        # adjust this if HR should also be allowed in
+        is_hr = interview.hr_name_id == user.id
+
+        if not (is_candidate or is_interviewer or is_hr):
+            return Response({"error": "Not authorized for this interview"}, status=status.HTTP_403_FORBIDDEN)
+
+        channel_name = interview.meeting_link  # now a channel name, not a URL
+        uid = user.id  # numeric UID Agora expects
+        expiration_seconds = 3600
+        current_ts = int(time.time())
+        privilege_expired_ts = current_ts + expiration_seconds
+
+        token = RtcTokenBuilder.buildTokenWithUid(
+            AGORA_APP_ID,
+            AGORA_APP_CERTIFICATE,
+            channel_name,
+            uid,
+            1,  # role: 1 = publisher
+            privilege_expired_ts
+        )
+
+        return Response({
+            "app_id": AGORA_APP_ID,
+            "channel": channel_name,
+            "token": token,
+            "uid": uid,
+        })
     
 class InterViewerLookUp(APIView):
     permission_classes=[IsAuthenticated]

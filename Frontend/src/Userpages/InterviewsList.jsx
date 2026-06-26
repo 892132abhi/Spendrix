@@ -124,15 +124,13 @@ const CandidateInterviews = () => {
 
                   <div className="flex items-center gap-2">
                     {interview.meeting_link && (
-                      <a
-                        href={interview.meeting_link}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold uppercase tracking-wider transition-all shadow-sm flex items-center gap-2"
+                      <button
+                        onClick={() => navigate(`/interview/call/${interview.id}`)}
+                        className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold uppercase tracking-wider transition-all shadow-sm flex items-center gap-2 border-none cursor-pointer"
                       >
                         <FiVideo size={13} />
                         <span>Join Interview</span>
-                      </a>
+                      </button>
                     )}
                     <button 
                       onClick={() => navigate(`/chat/${interview.id}`)}

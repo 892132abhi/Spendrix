@@ -430,7 +430,7 @@ const InterviewerCandidates = () => {
         </div>
 
         {/* Right Side: Detail View Container */}
-        <div className="${showMobileDetail ? 'flex' : 'hidden'} lg:flex flex-1 bg-white rounded-3xl border border-slate-200/60 shadow-sm overflow-hidden flex flex-col min-w-0">
+        <div className="flex-1 bg-white rounded-3xl border border-slate-200/60 shadow-sm overflow-hidden flex flex-col min-w-0">
           {selectedCandidate ? (
             <div className="flex flex-col h-full min-h-0">
               
@@ -693,34 +693,31 @@ const InterviewerCandidates = () => {
               </div>
 
               {/* Bottom Actions Panel */}
-{/* Bottom Actions Panel */}
-<div className="p-4 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2 shrink-0">
-  <div className="flex gap-2">
-    <button 
-      onClick={() => handleDecision("REJECTED")} 
-      className="px-4.5 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-100 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all shadow-sm active:scale-95"
-    >
-      Reject Candidate
-    </button>
-    {selectedCandidate?.meeting_link && (
-      
-        <a href={selectedCandidate.meeting_link}
-        target="_blank"
-        rel="noreferrer"
-        className="px-4.5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-all shadow-sm active:scale-95 flex items-center gap-1.5"
-        >
-        <FiVideo className="w-3.5 h-3.5" />
-        Join Interview
-      </a>
-      )}
-  </div>
-  <button 
-    onClick={handleSaveAssessment} 
-    className="px-5.5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-all shadow-sm active:scale-95"
-  >
-    Save Assessment
-  </button>
-      </div>
+              <div className="p-4 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2 shrink-0">
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => handleDecision("REJECTED")} 
+                    className="px-4.5 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-100 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all shadow-sm active:scale-95"
+                  >
+                    Reject Candidate
+                  </button>
+                  {selectedCandidate?.meeting_link && (
+                    <button
+                      onClick={() => navigate(`/interview/call/${selectedCandidate.id}`)}
+                      className="px-4.5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-all shadow-sm active:scale-95 flex items-center gap-1.5 border-none cursor-pointer"
+                    >
+                      <FiVideo className="w-3.5 h-3.5" />
+                      Join Interview
+                    </button>
+                  )}
+                </div>
+                <button 
+                  onClick={handleSaveAssessment} 
+                  className="px-5.5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-all shadow-sm active:scale-95"
+                >
+                  Save Assessment
+                </button>
+              </div>
 
             </div>
           ) : (
