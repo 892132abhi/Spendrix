@@ -81,7 +81,7 @@ SIMPLE_JWT = {
     'AUTH_COOKIE_HTTP_ONLY': True,
     'AUTH_COOKIE_PATH': '/',
     'AUTH_COOKIE_SAMESITE': 'None',
-    'AUTH_COOKIE_SECURE': False, # Set to True in production (HTTPS)
+    'AUTH_COOKIE_SECURE': True, # Set to True in production (HTTPS)
 }
 
 CORS_ALLOW_CREDENTIALS = True  # Crucial for cookies to work
