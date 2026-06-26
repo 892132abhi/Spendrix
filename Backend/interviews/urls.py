@@ -14,4 +14,3 @@ urlpatterns=[
     path('candidate/<int:id>/decision/',views.CandidateDecisionUpdate.as_view(),name='candidate-decision'),
     path('candidate/<int:id>/reschedule/', views.RescheduleInterviewView.as_view(), name='candidate-reschedule'),
     path('agora/token/<int:interview_id>/', views.AgoraTokenView.as_view(), name='agora-token'),
-]   

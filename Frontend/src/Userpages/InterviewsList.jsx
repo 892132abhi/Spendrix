@@ -116,31 +116,31 @@ const CandidateInterviews = () => {
                 </div>
 
                 {/* Bottom Action Area */}
-                <div className="mt-6 pt-5 border-t border-slate-50 flex items-center justify-between gap-2 flex-wrap">
-                  <div className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold">
-                    <FiInfo size={13} className="text-slate-300" />
-                    <span>Evaluation session link</span>
-                  </div>
+<div className="mt-6 pt-5 border-t border-slate-50 flex items-center justify-between gap-2 flex-wrap">
+  <div className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold">
+    <FiInfo size={13} className="text-slate-300" />
+    <span>Evaluation session link</span>
+  </div>
 
-                  <div className="flex items-center gap-2">
-                    {interview.meeting_link && (
-                      <button
-                        onClick={() => navigate(`/interview/call/${interview.id}`)}
-                        className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold uppercase tracking-wider transition-all shadow-sm flex items-center gap-2 border-none cursor-pointer"
-                      >
-                        <FiVideo size={13} />
-                        <span>Join Interview</span>
-                      </button>
-                    )}
-                    <button 
-                      onClick={() => navigate(`/chat/${interview.id}`)}
-                      className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-indigo-600 text-white text-xs font-bold uppercase tracking-wider transition-all shadow-sm cursor-pointer flex items-center gap-2 border-none"
-                    >
-                      <FiMessageSquare size={13} />
-                      <span>Enter Chat Room</span>
-                    </button>
-                  </div>
-                </div>
+  <div className="flex items-center gap-2">
+    {interview.meeting_link && (
+      <button
+        onClick={() => navigate(`/interview/call/${interview.id}`)}
+        className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold uppercase tracking-wider transition-all shadow-sm flex items-center gap-2 border-none cursor-pointer"
+      >
+        <FiVideo size={13} />
+        <span>Join Interview</span>
+      </button>
+    )}
+    <button 
+      onClick={() => navigate(`/chat/${interview.id}`)}
+      className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-indigo-600 text-white text-xs font-bold uppercase tracking-wider transition-all shadow-sm cursor-pointer flex items-center gap-2 border-none"
+    >
+      <FiMessageSquare size={13} />
+      <span>Enter Chat Room</span>
+    </button>
+  </div>
+</div>
               </div>
             );
           })}

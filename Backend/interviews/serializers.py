@@ -72,8 +72,7 @@ class InterviewSerializer(serializers.ModelSerializer):
         if not validated_data.get("meeting_link"):
             application = validated_data.get("application")
             app_id = application.id if application else uuid.uuid4().hex[:6]
-            channel_name = f"spendrix-interview-{app_id}-{uuid.uuid4().hex[:4]}"
-            validated_data["meeting_link"] = channel_name
+            validated_data["meeting_link"] = f"spendrix-interview-{app_id}-{uuid.uuid4().hex[:4]}"
         interview = Interview.objects.create(**validated_data)
 
         if interviewer_email:
