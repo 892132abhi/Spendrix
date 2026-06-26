@@ -277,3 +277,6 @@ AI_SERVICE_URL = os.getenv(
     "AI_SERVICE_URL",
     "http://ai_service:8001"
 )
+
+AGORA_APP_ID = os.getenv("AGORA_APP_ID")
+AGORA_APP_CERTIFICATE = os.getenv("AGORA_APP_CERTIFICATE")
