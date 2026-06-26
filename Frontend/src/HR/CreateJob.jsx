@@ -286,7 +286,7 @@ const handleGenerateJD = async () => {
       disabled={generatingJD}
       className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
     >
-      {generatingJD ? "Generating..." : "✨ Generate with AI"}
+      {generatingJD ? "Generating..." : "Generate Jd"}
     </button>
   </div>
 
