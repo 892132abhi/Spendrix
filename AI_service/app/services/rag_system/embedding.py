@@ -17,5 +17,6 @@ def embed(text: str, task_type: str = "RETRIEVAL_DOCUMENT"):
         model=EMBEDDING_MODEL,
         content=text,
         task_type=task_type,
+        output_dimensionality=768
     )
     return response["embedding"]
