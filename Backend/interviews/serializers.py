@@ -70,7 +70,9 @@ class InterviewSerializer(serializers.ModelSerializer):
         interviewer_email = validated_data.pop("interviewer_email", None)
         request = self.context.get("request")
         if not validated_data.get("meeting_link"):
-            validated_data["meeting_link"] = f"https://meet.jit.si/spendrix-{uuid.uuid4().hex[:8]}"
+            application = validated_data.get("application")
+            app_id = application.id if application else uuid.uuid4().hex[:6]
+            validated_data["meeting_link"] = f"https://meet.jit.si/spendrix-interview-{app_id}-{uuid.uuid4().hex[:4]}"
         interview = Interview.objects.create(**validated_data)
 
         if interviewer_email:
