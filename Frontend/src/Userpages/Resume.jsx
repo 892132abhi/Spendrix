@@ -27,7 +27,7 @@ const ResumeAnalyzer = () => {
 
     setLoading(true);
     try {
-      const response = await api.post("ai/resume", formData);
+      const response = await api.post("ai/resume/", formData);
       setAnalysis(response.data);
       toast.success("Resume analyzed successfully!");
     } catch (error) {
