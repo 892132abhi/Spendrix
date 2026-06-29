@@ -44,6 +44,8 @@ import InterviewerEditprofile from './Interviewer/EditIntervieweProfile'
 import ResumeAnalyzer from './Userpages/Resume'
 import WorkspacePage from "./Userpages/AiWorkSpace";
 import VideoCallPage from './Userpages/VideoChat'
+import ProtectedRoute from './Authentication/ProtectedRoute'
+
 function App() {
 
   return (
@@ -54,52 +56,67 @@ function App() {
       <Route path='/verify-email' element={<VerifyEmail/>}/>
       <Route path='/reset-password' element={<ResetPassword/>}/>
       <Route path='/new-password' element={<SetNewPassword/>}/>
-    <Route element={<Navbar/>}>
-      <Route path='/admin-dashboard' element={<AdminDashboard/>}/>
-      <Route path='/admin-usermanagement' element={<UserManagement/>}/>
-      <Route path='/company-list'element={<CompaniesListPage/>}/>
-      <Route path='/hrjob-management' element={<JobManagement/>}/>
+      <Route element={<Navbar/>}>
+        
+        {/* Admin Protected Routes */}
+        <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
+          <Route path='/admin-dashboard' element={<AdminDashboard/>}/>
+          <Route path='/admin-usermanagement' element={<UserManagement/>}/>
+          <Route path='/company-list'element={<CompaniesListPage/>}/>
+          <Route path='/hrjob-management' element={<JobManagement/>}/>
+        </Route>
 
-      <Route path='/hr-dashboard' element={<HRDashboard/>}/>
-      <Route path='/hr-staff' element={<StaffManagement/>}/>
-      <Route path='/hr-jobs' element={<HRJobsPage/>}/>
-      <Route path='/applicants' element={<ApplicantsPage/>}/>
-      <Route path='/interviews' element={<InterviewsPage/>}/>
-      <Route path='/createinterview' element={<CreateInterviewPage/>}/>
-      <Route path='/my-company' element={<CompanyDetail/>}/>
-      <Route path='/create-company' element={<CreateCompanyPage/>}/>
-      <Route path='/createjob' element={<CreateJobPage/>}/>
-      <Route path="/editjob/:id" element={<EditJobPage />} />
-      <Route path='/hr-profile' element={<HrProfilePage/>}/>
-      <Route path='/hr-editprofile' element={<ProfileEdit/>}/>
-      <Route path='/hr-notification' element={<HRNotificationPage/>}/>
-      <Route path='/hr/chat/:target/:sessionId' element={<ChatPageHR/>}/>
+        {/* HR Protected Routes */}
+        <Route element={<ProtectedRoute allowedRoles={['HR']} />}>
+          <Route path='/hr-dashboard' element={<HRDashboard/>}/>
+          <Route path='/hr-staff' element={<StaffManagement/>}/>
+          <Route path='/hr-jobs' element={<HRJobsPage/>}/>
+          <Route path='/applicants' element={<ApplicantsPage/>}/>
+          <Route path='/interviews' element={<InterviewsPage/>}/>
+          <Route path='/createinterview' element={<CreateInterviewPage/>}/>
+          <Route path='/my-company' element={<CompanyDetail/>}/>
+          <Route path='/create-company' element={<CreateCompanyPage/>}/>
+          <Route path='/createjob' element={<CreateJobPage/>}/>
+          <Route path="/editjob/:id" element={<EditJobPage />} />
+          <Route path='/hr-profile' element={<HrProfilePage/>}/>
+          <Route path='/hr-editprofile' element={<ProfileEdit/>}/>
+          <Route path='/hr-notification' element={<HRNotificationPage/>}/>
+          <Route path='/hr/chat/:target/:sessionId' element={<ChatPageHR/>}/>
+        </Route>
 
+        {/* Interviewer Protected Routes */}
+        <Route element={<ProtectedRoute allowedRoles={['INTERVIEWER']} />}>
+          <Route path='/interviewer-dashboard' element={<InterviewerDashboard/>}/>
+          <Route path='/interviewer-profile' element={<InterviewerProfile/>}/>
+          <Route path='/interviewer-editprofile' element={<InterviewerEditprofile/>}/>
+          <Route path='candidate-list' element={<InterviewerCandidates/>}/>
+          <Route path='/feedback' element={<InterviewerFeedback/>}/>
+          <Route path='/interviewer/chat/:sessionId' element={<InterviewerChat/>}/>
+          <Route path='/interviewer-notification' element={<InterviewerNotifications/>}/>
+        </Route>
 
-      <Route path='/interviewer-dashboard' element={<InterviewerDashboard/>}/>
-      <Route path='/interviewer-profile' element={<InterviewerProfile/>}/>
-      <Route path='/interviewer-editprofile' element={<InterviewerEditprofile/>}/>
-      <Route path='candidate-list' element={<InterviewerCandidates/>}/>
-      <Route path='/feedback' element={<InterviewerFeedback/>}/>
-      <Route path='/interviewer/chat/:sessionId' element={<InterviewerChat/>}/>
-      <Route path='/interviewer-notification' element={<InterviewerNotifications/>}/>
+        {/* Shared Protected Video Call Route */}
+        <Route element={<ProtectedRoute allowedRoles={['CANDIDATE', 'INTERVIEWER', 'HR']} />}>
+          <Route path="/interview/call/:interviewId" element={<VideoCallPage />} />
+        </Route>
 
-      <Route path="/interview/call/:interviewId" element={<VideoCallPage />} />
+        {/* Candidate Protected Routes */}
+        <Route element={<ProtectedRoute allowedRoles={['CANDIDATE']} />}>
+          <Route path='/' element={<HomePage/>}/>
+          <Route path='/profile' element={<ProfilePage/>}/>
+          <Route path='/editprofile'element={<EditProfilePage/>}/>
+          <Route path='/joblist' element={<JobListPage/>}/>
+          <Route path='/myjoblist' element={<MyApplicationsPage/>}/>
+          <Route path='/resume' element={<ResumeAnalyzer/>}/>
+          <Route path='/chat/:sessionId' element={<CandidateChat/>}/>
+          <Route path='/jobdetails/:id' element={<JobDetailsPage/>}/>
+          <Route path='/notifications' element={<NotificationCenter/>}/>
+          <Route path='/interviewslsit' element={<CandidateInterviews/>}/>
+          <Route path='/ai-rag'element={<WorkspacePage/>}/>
+        </Route>
 
-
-      <Route path='/' element={<HomePage/>}/>
-      <Route path='/profile' element={<ProfilePage/>}/>
-      <Route path='/editprofile'element={<EditProfilePage/>}/>
-      <Route path='/joblist' element={<JobListPage/>}/>
-      <Route path='/myjoblist' element={<MyApplicationsPage/>}/>
-      <Route path='/resume' element={<ResumeAnalyzer/>}/>
-      <Route path='/chat/:sessionId' element={<CandidateChat/>}/>
-      <Route path='/jobdetails/:id' element={<JobDetailsPage/>}/>
-      <Route path='/notifications' element={<NotificationCenter/>}/>
-      <Route path='/interviewslsit' element={<CandidateInterviews/>}/>
-      <Route path='/ai-rag'element={<WorkspacePage/>}/>
       </Route>
-      </Routes>
+    </Routes>
     </>
   )
 }
