@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+from interviews.models import Interview
 from .models import ChatRoom
 
 User = get_user_model()
@@ -15,7 +15,7 @@ class GetOrCreateChatRoom(APIView):
 
     def post(self, request):
         other_user_id = request.data.get("other_user_id")
-
+        interview_id = request.data.get("interview_id")
         if not other_user_id:
             return Response(
                 {"error": "other_user_id is required"},
@@ -30,9 +30,11 @@ class GetOrCreateChatRoom(APIView):
                 {"error": "You cannot chat with yourself"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        
+        interview = get_object_or_404(Interview, id=interview_id)
 
         user1, user2 = sorted([current_user, other_user], key=lambda user: user.id)
-        room, _ = ChatRoom.objects.get_or_create(user1=user1, user2=user2)
+        room, _ = ChatRoom.objects.get_or_create(interview=interview,user1=user1, user2=user2)
 
         return Response({"room_id": str(room.id)}, status=status.HTTP_200_OK)
 

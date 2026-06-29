@@ -47,6 +47,7 @@ const InterviewerChat = () => {
 
         const roomRes = await api.post('chat/room/', {
           other_user_id: interview.hr_id,
+          interview_id: sessionId,
         });
         const roomId = roomRes.data.room_id;
 
