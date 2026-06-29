@@ -5,9 +5,11 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from .service import AIServiceClient
+from rest_framework.parsers import MultiPartParser, FormParser
 
 
 class ResumeAnalysisView(APIView):
+    parser_classes = [MultiPartParser, FormParser]
     def post(self, request):
         file = request.FILES.get("file")
         if not file:
