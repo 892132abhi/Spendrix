@@ -9,7 +9,7 @@ genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 # Use system_instruction to force Gemini to follow strict behavior rules
 model = genai.GenerativeModel(
-    "gemini-2.5-flash",
+    "gemini-2.0-flash",
     generation_config={
         "temperature": 0.2,
         "top_p": 1,
