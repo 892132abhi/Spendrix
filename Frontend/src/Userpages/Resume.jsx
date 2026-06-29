@@ -29,7 +29,7 @@ const ResumeAnalyzer = () => {
     try {
       const response = await api.post("ai/resume/", formData,{
         headers:{
-          'Content-Type': undefined,
+          'Content-Type': 'multipart/form-data',
         }
       });
       setAnalysis(response.data);
