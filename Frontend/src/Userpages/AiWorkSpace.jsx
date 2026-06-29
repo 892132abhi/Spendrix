@@ -72,7 +72,7 @@ export default function WorkspacePage() {
     try {
       const response = await api.post('ai/workspace/upload/', formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          'Content-Type': undefined,
         },
       });
 
