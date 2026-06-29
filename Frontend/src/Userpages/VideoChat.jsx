@@ -114,10 +114,6 @@ const VideoCallPage = () => {
         const [audioTrack, videoTrack] = await AgoraRTC.createMicrophoneAndCameraTracks();
         localTracksRef.current = { audioTrack, videoTrack };
 
-        if (isMounted && localVideoRef.current) {
-          videoTrack.play(localVideoRef.current);
-        }
-
         await client.publish([audioTrack, videoTrack]);
 
         if (isMounted) {
@@ -151,6 +147,15 @@ const VideoCallPage = () => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [interviewId]);
+
+  // Plays the local camera preview once the call UI (with localVideoRef) has actually mounted.
+  // Running this here (instead of inside joinCall) avoids a race where the ref is still
+  // null because the component was showing the "connecting" screen when the track was created.
+  useEffect(() => {
+    if (status === 'joined' && localVideoRef.current && localTracksRef.current.videoTrack) {
+      localTracksRef.current.videoTrack.play(localVideoRef.current);
+    }
+  }, [status]);
 
   const handleEndCall = async () => {
     await leaveCall();

@@ -14,7 +14,7 @@ class JDRequest(BaseModel):
     job_type: str
     experience: int
     Qualification: str | None = None
-    skills: str          # comma-separated, matches your Job model field
+    skills: str          
     location: str | None = None
     company_name: str | None = None
 
