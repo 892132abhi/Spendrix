@@ -43,6 +43,7 @@ import InterviewerProfile from './Interviewer/InterviewerProfile'
 import InterviewerEditprofile from './Interviewer/EditIntervieweProfile'
 import ResumeAnalyzer from './Userpages/Resume'
 import WorkspacePage from "./Userpages/AiWorkSpace";
+import VideoCallPage from './Userpages/VideoChat'
 function App() {
 
   return (
@@ -82,6 +83,8 @@ function App() {
       <Route path='/feedback' element={<InterviewerFeedback/>}/>
       <Route path='/interviewer/chat/:sessionId' element={<InterviewerChat/>}/>
       <Route path='/interviewer-notification' element={<InterviewerNotifications/>}/>
+
+      <Route path="/interview/call/:interviewId" element={<VideoCallPage />} />
 
 
       <Route path='/' element={<HomePage/>}/>
