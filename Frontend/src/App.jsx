@@ -59,9 +59,6 @@ function App() {
       <Route element={<ProtectedRoute allowedRoles={['CANDIDATE', 'INTERVIEWER', 'HR']} />}>
           <Route path="/interview/call/:interviewId" element={<VideoCallPage />} />
       </Route>
-      <Route element={<ProtectedRoute allowedRoles={['CANDIDATE']} />}>
-      <Route path='/ai-rag'element={<WorkspacePage/>}/>
-      </Route>
       <Route element={<Navbar/>}>
         
         {/* Admin Protected Routes */}
@@ -115,9 +112,9 @@ function App() {
           <Route path='/jobdetails/:id' element={<JobDetailsPage/>}/>
           <Route path='/notifications' element={<NotificationCenter/>}/>
           <Route path='/interviewslsit' element={<CandidateInterviews/>}/>
-          
+          <Route path='/ai-rag'element={<WorkspacePage/>}/>
         </Route>
-
+        
 
       </Route>
     </Routes>
