@@ -56,12 +56,6 @@ function App() {
       <Route path='/verify-email' element={<VerifyEmail/>}/>
       <Route path='/reset-password' element={<ResetPassword/>}/>
       <Route path='/new-password' element={<SetNewPassword/>}/>
-
-      {/* Shared Protected Video Call Route (Full Screen, outside Navbar layout) */}
-      <Route element={<ProtectedRoute allowedRoles={['CANDIDATE', 'INTERVIEWER', 'HR']} />}>
-        <Route path="/interview/call/:interviewId" element={<VideoCallPage />} />
-      </Route>
-
       <Route element={<Navbar/>}>
         
         {/* Admin Protected Routes */}
@@ -99,6 +93,11 @@ function App() {
           <Route path='/feedback' element={<InterviewerFeedback/>}/>
           <Route path='/interviewer/chat/:sessionId' element={<InterviewerChat/>}/>
           <Route path='/interviewer-notification' element={<InterviewerNotifications/>}/>
+        </Route>
+
+        {/* Shared Protected Video Call Route */}
+        <Route element={<ProtectedRoute allowedRoles={['CANDIDATE', 'INTERVIEWER', 'HR']} />}>
+          <Route path="/interview/call/:interviewId" element={<VideoCallPage />} />
         </Route>
 
         {/* Candidate Protected Routes */}

@@ -5,7 +5,7 @@ import api from '../api/instance';
 import { toast } from 'react-hot-toast';
 import {
   FiMic, FiMicOff, FiVideo, FiVideoOff, FiPhoneOff,
-  FiAlertTriangle, FiUsers, FiMessageSquare
+  FiAlertTriangle, FiUsers
 } from 'react-icons/fi';
 
 const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
@@ -24,18 +24,6 @@ const VideoCallPage = () => {
   const [micOn, setMicOn] = useState(true);
   const [camOn, setCamOn] = useState(true);
   const [remoteCount, setRemoteCount] = useState(0);
-
-  // Chat integration states and refs
-  const [showChat, setShowChat] = useState(false);
-  const [messages, setMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState('');
-  const [roomId, setRoomId] = useState(null);
-  const [userRole, setUserRole] = useState(null);
-  const [currentUserId, setCurrentUserId] = useState(null);
-  const [otherUserRole, setOtherUserRole] = useState('candidate'); // 'candidate' | 'interviewer' (only for HR)
-  const [interviewDetail, setInterviewDetail] = useState(null);
-  const socketRef = useRef(null);
-  const chatScrollRef = useRef(null);
 
   const leaveCall = useCallback(async () => {
     try {
@@ -56,152 +44,6 @@ const VideoCallPage = () => {
       console.error('Error while leaving call:', err);
     }
   }, []);
-
-  // 1. Fetch user role, interview details and initial chat room
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchDetails = async () => {
-      try {
-        const profileRes = await api.get('accounts/profile/');
-        if (!isMounted) return;
-        const role = profileRes.data.role;
-        setUserRole(role);
-        setCurrentUserId(profileRes.data.user_id);
-
-        let interviewsRes;
-        if (role === 'CANDIDATE') {
-          interviewsRes = await api.get('interviews/candidateinterviews/');
-        } else if (role === 'INTERVIEWER') {
-          interviewsRes = await api.get('interviews/assignedinterviews/');
-        } else {
-          interviewsRes = await api.get('interviews/interviewlist/?');
-        }
-
-        if (!isMounted) return;
-
-        const interview = (interviewsRes.data || []).find(
-          item => String(item.id) === String(interviewId)
-        );
-
-        if (interview) {
-          setInterviewDetail(interview);
-          
-          let otherId = null;
-          if (role === 'CANDIDATE' || role === 'INTERVIEWER') {
-            otherId = interview.hr_id;
-          } else {
-            otherId = interview.candidate_id; // Default HR chat target is candidate
-          }
-
-          if (otherId) {
-            const roomRes = await api.post('chat/room/', {
-              other_user_id: otherId,
-              interview_id: interviewId
-            });
-            if (isMounted) {
-              setRoomId(roomRes.data.room_id);
-            }
-          }
-        }
-      } catch (err) {
-        console.error('Failed to resolve chat details:', err);
-      }
-    };
-
-    fetchDetails();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [interviewId]);
-
-  // 2. Manage WebSocket connection and load history when roomId is resolved
-  useEffect(() => {
-    if (!roomId) return;
-    let isMounted = true;
-
-    const setupChat = async () => {
-      try {
-        const historyRes = await api.get(`chat/history/${roomId}/`);
-        if (!isMounted) return;
-
-        const history = (historyRes.data || []).map(m => ({
-          text: m.text,
-          sender: m.sender_username,
-          is_me: m.sender_id === currentUserId
-        }));
-        setMessages(history);
-
-        const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-        const wsUrl = `${import.meta.env.VITE_WS_URL}/ws/chat/${roomId}/`;
-        socketRef.current = new WebSocket(wsUrl);
-
-        socketRef.current.onmessage = (e) => {
-          if (!isMounted) return;
-          const data = JSON.parse(e.data);
-          setMessages((prev) => [...prev, {
-            text: data.message,
-            sender: data.sender_username,
-            is_me: data.sender_id === currentUserId
-          }]);
-        };
-      } catch (err) {
-        console.error('Error establishing chat sync:', err);
-      }
-    };
-
-    setupChat();
-
-    return () => {
-      isMounted = false;
-      if (socketRef.current) {
-        socketRef.current.close();
-      }
-    };
-  }, [roomId, currentUserId]);
-
-  // 3. Auto-scroll chat panel to bottom on new messages
-  useEffect(() => {
-    chatScrollRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  const handleSendMessage = () => {
-    if (newMessage.trim() && socketRef.current?.readyState === WebSocket.OPEN) {
-      socketRef.current.send(JSON.stringify({ 'message': newMessage }));
-      setNewMessage('');
-    }
-  };
-
-  // 4. Switch chat line (For HR coordinator only)
-  const handleSwitchTarget = async (targetRole) => {
-    if (!interviewDetail) return;
-    setOtherUserRole(targetRole);
-    setMessages([]);
-    setRoomId(null);
-    if (socketRef.current) {
-      socketRef.current.close();
-    }
-
-    try {
-      const otherId = targetRole === 'candidate' 
-        ? interviewDetail.candidate_id 
-        : interviewDetail.interviewer_id;
-
-      if (!otherId) {
-        toast.error(`${targetRole === 'candidate' ? 'Candidate' : 'Interviewer'} is not assigned/found.`);
-        return;
-      }
-
-      const roomRes = await api.post('chat/room/', {
-        other_user_id: otherId,
-        interview_id: interviewId
-      });
-      setRoomId(roomRes.data.room_id);
-    } catch (err) {
-      console.error('Failed to switch chat room:', err);
-    }
-  };
 
   useEffect(() => {
     let isMounted = true;
@@ -306,6 +148,9 @@ const VideoCallPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [interviewId]);
 
+  // Plays the local camera preview once the call UI (with localVideoRef) has actually mounted.
+  // Running this here (instead of inside joinCall) avoids a race where the ref is still
+  // null because the component was showing the "connecting" screen when the track was created.
   useEffect(() => {
     if (status === 'joined' && localVideoRef.current && localTracksRef.current.videoTrack) {
       localTracksRef.current.videoTrack.play(localVideoRef.current);
@@ -366,7 +211,7 @@ const VideoCallPage = () => {
   }
 
   return (
-    <div className="h-screen bg-slate-950 flex flex-col p-4 gap-4 overflow-hidden">
+    <div className="h-screen bg-slate-950 flex flex-col p-4 gap-4">
       <div className="flex items-center justify-between shrink-0 px-2">
         <span className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
           <FiUsers className="w-3.5 h-3.5 text-indigo-400" />
@@ -378,123 +223,34 @@ const VideoCallPage = () => {
         </span>
       </div>
 
-      <div className="flex-1 flex gap-4 min-h-0">
-        {/* Left Video Area */}
-        <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 min-h-0">
-          <div className="relative w-full h-full rounded-2xl overflow-hidden bg-slate-900 border border-slate-800">
-            <div ref={localVideoRef} className="w-full h-full" />
-            <span className="absolute bottom-3 left-3 px-2.5 py-1 bg-black/60 rounded-lg text-[10px] font-bold text-white uppercase tracking-wider">
-              You
-            </span>
-            {!camOn && (
-              <div className="absolute inset-0 flex items-center justify-center bg-slate-900">
-                <FiVideoOff className="w-8 h-8 text-slate-600" />
-              </div>
-            )}
-          </div>
-
-          <div
-            ref={remoteContainerRef}
-            className="w-full h-full grid gap-2"
-            style={{
-              gridTemplateColumns: remoteCount > 1 ? 'repeat(2, 1fr)' : '1fr',
-            }}
-          >
-            {remoteCount === 0 && (
-              <div className="w-full h-full rounded-2xl bg-slate-900 border border-dashed border-slate-800 flex items-center justify-center">
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">
-                  Waiting for others to join...
-                </p>
-              </div>
-            )}
-          </div>
+      <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 min-h-0">
+        <div className="relative w-full h-full rounded-2xl overflow-hidden bg-slate-900 border border-slate-800">
+          <div ref={localVideoRef} className="w-full h-full" />
+          <span className="absolute bottom-3 left-3 px-2.5 py-1 bg-black/60 rounded-lg text-[10px] font-bold text-white uppercase tracking-wider">
+            You
+          </span>
+          {!camOn && (
+            <div className="absolute inset-0 flex items-center justify-center bg-slate-900">
+              <FiVideoOff className="w-8 h-8 text-slate-600" />
+            </div>
+          )}
         </div>
 
-        {/* Right Chat Sidebar */}
-        {showChat && (
-          <div className="w-80 md:w-90 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col overflow-hidden animate-in slide-in-from-right duration-300">
-            <div className="p-4 border-b border-slate-800 flex flex-col gap-2.5 bg-slate-950">
-              <div className="flex justify-between items-center">
-                <h4 className="text-[10px] font-black uppercase tracking-wider text-indigo-400">Secure Consultation</h4>
-                <button 
-                  onClick={() => setShowChat(false)} 
-                  className="text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors"
-                >
-                  Close
-                </button>
-              </div>
-
-              {/* Scope/Target toggles for HR recruiter */}
-              {userRole === 'HR' && interviewDetail && (
-                <div className="flex bg-slate-900 p-0.5 rounded-lg border border-slate-850">
-                  <button
-                    onClick={() => handleSwitchTarget('candidate')}
-                    className={`flex-1 py-1.5 rounded-md text-[8px] font-black uppercase tracking-wider transition-all ${
-                      otherUserRole === 'candidate'
-                        ? 'bg-indigo-650 text-white shadow'
-                        : 'text-slate-400 hover:text-slate-200'
-                    }`}
-                  >
-                    Candidate ({interviewDetail.candidate_name || 'Candidate'})
-                  </button>
-                  <button
-                    onClick={() => handleSwitchTarget('interviewer')}
-                    className={`flex-1 py-1.5 rounded-md text-[8px] font-black uppercase tracking-wider transition-all ${
-                      otherUserRole === 'interviewer'
-                        ? 'bg-indigo-650 text-white shadow'
-                        : 'text-slate-400 hover:text-slate-200'
-                    }`}
-                  >
-                    Interviewer ({interviewDetail.interviewer_name || 'Interviewer'})
-                  </button>
-                </div>
-              )}
+        <div
+          ref={remoteContainerRef}
+          className="w-full h-full grid gap-2"
+          style={{
+            gridTemplateColumns: remoteCount > 1 ? 'repeat(2, 1fr)' : '1fr',
+          }}
+        >
+          {remoteCount === 0 && (
+            <div className="w-full h-full rounded-2xl bg-slate-900 border border-dashed border-slate-800 flex items-center justify-center">
+              <p className="text-xs font-bold text-slate-550 uppercase tracking-widest">
+                Waiting for others to join...
+              </p>
             </div>
-
-            {/* Chat Messages */}
-            <div className="flex-1 p-4 overflow-y-auto space-y-4">
-              {messages.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-center p-4">
-                  <p className="text-[10px] font-bold text-slate-550 uppercase tracking-widest">No messages yet.</p>
-                </div>
-              ) : (
-                messages.map((msg, idx) => (
-                  <div key={idx} className={`flex flex-col ${msg.is_me ? 'items-end' : 'items-start'}`}>
-                    <div className={`p-3 rounded-2xl text-xs max-w-[85%] leading-relaxed ${
-                      msg.is_me 
-                        ? 'bg-indigo-650 text-white rounded-tr-none shadow-md shadow-indigo-900/10' 
-                        : 'bg-slate-800 text-slate-100 rounded-tl-none border border-slate-750'
-                    }`}>
-                      {msg.text}
-                    </div>
-                    <span className="text-[7px] font-black text-slate-500 uppercase tracking-widest mt-1.5 px-1">
-                      {msg.is_me ? 'You' : msg.sender}
-                    </span>
-                  </div>
-                ))
-              )}
-              <div ref={chatScrollRef} />
-            </div>
-
-            {/* Input Message Box */}
-            <div className="p-3 border-t border-slate-800 bg-slate-950 flex gap-2">
-              <input
-                type="text"
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                placeholder="Type message..."
-                className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white placeholder-slate-500 outline-none focus:border-indigo-500 transition-colors"
-              />
-              <button
-                onClick={handleSendMessage}
-                className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-[9px] font-black uppercase tracking-widest shadow-lg shadow-indigo-600/10 active:scale-95 transition-all"
-              >
-                Send
-              </button>
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       <div className="flex items-center justify-center gap-4 py-3 shrink-0">
@@ -514,17 +270,6 @@ const VideoCallPage = () => {
         >
           {camOn ? <FiVideo /> : <FiVideoOff />}
         </button>
-        
-        {/* Toggle Chat Sidebar */}
-        <button
-          onClick={() => setShowChat(!showChat)}
-          className={`p-4 rounded-full transition-all ${
-            showChat ? 'bg-indigo-600 text-white' : 'bg-slate-800 hover:bg-slate-700 text-white'
-          }`}
-        >
-          <FiMessageSquare />
-        </button>
-
         <button
           onClick={handleEndCall}
           className="p-4 rounded-full bg-rose-600 hover:bg-rose-500 text-white transition-all"
