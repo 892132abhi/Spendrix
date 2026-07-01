@@ -6,7 +6,7 @@ import {
   FiSearch, FiSliders, FiCalendar, FiClock, FiCheckCircle, 
   FiXCircle, FiMessageSquare, FiDownload, FiUser, FiPhone, 
   FiMapPin, FiBriefcase, FiCheck, FiChevronRight, FiAlertCircle,
-  FiEdit3,FiVideo
+  FiEdit3,FiVideo, FiChevronLeft
 } from 'react-icons/fi';
 
 const getMediaUrl = (url) => {
@@ -27,6 +27,7 @@ const InterviewerCandidates = () => {
   const [candidates, setCandidates] = useState([]);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showDetailMobile, setShowDetailMobile] = useState(false);
   
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("ALL");
@@ -143,6 +144,7 @@ const InterviewerCandidates = () => {
     setSelectedCandidate(candidate);
     setAssessment(getCandidateAssessment(candidate));
     setIsRescheduling(false); 
+    setShowDetailMobile(true);
   };
 
   const initRescheduleFields = () => {
@@ -340,7 +342,7 @@ const InterviewerCandidates = () => {
       <div className="flex-1 flex gap-6 overflow-hidden min-h-0">
         
         {/* Left Side: Cards Stream Container */}
-        <div className="w-full lg:w-[420px] h-full flex flex-col gap-4">
+        <div className={`w-full lg:w-[420px] h-full flex flex-col gap-4 ${showDetailMobile ? 'hidden lg:flex' : 'flex'}`}>
           <div className="flex-1 overflow-y-auto space-y-3.5 pr-2 custom-scrollbar">
             {loading ? (
               <div className="space-y-4">
@@ -430,13 +432,19 @@ const InterviewerCandidates = () => {
         </div>
 
         {/* Right Side: Detail View Container */}
-        <div className="flex-1 bg-white rounded-3xl border border-slate-200/60 shadow-sm overflow-hidden flex flex-col min-w-0">
+        <div className={`flex-1 bg-white rounded-3xl border border-slate-200/60 shadow-sm overflow-hidden flex flex-col min-w-0 ${showDetailMobile ? 'flex' : 'hidden lg:flex'}`}>
           {selectedCandidate ? (
             <div className="flex flex-col h-full min-h-0">
               
               {/* Header profile info */}
               <div className="p-6 bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950 text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0">
                 <div className="flex items-center gap-4">
+                  <button 
+                    onClick={() => setShowDetailMobile(false)}
+                    className="lg:hidden p-2 -ml-2 text-white hover:text-indigo-200 transition-colors"
+                  >
+                    <FiChevronLeft className="w-5 h-5" />
+                  </button>
                   <div className="w-16 h-16 bg-white/10 border border-white/20 rounded-2xl flex-shrink-0 overflow-hidden flex items-center justify-center font-extrabold text-2xl shadow-inner">
                     {selectedCandidate.profile_pic ? <img src={getMediaUrl(selectedCandidate.profile_pic)} className="w-full h-full object-cover animate-in fade-in-50" alt={selectedCandidate.name || "Candidate"}/> : (selectedCandidate.name || "C").charAt(0).toUpperCase()}
                   </div>
