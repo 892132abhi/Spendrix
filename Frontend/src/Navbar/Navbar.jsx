@@ -117,10 +117,10 @@ const Navbar = () => {
         <div className="bg-white/70 backdrop-blur-xl border border-white rounded-[2.5rem] flex flex-col h-full shadow-2xl shadow-slate-200/50 overflow-hidden">
           <div className="p-8 flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-violet-600 rounded-2xl flex items-center justify-center shadow-indigo-200 shadow-lg">
-              <span className="text-white font-black text-xl italic">H</span>
+              <span className="text-white font-black text-xl italic">S</span>
             </div>
             <div>
-              <h1 className="text-lg font-black tracking-tight text-slate-800 leading-tight">Spendrix Hiring platform</h1>
+              <h1 className="text-lg font-black tracking-tight text-slate-800 leading-tight">Spendrix </h1>
               <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-widest leading-none">{role} Portal</p>
             </div>
           </div>
