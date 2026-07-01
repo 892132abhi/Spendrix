@@ -96,9 +96,7 @@ function App() {
         </Route>
 
         {/* Shared Protected Video Call Route */}
-        <Route element={<ProtectedRoute allowedRoles={['CANDIDATE', 'INTERVIEWER', 'HR']} />}>
-          <Route path="/interview/call/:interviewId" element={<VideoCallPage />} />
-        </Route>
+        
 
         {/* Candidate Protected Routes */}
         <Route element={<ProtectedRoute allowedRoles={['CANDIDATE']} />}>
@@ -116,6 +114,9 @@ function App() {
         </Route>
 
       </Route>
+      <Route element={<ProtectedRoute allowedRoles={['CANDIDATE', 'INTERVIEWER', 'HR']} />}>
+          <Route path="/interview/call/:interviewId" element={<VideoCallPage />} />
+        </Route>
     </Routes>
     </>
   )
