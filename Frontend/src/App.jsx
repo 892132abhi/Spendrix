@@ -56,6 +56,9 @@ function App() {
       <Route path='/verify-email' element={<VerifyEmail/>}/>
       <Route path='/reset-password' element={<ResetPassword/>}/>
       <Route path='/new-password' element={<SetNewPassword/>}/>
+        <Route element={<ProtectedRoute allowedRoles={['CANDIDATE', 'INTERVIEWER', 'HR']} />}>
+          <Route path="/interview/call/:interviewId" element={<VideoCallPage />} />
+        </Route>
       <Route element={<Navbar/>}>
         
         {/* Admin Protected Routes */}
@@ -114,9 +117,6 @@ function App() {
         </Route>
 
       </Route>
-      <Route element={<ProtectedRoute allowedRoles={['CANDIDATE', 'INTERVIEWER', 'HR']} />}>
-          <Route path="/interview/call/:interviewId" element={<VideoCallPage />} />
-        </Route>
     </Routes>
     </>
   )
